@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,15 +11,15 @@ public class UIManagement : MonoBehaviour
     public GameObject shovelBank;
     public Text levelNameText;
 
-    public GameObject cardGroup;   //¿¨²ÛÈº×é
+    public GameObject cardGroup;   //NhÃ³m tháº» cÃ¢y
 
     // Start is called before the first frame update
     public void initUI()
     {
-        //¼ÓÔØ¹Ø¿¨Ãû×Ö
+        //Táº£i tÃªn mÃ n chÆ¡i
         levelNameText.text = GameManagement.levelData.levelName;
 
-        //¼ÓÔØ¿¨²ÛÈº×é£¬²¢ÉèÖÃÏà¹ØUIµÄ´óĞ¡Î»ÖÃ
+        //Táº£i nhÃ³m tháº» cÃ¢y vÃ  Ä‘áº·t kÃ­ch thÆ°á»›c, vá»‹ trÃ­ cho UI liÃªn quan
         List<string> plantCards = GameManagement.levelData.plantCards;
         List<Card> cards = new List<Card>();
         foreach (string plant in plantCards)
@@ -43,7 +43,7 @@ public class UIManagement : MonoBehaviour
 
     public void appear()
     {
-        //¿¨²ÛÈº×é±¾Îª²»»îÔ¾£¬ÒÔ±ÜÃâ¾çÇéÆÚ¼ä¿¨²ÛÀäÈ´¼õÉÙ
+        //NhÃ³m tháº» cÃ¢y vá»‘n Ä‘á»ƒ inactive, trÃ¡nh viá»‡c tháº» há»“i chiÃªu trong lÃºc Ä‘ang cháº¡y cá»‘t truyá»‡n
         cardGroup.SetActive(true);
 
         topMotionPanel.GetComponent<MotionPanel>().startMove();

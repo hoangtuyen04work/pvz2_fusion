@@ -1,20 +1,20 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class StraightBullet : MonoBehaviour
 {
-    public float speed = 4;   //×Óµ¯ËÙ¶È
-    public int hurt;  //×Óµ¯ÉËº¦
+    public float speed = 4;   //Tá»‘c Ä‘á»™ Ä‘áº¡n
+    public int hurt;  //SÃ¡t thÆ°Æ¡ng Ä‘áº¡n
     public Sprite boomSprite;
 
-    protected bool boomState = false;  //×Óµ¯ÊÇ·ñÒÑ±¬Õ¨
+    protected bool boomState = false;  //Äáº¡n Ä‘Ã£ ná»• chÆ°a
     protected int row;
 
     // Update is called once per frame
     void Update()
     {
-        if (boomState == false)  //Ã»ÓĞÕ¨¿ª£¬ÔòÏòÇ°·É
+        if (boomState == false)  //ChÆ°a ná»• thÃ¬ bay tiáº¿p vá» phÃ­a trÆ°á»›c
         {
             transform.Translate(speed * Time.deltaTime, 0, 0);
         }
@@ -37,16 +37,16 @@ public class StraightBullet : MonoBehaviour
     {
         boomState = true;
 
-        //ÇĞ»»Õ¨¿ªÍ¼Æ¬
+        //Äá»•i sang áº£nh ná»•
         gameObject.GetComponent<SpriteRenderer>().sprite = boomSprite;
         Invoke("disappear", 0.1f);
     }
 
     protected virtual void attack(Zombie target)
     {
-        //²¥·ÅÒôĞ§
+        //PhÃ¡t Ã¢m thanh
         target.playAudioOfBeingAttacked();
-        //½©Ê¬±»¹¥»÷
+        //Zombie bá»‹ táº¥n cÃ´ng
         target.beAttacked(hurt);
     }
 

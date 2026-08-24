@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class SkySun : SunBase
 {
-    //供SkySun子类使用
+    //Dành cho lớp con SkySun sử dụng
     const float upperEdge = 2f;
     const float lowerEdge = -2.7f;
     protected float finalY;

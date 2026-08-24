@@ -5,23 +5,23 @@ using UnityEngine.UI;
 
 public class SunNumber : MonoBehaviour
 {
-    //阳光数文本
+    //Text số nắng
     Text myText;
     int nowSun;
 
-    //卡槽群组
+    //Nhóm thẻ cây
     List<Card> cardGroup;
 
 
     // Start is called before the first frame update
     void Start()
     {
-        //获取阳光数
+        //Lấy số nắng
         myText = gameObject.GetComponent<Text>();
         string sunStr = myText.text;
         nowSun = int.Parse(sunStr);
 
-        //更新卡槽状态
+        //Cập nhật trạng thái thẻ cây
         updateCard();
     }
 
@@ -34,7 +34,7 @@ public class SunNumber : MonoBehaviour
     {
         nowSun += sunNum;
         myText.text = nowSun.ToString();
-        //更新卡槽状态
+        //Cập nhật trạng thái thẻ cây
         updateCard();
     }
 
@@ -44,7 +44,7 @@ public class SunNumber : MonoBehaviour
         {
             nowSun -= sunNum;
             myText.text = nowSun.ToString();
-            //更新卡槽状态
+            //Cập nhật trạng thái thẻ cây
             updateCard();
         }
     }

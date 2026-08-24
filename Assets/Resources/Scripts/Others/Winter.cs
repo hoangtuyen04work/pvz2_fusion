@@ -1,12 +1,12 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-//¶¬Ìì³¡¾°×é¼ş£¬²úÉúÖ²ÎïËæ»úº®Àä¼õËÙĞ§¹û
-//Ó¦¹ÒÔØÓÚPlanting Management¶ÔÏóÏÂ
+//Component cáº£nh mÃ¹a Ä‘Ã´ng, táº¡o hiá»‡u á»©ng lÃ m cháº­m ngáº«u nhiÃªn do láº¡nh lÃªn cÃ¢y
+//Pháº£i gáº¯n dÆ°á»›i Ä‘á»‘i tÆ°á»£ng Planting Management
 public class Winter : MonoBehaviour
 {
-    private int times = 0;   //ÒÑÀä¶³´ÎÊı
+    private int times = 0;   //Sá»‘ láº§n Ä‘Ã£ bá»‹ Ä‘Ã³ng bÄƒng
 
     private void Start()
     {

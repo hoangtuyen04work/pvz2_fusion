@@ -1,22 +1,22 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class EndMenu : MonoBehaviour
 {
-    public Text dialogText;   //×Ó¶ÔÏóDialogTextµÄText×é¼ş£¬ÓÃÓÚ¸üĞÂ×ÖÌå
-    public AudioSource backgroundAudio;   //±³¾°ÒôÀÖµÄ²¥·Å×é¼ş
+    public Text dialogText;   //Component Text cá»§a Ä‘á»‘i tÆ°á»£ng con DialogText, dÃ¹ng Ä‘á»ƒ cáº­p nháº­t font
+    public AudioSource backgroundAudio;   //Component phÃ¡t nháº¡c ná»n
 
     public void gameOver()
     {
-        //ÏÔÊ¾½çÃæ
+        //Hiá»ƒn thá»‹ giao diá»‡n
         Time.timeScale = 0;
-        dialogText.text = "½©Ê¬³ÔµôÁËÄãµÄÄÔ×Ó";
+        dialogText.text = "Zombie Ä‘Ã£ Äƒn máº¥t nÃ£o báº¡n";
         dialogText.color = new Color(0.06f, 0.79f, 0.11f);
         gameObject.SetActive(true);
 
-        //²¥·ÅÒôĞ§
+        //PhÃ¡t Ã¢m thanh
         backgroundAudio.Stop();
         GetComponent<AudioSource>().clip =
             Resources.Load<AudioClip>("Sounds/UI/loseMusic");
@@ -30,13 +30,13 @@ public class EndMenu : MonoBehaviour
 
     private void win_real()
     {
-        //ÏÔÊ¾½çÃæ
+        //Hiá»ƒn thá»‹ giao diá»‡n
         Time.timeScale = 0;
-        dialogText.text = "ÄãÒÑ³É¹¦»÷ÍËÁË½©Ê¬";
+        dialogText.text = "Báº¡n Ä‘Ã£ Ä‘áº©y lÃ¹i Ä‘Æ°á»£c lÅ© zombie";
         dialogText.color = new Color(0.89f, 0.76f, 0.37f);
         gameObject.SetActive(true);
 
-        //²¥·ÅÒôĞ§
+        //PhÃ¡t Ã¢m thanh
         backgroundAudio.Stop();
         GetComponent<AudioSource>().clip =
             Resources.Load<AudioClip>("Sounds/UI/winMusic");

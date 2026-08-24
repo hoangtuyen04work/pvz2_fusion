@@ -4,18 +4,18 @@ using UnityEngine;
 
 public class SunManagement : MonoBehaviour
 {
-    //天空太阳预制体
+    //Prefab mặt trời trên trời
     public GameObject skysunPrefab;
     public GameObject fullMoonPrefab;
     public GameObject crescentMoonPrefab;
 
-    string createFunc;   //创造阳光函数名，分为白天和夜晚
+    string createFunc;   //Tên hàm tạo nắng, chia làm ban ngày và ban đêm
 
-    //太阳掉落计时
+    //Đếm giờ mặt trời rơi
     float minInterval = 10f, maxInterval = 20f;
-    //太阳初始位置
+    //Vị trí ban đầu của mặt trời
     float posY =  3.4f;
-    //太阳掉落位置x轴限制
+    //Giới hạn trục x của vị trí mặt trời rơi
     const float leftEdge = -4.4f;
     const float rightEdge = 2.8f;
 

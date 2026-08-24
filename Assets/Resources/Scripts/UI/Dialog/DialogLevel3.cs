@@ -1,24 +1,24 @@
-using System.Collections;
+Ôªøusing System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class DialogLevel3 : MonoBehaviour
 {
-    public SpeechBubble flowerSpeechBubble;   //œÚ»’ø˚∂‘ª∞øÚ
-    public SpeechBubble squashSpeechBubble;    //Œ—πœ∂‘ª∞øÚ
-    public SpeechBubble peaSpeechBubble;   //Õ„∂π∂‘ª∞øÚ
-    public GameObject introduce1;   //Ω© ¨ΩÈ…‹¿∏1
-    public GameObject introduce2;   //Ω© ¨ΩÈ…‹¿∏2
+    public SpeechBubble flowerSpeechBubble;   //Khung tho·∫°i c·ªßa H∆∞·ªõng D∆∞∆°ng
+    public SpeechBubble squashSpeechBubble;    //Khung tho·∫°i c·ªßa B√≠ Ng√≤i
+    public SpeechBubble peaSpeechBubble;   //Khung tho·∫°i c·ªßa ƒê·∫≠u B·∫Øn
+    public GameObject introduce1;   //B·∫£ng gi·ªõi thi·ªáu zombie 1
+    public GameObject introduce2;   //B·∫£ng gi·ªõi thi·ªáu zombie 2
 
     GameObject flower;
     GameObject squash;
     GameObject pea;
 
-    int count = 0;  //∂‘ª∞º∆ ˝£¨µ±«∞ «µ⁄º∏Ãı∂‘ª∞
+    int count = 0;  //ƒê·∫øm h·ªôi tho·∫°i, hi·ªán l√† c√¢u th·ª© m·∫•y
 
     private void Awake()
     {
-        //÷÷÷≤≤Œ”Î∂‘ª∞µƒ÷≤ŒÔ
+        //Tr·ªìng nh·ªØng c√¢y tham gia h·ªôi tho·∫°i
         flower = GameObject.Find("Plant-2-2")
             .GetComponent<PlantGrid>().plantByGod("SunFlowerForDialog");
         pea = GameObject.Find("Plant-5-2")
@@ -37,21 +37,21 @@ public class DialogLevel3 : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //µ„ª˜ Û±Í◊Ûº¸£¨Ω¯»Îœ¬“ª ¬º˛
+        //B·∫•m chu·ªôt tr√°i ƒë·ªÉ sang s·ª± ki·ªán ti·∫øp theo
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
             switch (count)
             {
                 case 1:
-                    flowerSpeechBubble.showDialog("»∑ µ»Á¥À");
+                    flowerSpeechBubble.showDialog("ƒê√∫ng l√† v·∫≠y th·∫≠t");
                     count++;
                     break;
                 case 2:
-                    flowerSpeechBubble.showDialog("µ´Õ„∂πœ¬ ø£¨ƒ„≤ªæıµ√∂„µΩ÷∏ª”πŸ±≥∫Û «“ª÷÷≥‹»Ë¬");
+                    flowerSpeechBubble.showDialog("Nh∆∞ng H·∫° sƒ© ƒê·∫≠u B·∫Øn n√†y, c·∫≠u kh√¥ng th·∫•y n√∫p sau l∆∞ng Ch·ªâ huy l√† m·ªôt n·ªói nh·ª•c sao");
                     count++;
                     break;
                 case 3:
-                    peaSpeechBubble.showDialog("ﬂ¿......");
+                    peaSpeechBubble.showDialog("·ªú......");
                     count++;
                     break;
                 case 4:
@@ -61,11 +61,11 @@ public class DialogLevel3 : MonoBehaviour
                     count = -1;
                     break;
                 case 5:
-                    peaSpeechBubble.showDialog("Œ—πœ…ŸŒæ£°£°£°");
+                    peaSpeechBubble.showDialog("Thi·∫øu √∫y B√≠ Ng√≤i!!!");
                     count++;
                     break;
                 case 6:
-                    squashSpeechBubble.showDialog("◊˜Œ™’Ω ø£¨Œ“√«æÕ”¶”¬Õ˘÷±«∞");
+                    squashSpeechBubble.showDialog("L√† chi·∫øn binh, ch√∫ng ta ph·∫£i x√¥ng th·∫≥ng v·ªÅ ph√≠a tr∆∞·ªõc");
                     count++;
                     break;
                 case 7:
@@ -82,13 +82,13 @@ public class DialogLevel3 : MonoBehaviour
                     count = -1;
                     break;
                 case 9:
-                    squashSpeechBubble.showDialog("¥Ûæ™–°π÷");
+                    squashSpeechBubble.showDialog("Chuy·ªán b√© x√© ra to");
                     count++;
                     break;
                 case 10:
                     introduce1.SetActive(true);
 
-                    //∂‘ª∞÷≤ŒÔœ˚ ß
+                    //C√¢y h·ªôi tho·∫°i bi·∫øn m·∫•t
                     flower.GetComponent<Plant>().die("");
                     squash.GetComponent<Plant>().die("");
                     pea.GetComponent<Plant>().die("");
@@ -108,14 +108,14 @@ public class DialogLevel3 : MonoBehaviour
 
     private void showFirstTalk()
     {
-        peaSpeechBubble.showDialog("œÚ»’ø˚÷∏ª”πŸ£¨’‚¿Ô∫√“ı…≠∞°");
+        peaSpeechBubble.showDialog("Ch·ªâ huy H∆∞·ªõng D∆∞∆°ng ∆°i, ch·ªó n√†y √¢m u qu√°");
         count++;
     }
 
     private void peaTalk2()
     {
         peaSpeechBubble.transform.localPosition += new Vector3(300, 0, 0);
-        peaSpeechBubble.showDialog("ƒ„Àµµ√∂‘£¨◊˜Œ™’Ω ø£¨Œ““ª∂®ª·µ≤‘⁄≥§πŸ«∞√Êµƒ");
+        peaSpeechBubble.showDialog("C·∫≠u n√≥i ƒë√∫ng, l√† chi·∫øn binh, t√¥i nh·∫•t ƒë·ªãnh s·∫Ω ch·∫Øn ph√≠a tr∆∞·ªõc c·∫•p tr√™n");
         count = 8;
     }
 
@@ -138,7 +138,7 @@ public class DialogLevel3 : MonoBehaviour
         if(count == -1)
         {
             peaSpeechBubble.transform.localPosition -= new Vector3(300, 0, 0);
-            peaSpeechBubble.showDialog("Œ“*£°ƒ« ≤√¥ÕÊ“‚");
+            peaSpeechBubble.showDialog("·ªêi *! C√°i qu√°i g√¨ th·∫ø kia");
             count = 9;
         }
             
@@ -146,7 +146,7 @@ public class DialogLevel3 : MonoBehaviour
 
     private void squashTalk()
     {
-        squashSpeechBubble.showDialog("œÚ»’ø˚÷∏ª”πŸÀµµ√∂‘");
+        squashSpeechBubble.showDialog("Ch·ªâ huy H∆∞·ªõng D∆∞∆°ng n√≥i ƒë√∫ng");
         count = 5;
     }
 

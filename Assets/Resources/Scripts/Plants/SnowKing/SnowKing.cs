@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,8 +7,8 @@ public class SnowKing : MultiImagePlant
     public GameObject SongController;
     public List<GameObject> bullets;
 
-    private Vector3 bulletOffset = new Vector3(0.656f, 0.392f, 0);   //×Óµ¯³õÊ¼Î»ÖÃÆ«ÒÆÁ¿
-    private Vector2 castEndPoint;   //ÉäÏßÍ¶ÉäÊ±ÖÕµã
+    private Vector3 bulletOffset = new Vector3(0.656f, 0.392f, 0);   //Äá»™ lá»‡ch vá»‹ trÃ­ ban Ä‘áº§u cá»§a Ä‘áº¡n
+    private Vector2 castEndPoint;   //Äiá»ƒm cuá»‘i khi phÃ³ng raycast
 
     protected override void Start()
     {
@@ -48,7 +48,7 @@ public class SnowKing : MultiImagePlant
         }
     }
 
-    //Ñ©Íõ²»»áº®Àä£¬¹ÊÖØĞ´Îª¿Õ
+    //Vua Tuyáº¿t khÃ´ng bá»‹ láº¡nh nÃªn ghi Ä‘Ã¨ thÃ nh rá»—ng
     public override void cold()
     {
         

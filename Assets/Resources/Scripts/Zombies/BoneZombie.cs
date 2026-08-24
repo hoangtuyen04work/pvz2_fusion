@@ -1,10 +1,10 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class BoneZombie : Zombie
 {
-    int lifeNumber = 3;   //Ê£Óà¼¸ÌõÃü
+    int lifeNumber = 3;   //CÃ²n láº¡i máº¥y máº¡ng
 
     protected override void Start()
     {
@@ -22,32 +22,32 @@ public class BoneZombie : Zombie
 
     private void split()
     {
-        //Åö×²ÌåÊ§Ğ§
+        //VÃ´ hiá»‡u collider
         gameObject.GetComponent<Collider2D>().enabled = false;
-        //Ãü¼õÉÙ
+        //Giáº£m máº¡ng
         lifeNumber--;
         if (lifeNumber <= 0)
         {
-            //È«³¡½©Ê¬Êı¼õÒ»
+            //Giáº£m má»™t zombie trÃªn toÃ n mÃ n
             GameObject.Find("Zombie Management").GetComponent<ZombieManagement>().minusZombieNumAll();
-            //½©Ê¬ÏûÊ§
+            //Zombie biáº¿n máº¥t
             Invoke("disappear", 2f);
         }
-        //¶¯»­ÇĞ»»
+        //Chuyá»ƒn animation
         myAnimator.SetBool("Walk", false);
         myAnimator.SetBool("Die", true);
-        //Ëæ»úÊ±¼äºó¸´»î
+        //Há»“i sinh sau má»™t khoáº£ng thá»i gian ngáº«u nhiÃªn
         Invoke("revive", Random.Range(20.0f, 30.0f));
     }
 
     private void revive()
     {
-        //¶¯»­ÇĞ»»
+        //Chuyá»ƒn animation
         myAnimator.SetBool("Die", false);
         myAnimator.SetBool("Walk", true);
-        //ÑªÁ¿»Ö¸´
+        //Há»“i mÃ¡u
         bloodVolume = bloodVolumeMax;
-        //Åö×²ÌåÉúĞ§
+        //KÃ­ch hoáº¡t collider
         gameObject.GetComponent<Collider2D>().enabled = true;
     }
 }

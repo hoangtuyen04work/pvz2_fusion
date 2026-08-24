@@ -1,30 +1,30 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class PlantGrid : MonoBehaviour
 {
-    #region ±äÁ¿
+    #region Biáº¿n
 
-    public int row;   //ÔÚµÚ¼¸ĞĞ
+    public int row;   //á» hÃ ng thá»© máº¥y
 
-    GameObject toBePlanted;   //To Be Planted¶ÔÏó
-    GameObject selectedShovel;        //SelectedShovel¶ÔÏó
+    GameObject toBePlanted;   //Äá»‘i tÆ°á»£ng To Be Planted
+    GameObject selectedShovel;        //Äá»‘i tÆ°á»£ng SelectedShovel
 
-    SpriteRenderer spriteRenderer;  //×ÔÉíSpriteRenderer×é¼ş
-    AudioSource audioSource;   //×ÔÉíAudioSource×é¼ş
+    SpriteRenderer spriteRenderer;  //Component SpriteRenderer cá»§a chÃ­nh nÃ³
+    AudioSource audioSource;   //Component AudioSource cá»§a chÃ­nh nÃ³
 
-    bool havePlanted = false;   //¸Ã¸ñÊÇ·ñÒÑÖÖÖ²Ö²Îï
-    GameObject nowPlant;    //µ±Ç°ËùÖÖÖ²Îï
+    bool havePlanted = false;   //Ã” nÃ y Ä‘Ã£ trá»“ng cÃ¢y chÆ°a
+    GameObject nowPlant;    //CÃ¢y Ä‘ang trá»“ng hiá»‡n táº¡i
 
     #endregion
 
-    #region ÏµÍ³ÏûÏ¢
+    #region ThÃ´ng Ä‘iá»‡p há»‡ thá»‘ng
 
     private void Awake()
     {
-        //»ñÈ¡¶ÔÏóÓë×é¼ş
+        //Láº¥y Ä‘á»‘i tÆ°á»£ng vÃ  component
         toBePlanted = GameObject.Find("To Be Planted");
         selectedShovel = GameObject.Find("SelectedShovel");
 
@@ -70,18 +70,18 @@ public class PlantGrid : MonoBehaviour
 
     #endregion
 
-    #region Ë½ÓĞ×Ô¶¨Òåº¯Êı
+    #region HÃ m tá»± Ä‘á»‹nh nghÄ©a private
 
     #endregion
 
-    #region ¹«ÓĞ×Ô¶¨Òåº¯Êı
+    #region HÃ m tá»± Ä‘á»‹nh nghÄ©a public
 
     public void plant(string name)
     {
-        spriteRenderer.sprite = null;   //Òş²ØĞéÓ°
-        havePlanted = true;   //ÒÑÖÖÖ²Îï
+        spriteRenderer.sprite = null;   //áº¨n bÃ³ng má»
+        havePlanted = true;   //CÃ¢y Ä‘Ã£ trá»“ng
 
-        //Éú³ÉÖ²Îï
+        //Sinh ra cÃ¢y
         nowPlant = Instantiate(Resources.Load<GameObject>("Prefabs/Plants/" + name),
                                 transform.position + new Vector3(0, 0, 5),
                                 Quaternion.Euler(0, 0, 0),
@@ -92,22 +92,22 @@ public class PlantGrid : MonoBehaviour
             spriteRenderer.sortingOrder
         );
 
-        //²¥·ÅÒôĞ§
+        //PhÃ¡t Ã¢m thanh
         audioSource.clip =
             Resources.Load<AudioClip>("Sounds/UI/SeedAndShovelBank/plant");
         audioSource.Play();
 
-        //ÏòPlantingManagement·¢ËÍÏûÏ¢ÒÔ´¦ÀíUIÏà¹ØÊÂ¼ş
+        //Gá»­i thÃ´ng Ä‘iá»‡p tá»›i PlantingManagement Ä‘á»ƒ xá»­ lÃ½ cÃ¡c sá»± kiá»‡n liÃªn quan UI
         GameObject.Find("Planting Management").GetComponent<PlantingManagement>().plant();
 
     }
 
-    //ÉÏµÛÄ£Ê½ÖÖÖ²£¬ÓÃÓÚ¹Ø¿¨¿ªÊ¼¶Ô»°Éú³É²ÎÓë¶Ô»°µÄÖ²Îï
+    //Trá»“ng á»Ÿ cháº¿ Ä‘á»™ god mode, dÃ¹ng Ä‘á»ƒ sinh cÃ¢y tham gia há»™i thoáº¡i Ä‘áº§u mÃ n
     public GameObject plantByGod(string name)
     {
-        havePlanted = true;   //ÒÑÖÖÖ²Îï
+        havePlanted = true;   //CÃ¢y Ä‘Ã£ trá»“ng
 
-        //Éú³ÉÖ²Îï
+        //Sinh ra cÃ¢y
         nowPlant = Instantiate(Resources.Load<GameObject>("Prefabs/Plants/" + name),
                                           transform.position + new Vector3(0, 0, 5),
                                           Quaternion.Euler(0, 0, 0),
@@ -123,13 +123,13 @@ public class PlantGrid : MonoBehaviour
 
     public void plantDie(string reason)
     {
-        havePlanted = false;   //ÒÑÃ»ÓĞÖ²Îï
+        havePlanted = false;   //KhÃ´ng cÃ²n cÃ¢y ná»¯a
 
         AudioClip clip = null;
         if (reason != "") clip = Resources.Load<AudioClip>("Sounds/Plants/" + reason);
         if (clip != null)
         {
-            //²¥·ÅÒôĞ§
+            //PhÃ¡t Ã¢m thanh
             audioSource.clip = clip; 
             audioSource.Play();
         }

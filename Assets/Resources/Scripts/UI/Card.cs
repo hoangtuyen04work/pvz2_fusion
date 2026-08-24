@@ -5,22 +5,22 @@ using UnityEngine.UI;
 
 public class Card : MonoBehaviour
 {
-    //冷却贴图
+    //Ảnh hồi chiêu
     public GameObject upperImageObj;
     public Image lowerImage;
     public GameObject lowerImageObj;
 
-    public Button myButton;   //自身Button组件
+    public Button myButton;   //Component Button của chính nó
 
-    //冷却时间与冷却状态
+    //Thời gian và trạng thái hồi chiêu
     public float coolingTime;
     float timer;
     bool coolingState = true;
 
-    //阳光是否充足状态
+    //Trạng thái nắng có đủ hay không
     bool sunEnough;
 
-    //种植相关
+    //Liên quan tới trồng cây
     PlantingManagement planting;
     public string plantName;
     public int sunNeeded;
@@ -28,7 +28,7 @@ public class Card : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        //该组件须由管理对象加载，故在Start获取
+        //Component này phải do đối tượng quản lý tải, nên lấy trong Start
         planting = GameObject.Find("Planting Management").GetComponent<PlantingManagement>();
 
         if (coolingTime > 10f) cooling();
@@ -89,10 +89,10 @@ public class Card : MonoBehaviour
 
     public void click()
     {
-        //播放音效
+        //Phát âm thanh
         gameObject.GetComponent<AudioSource>().Play();
 
-        //转给种植管理
+        //Chuyển cho quản lý trồng cây
         planting.clickPlant(plantName, gameObject.GetComponent<Card>());
     }
 }

@@ -1,12 +1,12 @@
-using System.Collections;
+Ôªøusing System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class DialogLevel0 : MonoBehaviour
 {
-    public GameObject zombieIntroduce;   //Ω© ¨ΩÈ…‹¿∏
-    public GameObject plantIntroduce;    //÷≤ŒÔΩÈ…‹¿∏
+    public GameObject zombieIntroduce;   //B·∫£ng gi·ªõi thi·ªáu zombie
+    public GameObject plantIntroduce;    //B·∫£ng gi·ªõi thi·ªáu c√¢y
  
 
     // Start is called before the first frame update

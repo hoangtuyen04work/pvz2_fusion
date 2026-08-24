@@ -1,15 +1,15 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class MiaoMiao : MultiImagePlant
 {
-    public GameObject parasiticSeed;   //¼ÄÉúÖÖ×ÓÔ¤ÖÆÌå
-    public GameObject leafKnife;   //·ÉÒ¶µ¶Ô¤ÖÆÌå
+    public GameObject parasiticSeed;   //Prefab háº¡t kÃ½ sinh
+    public GameObject leafKnife;   //Prefab phi diá»‡p Ä‘ao
  
-    public bool prepareParasitic = false;   //ÊÇ·ñÓ¦·¢Éä¼ÄÉúÖÖ×Ó
-    private Vector3 bulletOffset = new Vector3(0.054f, 0.218f, 0);   //×Óµ¯³õÊ¼Î»ÖÃÆ«ÒÆÁ¿
-    private Vector2 castEndPoint;   //ÉäÏßÍ¶ÉäÊ±ÖÕµã
+    public bool prepareParasitic = false;   //CÃ³ nÃªn báº¯n háº¡t kÃ½ sinh khÃ´ng
+    private Vector3 bulletOffset = new Vector3(0.054f, 0.218f, 0);   //Äá»™ lá»‡ch vá»‹ trÃ­ ban Ä‘áº§u cá»§a Ä‘áº¡n
+    private Vector2 castEndPoint;   //Äiá»ƒm cuá»‘i khi phÃ³ng raycast
 
     protected override void Start()
     {
@@ -36,7 +36,7 @@ public class MiaoMiao : MultiImagePlant
             {
                 if(hitResult.transform.GetComponent<Zombie>().pos_row == row)
                 {
-                    //·¢Éä¼ÄÉúÖÖ×Ó
+                    //Báº¯n háº¡t kÃ½ sinh
                     Instantiate(parasiticSeed,
                                 transform.position + bulletOffset,
                                 Quaternion.Euler(0, 0, 0))
@@ -48,7 +48,7 @@ public class MiaoMiao : MultiImagePlant
                 }
             }
 
-            //Ì½²âÎ´·¢ÏÖ½©Ê¬£¬·¢Éä·ÉÒ¶µ¶
+            //DÃ² khÃ´ng tháº¥y zombie, báº¯n phi diá»‡p Ä‘ao
             Instantiate(leafKnife,
                         transform.position + bulletOffset,
                         Quaternion.Euler(0, 0, 0))

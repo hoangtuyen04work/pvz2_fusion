@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,13 +9,13 @@ public class Ghost : Zombie
     {
         base.Start();
 
-        //³öÏÖÔÚºó°ë²İÆºÖĞËæ»úÎ»ÖÃ
+        //Xuáº¥t hiá»‡n á»Ÿ vá»‹ trÃ­ ngáº«u nhiÃªn trong ná»­a sau bÃ£i cá»
         transform.localPosition = new Vector3( Random.Range(1.0f, 4.0f), transform.localPosition.y, 0);
 
         bloodVolume = Random.Range(60, 200);
     }
 
-    //ÖØĞ´Îª¿Õ
+    //Ghi Ä‘Ã¨ thÃ nh rá»—ng
     protected override void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.tag == "GameOverLine")
@@ -24,7 +24,7 @@ public class Ghost : Zombie
         }
     }
 
-    //ÖØĞ´Îª¿Õ
+    //Ghi Ä‘Ã¨ thÃ nh rá»—ng
     protected override void OnTriggerExit2D(Collider2D collision)
     {
 
@@ -32,14 +32,14 @@ public class Ghost : Zombie
 
     protected override void die()
     {
-        //Åö×²ÌåÊ§Ğ§
+        //VÃ´ hiá»‡u collider
         gameObject.GetComponent<Collider2D>().enabled = false;
-        //¶¯»­ÇĞ»»
+        //Chuyá»ƒn animation
         myAnimator.SetBool("Walk", false);
         myAnimator.SetBool("Die", true);
     }
 
-    //±»¹¥»÷
+    //Bá»‹ táº¥n cÃ´ng
     public override void beAttacked(int hurt)
     {
         bloodVolume -= hurt;

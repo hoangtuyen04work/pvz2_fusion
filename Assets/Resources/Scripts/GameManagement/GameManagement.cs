@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,16 +6,16 @@ using UnityEngine.UI;
 
 public class GameManagement : MonoBehaviour
 {
-    public int level;   //µ±Ç°¹Ø¿¨ĞòºÅ
+    public int level;   //Sá»‘ thá»© tá»± mÃ n hiá»‡n táº¡i
     private LevelController levelController;
-    public static LevelData levelData;   //µ±Ç°¹Ø¿¨Êı¾İ
+    public static LevelData levelData;   //Dá»¯ liá»‡u mÃ n hiá»‡n táº¡i
 
-    public List<GameObject> awakeList;  //´ı»½ĞÑÁĞ±í£¬ÓÃÓÚ¿ª³¡¾çÇé½áÊøºó»½ĞÑ¸Ã»½ĞÑµÄ¶ÔÏó
+    public List<GameObject> awakeList;  //Danh sÃ¡ch chá» Ä‘Ã¡nh thá»©c, dÃ¹ng Ä‘á»ƒ Ä‘Ã¡nh thá»©c cÃ¡c Ä‘á»‘i tÆ°á»£ng sau khi káº¿t thÃºc cá»‘t truyá»‡n má»Ÿ mÃ n
 
-    public GameObject endMenuPanel;   //ÓÎÏ·½áÊøÃæ°å
-    public GameObject background;   //±³¾°¶ÔÏó
-    public GameObject zombieManagement;   //½©Ê¬¹ÜÀí¶ÔÏó
-    public GameObject uiManagement;   //UI¹ÜÀí¶ÔÏó
+    public GameObject endMenuPanel;   //Báº£ng káº¿t thÃºc trÃ² chÆ¡i
+    public GameObject background;   //Äá»‘i tÆ°á»£ng ná»n
+    public GameObject zombieManagement;   //Äá»‘i tÆ°á»£ng quáº£n lÃ½ zombie
+    public GameObject uiManagement;   //Äá»‘i tÆ°á»£ng quáº£n lÃ½ UI
 
     private void Awake()
     {
@@ -23,14 +23,14 @@ public class GameManagement : MonoBehaviour
             (LevelController)gameObject.AddComponent(Type.GetType("Level" + level + "Controller"));
         levelController.init();
 
-        //¼ÓÔØ±³¾°Í¼Æ¬
+        //Táº£i áº£nh ná»n
         background.GetComponent<SpriteRenderer>().sprite =
             Resources.Load<Sprite>("Sprites/Background/Background" + levelData.mapSuffix);
-        //ÉèÖÃ±³¾°ÒôÀÖ
+        //Äáº·t nháº¡c ná»n
         background.GetComponent<BGMusicControl>()
             .changeMusic("Music" + levelData.backgroundSuffix);
 
-        //¼ÓÔØ¶ÔÓ¦µÄÖÖÖ²¹ÜÀí×é¼ş
+        //Táº£i component quáº£n lÃ½ trá»“ng cÃ¢y tÆ°Æ¡ng á»©ng
         GameObject pm = Instantiate(
             Resources.Load<GameObject>(
                 "Prefabs/PlantingManagement/PlantingManagement" + levelData.plantingManagementSuffix),
@@ -39,10 +39,10 @@ public class GameManagement : MonoBehaviour
         );
         pm.name = "Planting Management";
 
-        //¼ÓÔØUI
+        //Táº£i UI
         uiManagement.GetComponent<UIManagement>().initUI();
 
-        //¼ÓÔØ¶Ô»°Ãæ°å
+        //Táº£i báº£ng há»™i thoáº¡i
         Instantiate(Resources.Load<UnityEngine.Object>("Prefabs/UI/DialogPanel/DialogPanel-Level" + level),
                     new Vector3(0, 0, 0),
                     Quaternion.Euler(0, 0, 0),

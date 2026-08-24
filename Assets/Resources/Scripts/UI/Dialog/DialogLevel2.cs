@@ -1,27 +1,27 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class DialogLevel2 : MonoBehaviour
 {
-    public SpeechBubble flowerSpeechBubble;   //ÏòÈÕ¿û¶Ô»°¿ò
-    public SpeechBubble nutSpeechBubble;    //¼á¹ûÇ½¶Ô»°¿ò
-    public SpeechBubble peaSpeechBubble;   //Íã¶¹¶Ô»°¿ò
-    public GameObject introduce;   //½©Ê¬½éÉÜÀ¸
+    public SpeechBubble flowerSpeechBubble;   //Khung thoáº¡i cá»§a HÆ°á»›ng DÆ°Æ¡ng
+    public SpeechBubble nutSpeechBubble;    //Khung thoáº¡i cá»§a TÆ°á»ng Háº¡t Dáº»
+    public SpeechBubble peaSpeechBubble;   //Khung thoáº¡i cá»§a Äáº­u Báº¯n
+    public GameObject introduce;   //Báº£ng giá»›i thiá»‡u zombie
 
     GameObject flower;
     GameObject nut;
     GameObject pea;
 
-    BGMusicControl bGMusicControl;   //±³¾°¶ÔÏóµÄÒôÔ´×é¼ş
+    BGMusicControl bGMusicControl;   //Component nguá»“n Ã¢m thanh cá»§a Ä‘á»‘i tÆ°á»£ng ná»n
 
-    int count = 0;  //¶Ô»°¼ÆÊı£¬µ±Ç°ÊÇµÚ¼¸Ìõ¶Ô»°
+    int count = 0;  //Äáº¿m há»™i thoáº¡i, hiá»‡n lÃ  cÃ¢u thá»© máº¥y
 
     private void Awake()
     {
-        //»ñÈ¡×é¼ş
+        //Láº¥y component
         bGMusicControl = GameObject.Find("Background").GetComponent<BGMusicControl>();
-        //ÖÖÖ²²ÎÓë¶Ô»°µÄÖ²Îï
+        //Trá»“ng nhá»¯ng cÃ¢y tham gia há»™i thoáº¡i
         flower = GameObject.Find("Plant-0-2")
             .GetComponent<PlantGrid>().plantByGod("SunFlowerForDialog");
         nut = GameObject.Find("Plant-4-2")
@@ -31,42 +31,42 @@ public class DialogLevel2 : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        //ÉèÖÃ±³¾°ÒôÀÖ
+        //Äáº·t nháº¡c ná»n
         bGMusicControl.changeMusic("Music_Night");
 
-        flowerSpeechBubble.showDialog("ÖÕÓÚÕÒµ½ÄãÁË£¬¼á¹ûÏÂÊ¿£¡");
+        flowerSpeechBubble.showDialog("Cuá»‘i cÃ¹ng cÅ©ng tÃ¬m Ä‘Æ°á»£c cáº­u, Háº¡ sÄ© Háº¡t Dáº»!");
     }
 
     // Update is called once per frame
     void Update()
     {
-        //µã»÷Êó±ê×ó¼ü£¬½øÈëÏÂÒ»ÊÂ¼ş
+        //Báº¥m chuá»™t trÃ¡i Ä‘á»ƒ sang sá»± kiá»‡n tiáº¿p theo
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
             switch (count)
             {
                 case 0:
-                    nutSpeechBubble.showDialog("Ğí¾ÃÎ´¼û£¬Ö¸»Ó¹Ù±ğÀ´ÎŞí¦°¡£¿");
+                    nutSpeechBubble.showDialog("LÃ¢u rá»“i khÃ´ng gáº·p, Chá»‰ huy váº«n khá»e chá»©?");
                     count++;
                     break;
                 case 1:
-                    flowerSpeechBubble.showDialog("»¹ºÃÀ²£¬¾ÍÊÇÕâ´ó×©Í·ÉÏ´ô×ÅÕæ²»Êæ·ş");
+                    flowerSpeechBubble.showDialog("CÅ©ng á»•n, chá»‰ lÃ  Ä‘á»©ng mÃ£i trÃªn Ä‘á»‘ng gáº¡ch nÃ y khÃ³ chá»‹u tháº­t");
                     count++;
                     break;
                 case 2:
-                    flowerSpeechBubble.showDialog("Èç¹û»¨ÅèÏÂÊ¿ÔÚ¾ÍºÃÁË");
+                    flowerSpeechBubble.showDialog("GiÃ¡ mÃ  cÃ³ Háº¡ sÄ© Cháº­u Hoa á»Ÿ Ä‘Ã¢y thÃ¬ tá»‘t");
                     count++;
                     break;
                 case 3:
-                    nutSpeechBubble.showDialog("ÊÊÔò°²Ö®");
+                    nutSpeechBubble.showDialog("TÃ¹y cáº£nh mÃ  an lÃ²ng");
                     count++;
                     break;
                 case 4:
-                    peaSpeechBubble.showDialog("²»ºÃÁË£¡²»ºÃÁË£¡");
+                    peaSpeechBubble.showDialog("Nguy rá»“i! Nguy rá»“i!");
                     count++;
                     break;
                 case 5:
-                    flowerSpeechBubble.showDialog("³³Ê²Ã´³³£¬Ã»¿´ÎÒ¸ú¼á¹ûÏÂÊ¿ÕıĞğ¾ÉÄØ");
+                    flowerSpeechBubble.showDialog("á»’n Ã o cÃ¡i gÃ¬, khÃ´ng tháº¥y ta Ä‘ang hÃ n huyÃªn vá»›i Háº¡ sÄ© Háº¡t Dáº» Ã ");
                     count++;
                     break;
                 case 6:
@@ -74,29 +74,29 @@ public class DialogLevel2 : MonoBehaviour
                         .GetComponent<PlantGrid>().plantByGod("PeaShooterSingle");
                     peaSpeechBubble.gameObject.GetComponent<RectTransform>().localPosition -=
                         new Vector3(85, 0, 0);
-                    peaSpeechBubble.showDialog("±ğÁÄÁË£¬ÍâÃæºÃ¶àÆæ¹ÖµÄ½©Ê¬£¬¾ÍÒª³å½øÀ´ÁË");
+                    peaSpeechBubble.showDialog("Äá»«ng tÃ¡n gáº«u ná»¯a, bÃªn ngoÃ i Ä‘áº§y zombie ká»³ láº¡, sáº¯p trÃ n vÃ o rá»“i");
                     count++;
                     break;
                 case 7:
-                    flowerSpeechBubble.showDialog("Ê²Ã´£¡Õâ´óÍíÉÏµÄ£¬Ñô¹â¹½Ö¸»Ó¹ÙÓÖ²»ÔÚ£¬ÕâÏÂÍêÁË");
+                    flowerSpeechBubble.showDialog("CÃ¡i gÃ¬! ÄÃªm hÃ´m tháº¿ nÃ y, Chá»‰ huy Náº¥m Máº·t Trá»i láº¡i khÃ´ng cÃ³ á»Ÿ Ä‘Ã¢y, phen nÃ y xong Ä‘á»i");
                     count++;
                     break;
                 case 8:
-                    nutSpeechBubble.showDialog("Ö¸»Ó¹ÙÎŞĞëÓÇ³î£¬ÔÚ´ËÆæÃîÖ®ÊÀ£¬Ò¹ÒàÓĞÇ§Àïğ©ÔÂ");
+                    nutSpeechBubble.showDialog("Chá»‰ huy chá»› lo Ã¢u, giá»¯a cÃµi ká»³ diá»‡u nÃ y, Ä‘Ãªm cÅ©ng cÃ³ váº§ng trÄƒng sÃ¡ng ngÃ n dáº·m");
                     count++;
                     break;
                 case 9:
-                    peaSpeechBubble.showDialog("Ê²Ã´Ç§Àï£¿¼á¹ûĞÖµÜ£¬ÄãÔõÃ´±äµÃÎÄ×Ş×ŞµÄ");
+                    peaSpeechBubble.showDialog("NgÃ n dáº·m gÃ¬ chá»©? Anh Háº¡t Dáº» nÃ y, sao tá»± dÆ°ng Äƒn nÃ³i vÄƒn váº» tháº¿");
                     count++;
                     break;
                 case 10:
-                    flowerSpeechBubble.showDialog("²»¹ÜÁË£¬´ó¼Ò¸÷¾Í¸÷Î»£¬ÎÒÏòÈÕ¿ûÖ¸»Ó¹Ù¿É²»ÊÇÀËµÃĞéÃû");
+                    flowerSpeechBubble.showDialog("ThÃ´i ká»‡, má»i ngÆ°á»i vÃ o vá»‹ trÃ­, ta lÃ  Chá»‰ huy HÆ°á»›ng DÆ°Æ¡ng chá»© Ä‘Ã¢u pháº£i há»¯u danh vÃ´ thá»±c");
                     count++;
                     break;
                 case 11:
                     introduce.SetActive(true);
 
-                    //¶Ô»°Ö²ÎïÏûÊ§
+                    //CÃ¢y há»™i thoáº¡i biáº¿n máº¥t
                     flower.GetComponent<Plant>().die("");
                     nut.GetComponent<Plant>().die("");
                     pea.GetComponent<Plant>().die("");
@@ -117,7 +117,7 @@ public class DialogLevel2 : MonoBehaviour
             );
         introduce.SetActive(false);
 
-        //ÇĞ»»±³¾°ÒôÀÖ
+        //Äá»•i nháº¡c ná»n
         bGMusicControl.changeMusicSmoothly("Music_Night_Wall");
 
         GameObject.Find("Game Management").GetComponent<GameManagement>().awakeAll();

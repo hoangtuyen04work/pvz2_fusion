@@ -1,36 +1,36 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Zombie : MonoBehaviour
 {
-    public float speed;   //ÒÆ¶¯ËÙ¶È
-    public float eatOffset;   //³ÔÖ²ÎïÎ»ÖÃÆ«ÒÆ£¬¾ÍÊÇÖ²ÎïÔÚ×Ô¼ººó±ß¶àÔ¶Ê±¾Í²»³ÔÁË
-    public int pos_row;   //Î»ÓÚµÚ¼¸ĞĞ
+    public float speed;   //Tá»‘c Ä‘á»™ di chuyá»ƒn
+    public float eatOffset;   //Äá»™ lá»‡ch vá»‹ trÃ­ Äƒn cÃ¢y, tá»©c lÃ  cÃ¢y á»Ÿ phÃ­a sau mÃ¬nh bao xa thÃ¬ khÃ´ng Äƒn ná»¯a
+    public int pos_row;   //Äang á»Ÿ hÃ ng thá»© máº¥y
     public ZombieState state = ZombieState.Normal;
-    private Plant parasiticPlant;   //¼ÄÉú×´Ì¬ÏÂ¼ÄÉú×Ô¼ºµÄÖ²Îï
+    private Plant parasiticPlant;   //CÃ¢y Ä‘ang kÃ½ sinh lÃªn mÃ¬nh khi á»Ÿ tráº¡ng thÃ¡i bá»‹ kÃ½ sinh
 
-    //ÉúÃüÏà¹Ø
-    public int bloodVolume;   //ÑªÁ¿
+    //LiÃªn quan tá»›i mÃ¡u
+    public int bloodVolume;   //LÆ°á»£ng mÃ¡u
     protected int bloodVolumeMax;
     private bool alive = true;
 
-    //¹¥»÷Ïà¹Ø
-    public int attackPower;  //¹¥»÷Á¦
-    protected Plant plant;   //µ±Ç°Ëù¹¥»÷Ö²ÎïµÄPlant×é¼ş
+    //LiÃªn quan tá»›i táº¥n cÃ´ng
+    public int attackPower;  //Sá»©c táº¥n cÃ´ng
+    protected Plant plant;   //Component Plant cá»§a cÃ¢y Ä‘ang bá»‹ táº¥n cÃ´ng
 
-    protected Animator myAnimator;   //¶¯»­×é¼ş
-    protected AudioSource audioSource;  //×ÔÉíAudioSource×é¼ş
+    protected Animator myAnimator;   //Component animation
+    protected AudioSource audioSource;  //Component AudioSource cá»§a chÃ­nh nÃ³
     protected string audioOfBeingAttacked = "Sounds/Zombies/bodyhit";
     private int audioIndex = 1;
 
     static int orderOffset = 0;
 
-    bool sleep = true;   //ÊÇ·ñÓĞ³õÊ¼¾²Ö¹
+    bool sleep = true;   //CÃ³ Ä‘á»©ng yÃªn lÃºc Ä‘áº§u khÃ´ng
 
     protected virtual void Awake()
     {
-        //»ñÈ¡×é¼ş
+        //Láº¥y component
         myAnimator = gameObject.GetComponent<Animator>();
         audioSource = gameObject.GetComponent<AudioSource>();
     }
@@ -38,14 +38,14 @@ public class Zombie : MonoBehaviour
     // Start is called before the first frame update
     protected virtual void Start()
     {
-        //½©Ê¬³õÊ¼Ëæ»ú¾²Ö¹Ò»¶ÎÊ±¼ä£¬Ê¹½©Ê¬ĞĞ¶¯²»ÄÇÃ´ÕûÆë»®Ò»
+        //Zombie Ä‘á»©ng yÃªn ngáº«u nhiÃªn má»™t lÃºc lÃºc Ä‘áº§u, Ä‘á»ƒ chÃºng khÃ´ng di chuyá»ƒn Ä‘á»u tÄƒm táº¯p
         if (sleep == true)
         {
             gameObject.SetActive(false);
             Invoke("activate", Random.Range(0.0f, 5.0f));
         }
 
-        //Ìí¼ÓËæ»úËÙ¶ÈÔö·ù
+        //ThÃªm má»©c tÄƒng tá»‘c Ä‘á»™ ngáº«u nhiÃªn
         float increase = Random.Range(1.0f, 1.5f);
         speed *= increase;
         myAnimator.speed *= increase;
@@ -96,7 +96,7 @@ public class Zombie : MonoBehaviour
 
     public virtual void attack()
     {
-        //Ö²Îï±»¹¥»÷
+        //CÃ¢y bá»‹ táº¥n cÃ´ng
         if (plant != null)
         {
             plant.beAttacked(attackPower, "beEated");
@@ -105,25 +105,25 @@ public class Zombie : MonoBehaviour
 
     protected virtual void die()
     {
-        //Åö×²ÌåÊ§Ğ§
+        //VÃ´ hiá»‡u collider
         gameObject.GetComponent<Collider2D>().enabled = false;
-        //È«³¡½©Ê¬Êı¼õÒ»
+        //Giáº£m má»™t zombie trÃªn toÃ n mÃ n
         GameObject.Find("Zombie Management").GetComponent<ZombieManagement>().minusZombieNumAll();
         alive = false;
-        //Òş²ØÍ·
+        //áº¨n Ä‘áº§u
         hideHead();
-        //¶¯»­ÇĞ»»
+        //Chuyá»ƒn animation
         myAnimator.SetBool("Walk", false);
         myAnimator.SetBool("Die", true);
     }
 
-    //ÓÉÓÚ¸÷¸ö½©Ê¬Í·²¿·Ö¿ÉÄÜ²»Í¬£¬¹Ê¸Ãº¯ÊıÓÉ×ÓÀàÖØĞ´
+    //VÃ¬ pháº§n Ä‘áº§u cá»§a má»—i zombie cÃ³ thá»ƒ khÃ¡c nhau nÃªn hÃ m nÃ y do lá»›p con ghi Ä‘Ã¨
     protected virtual void hideHead()
     {
 
     }
 
-    //±»¹¥»÷
+    //Bá»‹ táº¥n cÃ´ng
     public virtual void beAttacked(int hurt)
     {
         bloodVolume -= hurt;
@@ -142,7 +142,7 @@ public class Zombie : MonoBehaviour
         else audioIndex = 1;
     }
 
-    //±»×ÆÉË£¬±»»ğÑæ¹¥»÷Ê±µ÷ÓÃ
+    //Bá»‹ thiÃªu, gá»i khi trÃºng Ä‘Ã²n lá»­a
     public virtual void beBurned()
     {
         beAttacked(10);
@@ -153,9 +153,9 @@ public class Zombie : MonoBehaviour
         bloodVolume -= 1800;
         if(bloodVolume <= 0)
         {
-            //È«³¡½©Ê¬Êı¼õÒ»
+            //Giáº£m má»™t zombie trÃªn toÃ n mÃ n
             GameObject.Find("Zombie Management").GetComponent<ZombieManagement>().minusZombieNumAll();
-            //½©Ê¬ÏûÊ§
+            //Zombie biáº¿n máº¥t
             Destroy(gameObject);
         }
     }
@@ -191,13 +191,13 @@ public class Zombie : MonoBehaviour
         sleep = false;
     }
 
-    //ÉèÖÃËùÔÚĞĞ£¬²¢ËæºóÒÀ¾İËùÔÚĞĞÉèÖÃÏÔÊ¾Ë³Ğò
+    //Äáº·t hÃ ng Ä‘ang Ä‘á»©ng, rá»“i dá»±a vÃ o hÃ ng Ä‘Ã³ Ä‘á»ƒ Ä‘áº·t thá»© tá»± hiá»ƒn thá»‹
     public virtual void setPosRow(int pos)
     {
-        //ÉèÖÃËùÔÚĞĞ
+        //Äáº·t hÃ ng Ä‘ang Ä‘á»©ng
         pos_row = pos;
 
-        //ÉèÖÃË³ĞòÍ¼²ã¼°ÏÔÊ¾Ë³Ğò
+        //Äáº·t sorting layer vÃ  thá»© tá»± hiá»ƒn thá»‹
         SpriteRenderer[] spriteRenderers = gameObject.GetComponentsInChildren<SpriteRenderer>(true);
         foreach (SpriteRenderer spriteRenderer in spriteRenderers)
         {
@@ -210,7 +210,7 @@ public class Zombie : MonoBehaviour
         orderOffset++;
     }
 
-    //²¥·Å½©Ê¬µ¹ÏÂµÄÒôĞ§
+    //PhÃ¡t Ã¢m thanh zombie ngÃ£ xuá»‘ng
     public virtual void fallDown()
     {
         audioSource.PlayOneShot(
@@ -218,7 +218,7 @@ public class Zombie : MonoBehaviour
         );
     }
 
-    //²¥·Å½©Ê¬¿ĞÒ§µÄÒôĞ§
+    //PhÃ¡t Ã¢m thanh zombie gáº·m
     public virtual void PlayEatAudio()
     {
         audioSource.PlayOneShot(
@@ -226,7 +226,7 @@ public class Zombie : MonoBehaviour
         );
     }
 
-    //½©Ê¬µ¹ÏÂºóÊ¬ÌåÏûÊ§
+    //XÃ¡c zombie biáº¿n máº¥t sau khi ngÃ£ xuá»‘ng
     public void disappear()
     {
         Destroy(gameObject);

@@ -6,7 +6,7 @@ public class FlowerSun : SunBase
 {
     protected Vector3 highestPoint, lowestPoint;
 
-    //0:上升，1:下降，2:停止
+    //0: đi lên, 1: đi xuống, 2: dừng
     int moveState = 0;
 
     protected override void Start()

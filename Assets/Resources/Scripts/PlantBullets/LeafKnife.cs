@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,15 +8,15 @@ public class LeafKnife : StraightBullet
 
     protected override void attack(Zombie target)
     {
-        //²¥·ÅÒôĞ§
+        //PhÃ¡t Ã¢m thanh
         AudioSource.PlayClipAtPoint(
             Resources.Load<AudioClip>("Sounds/Plants/KnifeKill"),
             new Vector3(0, 0, -10)
         );
-        //½©Ê¬±»¹¥»÷
+        //Zombie bá»‹ táº¥n cÃ´ng
         target.beAttacked(hurt);
 
-        //Èç¹û½©Ê¬Ã»±»¼ÄÉú£¬¾ÍÍ¨Öªß÷ß÷Ó¦¸Ã·¢Éä¼ÄÉúÖÖ×Ó
+        //Náº¿u zombie chÆ°a bá»‹ kÃ½ sinh thÃ¬ bÃ¡o MÃ¨o Miu báº¯n háº¡t kÃ½ sinh
         if (target.state != ZombieState.Parasiticed && myCreater != null)
             myCreater.prepareParasitic = true;
     }

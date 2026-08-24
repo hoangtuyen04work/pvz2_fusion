@@ -1,4 +1,4 @@
-using System.Collections;
+锘縰sing System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,7 +8,7 @@ public class IceShield : Zombie
 
     protected override void Awake()
     {
-        //获取组件
+        //L岷 component
         audioSource = gameObject.GetComponent<AudioSource>();
     }
 
@@ -59,7 +59,7 @@ public class IceShield : Zombie
         bloodVolume -= 1800;
         if (bloodVolume <= 0)
         {
-            //僵尸消失
+            //Zombie bi岷縩 m岷
             Destroy(gameObject);
         }
     }

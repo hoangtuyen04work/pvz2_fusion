@@ -1,20 +1,20 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class ToBePlanted : MonoBehaviour
 {
-    #region ±äÁ¿
+    #region Biáº¿n
 
-    public string plantName;   //µ±Ç°Ñ¡ÖĞÖ²ÎïµÄÃû³Æ
+    public string plantName;   //TÃªn cÃ¢y Ä‘ang Ä‘Æ°á»£c chá»n
 
-    SpriteRenderer spriteRenderer;   //×ÔÉíSpriteRenderer×é¼ş
+    SpriteRenderer spriteRenderer;   //Component SpriteRenderer cá»§a chÃ­nh nÃ³
 
-    Vector3 mouseWorldPos;  //Êó±êÎ»ÖÃ
+    Vector3 mouseWorldPos;  //Vá»‹ trÃ­ chuá»™t
 
     #endregion
 
-    #region ÏµÍ³ÏûÏ¢
+    #region ThÃ´ng Ä‘iá»‡p há»‡ thá»‘ng
 
     // Start is called before the first frame update
     void Start()
@@ -26,14 +26,14 @@ public class ToBePlanted : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //»ñÈ¡µ±Ç°Êó±êÎ»ÖÃ
+        //Láº¥y vá»‹ trÃ­ chuá»™t hiá»‡n táº¡i
         mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         mouseWorldPos.z = 0;
 
-        //´ıÖÖÖ²Ö²ÎïËæÊó±êÒÆ¶¯
+        //CÃ¢y chá» trá»“ng di chuyá»ƒn theo chuá»™t
         transform.position = mouseWorldPos;
 
-        //µã»÷Êó±ê×ó¼ü£¬×ÔÉí²»¿É¼û
+        //Báº¥m chuá»™t trÃ¡i, chÃ­nh nÃ³ áº©n Ä‘i
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
             gameObject.SetActive(false);
@@ -42,18 +42,18 @@ public class ToBePlanted : MonoBehaviour
 
     #endregion
 
-    #region Ë½ÓĞ×Ô¶¨Òåº¯Êı
+    #region HÃ m tá»± Ä‘á»‹nh nghÄ©a private
 
     #endregion
 
-    #region ¹«ÓĞ×Ô¶¨Òåº¯Êı
+    #region HÃ m tá»± Ä‘á»‹nh nghÄ©a public
 
     public void showPlantPreview(string name)
     {
         plantName = name;
         spriteRenderer.sprite = Resources.Load<Sprite>("Sprites/Plants/" + plantName);
 
-        //»ñÈ¡µ±Ç°Êó±êÎ»ÖÃ
+        //Láº¥y vá»‹ trÃ­ chuá»™t hiá»‡n táº¡i
         mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         mouseWorldPos.z = 0;
 
