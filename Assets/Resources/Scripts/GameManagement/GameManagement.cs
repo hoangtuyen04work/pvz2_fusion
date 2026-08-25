@@ -19,6 +19,10 @@ public class GameManagement : MonoBehaviour
 
     private void Awake()
     {
+        // Nếu vào từ bảng chọn màn, ưu tiên level mà người chơi vừa chọn.
+        if (GameSession.SelectedLevel >= 0)
+            level = GameSession.SelectedLevel;
+
         levelController = 
             (LevelController)gameObject.AddComponent(Type.GetType("Level" + level + "Controller"));
         levelController.init();
@@ -51,6 +55,9 @@ public class GameManagement : MonoBehaviour
 
     public void awakeAll()
     {
+        // Hội thoại mở đầu đã kết thúc, ẩn nút bỏ qua trước khi gameplay bắt đầu.
+        StartupSkipController.HideForGameplay();
+
         foreach (GameObject gameObject in awakeList)
         {
             gameObject.SetActive(true);
