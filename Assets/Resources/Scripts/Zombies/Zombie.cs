@@ -14,6 +14,9 @@ public class Zombie : MonoBehaviour
     public int bloodVolume;   //Lượng máu
     protected int bloodVolumeMax;
     private bool alive = true;
+    private bool burning;
+    private float burnEndTime;
+    private int burnDamagePerTick;
 
     //Liên quan tới tấn công
     public int attackPower;  //Sức tấn công
@@ -100,6 +103,8 @@ public class Zombie : MonoBehaviour
         if (plant != null)
         {
             plant.beAttacked(attackPower, "beEated");
+            FireWallNutFusion fusion = plant.GetComponent<FireWallNutFusion>();
+            if (fusion != null) fusion.OnBitten(this);
         }
     }
 
@@ -146,6 +151,41 @@ public class Zombie : MonoBehaviour
     public virtual void beBurned()
     {
         beAttacked(10);
+    }
+
+    public void applyBurn(int damagePerTick, float duration)
+    {
+        burnDamagePerTick = Mathf.Max(burnDamagePerTick, damagePerTick);
+        burnEndTime = Mathf.Max(burnEndTime, Time.time + duration);
+        if (!burning)
+        {
+            burning = true;
+            InvokeRepeating("burnTick", 0f, 1f);
+            setBurnColor(true);
+        }
+    }
+
+    private void burnTick()
+    {
+        if (!alive || Time.time >= burnEndTime)
+        {
+            burning = false;
+            CancelInvoke("burnTick");
+            setBurnColor(false);
+            return;
+        }
+        beAttacked(burnDamagePerTick);
+    }
+
+    private void setBurnColor(bool value)
+    {
+        foreach (SpriteRenderer renderer in GetComponentsInChildren<SpriteRenderer>(true))
+        {
+            Color color = renderer.color;
+            renderer.color = value
+                ? new Color(1f, 0.48f, 0.16f, color.a)
+                : new Color(1f, 1f, 1f, color.a);
+        }
     }
 
     public virtual void beSquashed()

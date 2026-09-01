@@ -75,7 +75,10 @@ public class TorchWood : Plant
 
     protected override void beforeDie()
     {
-        transform.Find("WarmPlantRegion").GetComponent<WarmPlantRegion>().stopWarm();
+        Transform region = transform.Find("WarmPlantRegion");
+        if (region == null) return;
+        WarmPlantRegion warmRegion = region.GetComponent<WarmPlantRegion>();
+        if (warmRegion != null) warmRegion.stopWarm();
     }
 
     protected override void intensify_specific()

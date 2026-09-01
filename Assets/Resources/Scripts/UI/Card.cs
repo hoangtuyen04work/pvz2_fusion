@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
-public class Card : MonoBehaviour
+public class Card : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     //Ảnh hồi chiêu
     public GameObject upperImageObj;
@@ -94,5 +95,30 @@ public class Card : MonoBehaviour
 
         //Chuyển cho quản lý trồng cây
         planting.clickPlant(plantName, gameObject.GetComponent<Card>());
+    }
+
+    public void OnBeginDrag(PointerEventData eventData)
+    {
+        if (myButton == null || !myButton.enabled) return;
+        click();
+    }
+
+    public void OnDrag(PointerEventData eventData)
+    {
+        // ToBePlanted tu di theo chuot; interface nay giu drag hoat dong tren UI.
+    }
+
+    public void OnEndDrag(PointerEventData eventData)
+    {
+        GameObject preview = GameObject.Find("To Be Planted");
+        if (preview == null || !preview.activeSelf || Camera.main == null) return;
+
+        Vector3 world = Camera.main.ScreenToWorldPoint(eventData.position);
+        foreach (Collider2D hit in Physics2D.OverlapPointAll(new Vector2(world.x, world.y)))
+        {
+            PlantGrid grid = hit.GetComponent<PlantGrid>();
+            if (grid != null && grid.tryPlaceSelectedPlant()) break;
+        }
+        preview.SetActive(false);
     }
 }

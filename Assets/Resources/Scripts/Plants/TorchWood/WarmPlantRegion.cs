@@ -6,9 +6,10 @@ public class WarmPlantRegion : MonoBehaviour
 {
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if(collision.tag == "Plant")
+        if(collision.CompareTag("Plant"))
         {
-            collision.GetComponent<Plant>().warm();
+            Plant plant = collision.GetComponent<Plant>();
+            if (plant != null) plant.warm();
         }
     }
 
@@ -22,9 +23,12 @@ public class WarmPlantRegion : MonoBehaviour
 
         if (GetComponent<Collider2D>().Overlap(contactFilter, plants) != 0)
         {
+            HashSet<Plant> warmedPlants = new HashSet<Plant>();
             foreach (Collider2D collider in plants)
             {
-                collider.gameObject.GetComponent<Plant>().stopWarm();
+                if (collider == null) continue;
+                Plant plant = collider.GetComponent<Plant>();
+                if (plant != null && warmedPlants.Add(plant)) plant.stopWarm();
             }
         }
     }

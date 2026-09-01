@@ -57,15 +57,26 @@ public class GameplayPauseMenu : MonoBehaviour
         pauseButton = CreateTextureButton(
             "Nút Tùy chọn",
             canvasObject.transform,
-            Resources.Load<Sprite>("Sprites/UI/PauseMenu/options_normal"),
-            Resources.Load<Sprite>("Sprites/UI/PauseMenu/options_highlight"),
+            Resources.Load<Sprite>("Sprites/UI/PauseMenu/button_normal"),
+            Resources.Load<Sprite>("Sprites/UI/PauseMenu/button_highlight"),
             TogglePause
         );
         var pauseRect = pauseButton.GetComponent<RectTransform>();
         pauseRect.anchorMin = pauseRect.anchorMax = new Vector2(1f, 1f);
         pauseRect.pivot = new Vector2(1f, 1f);
         pauseRect.anchoredPosition = new Vector2(-18f, -16f);
-        pauseRect.sizeDelta = new Vector2(96f, 36f);
+        pauseRect.sizeDelta = new Vector2(176f, 48f);
+
+        var pauseOutline = pauseButton.AddComponent<Outline>();
+        pauseOutline.effectColor = new Color(0.02f, 0.025f, 0.015f, 0.85f);
+        pauseOutline.effectDistance = new Vector2(2.5f, -2.5f);
+
+        var pauseLabel = CreateText("Chữ Tùy chọn", pauseButton.transform, "TÙY CHỌN", 24, new Color(0.64f, 1f, 0.24f));
+        Stretch(pauseLabel.rectTransform);
+        pauseLabel.rectTransform.offsetMin = new Vector2(12f, 4f);
+        pauseLabel.rectTransform.offsetMax = new Vector2(-12f, -3f);
+        pauseLabel.rectTransform.localRotation = Quaternion.Euler(0f, 0f, -1.4f);
+        pauseLabel.raycastTarget = false;
 
         overlay = new GameObject("Lớp tạm dừng", typeof(RectTransform), typeof(Image), typeof(CanvasGroup));
         overlay.transform.SetParent(canvasObject.transform, false);
@@ -229,10 +240,11 @@ public class GameplayPauseMenu : MonoBehaviour
 
     private Text CreateText(string name, Transform parent, string value, int fontSize, Color color)
     {
-        var go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Text), typeof(Outline));
+        var go = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Text), typeof(Outline), typeof(Shadow));
         go.transform.SetParent(parent, false);
         var text = go.GetComponent<Text>();
         text.font = font;
+        text.fontStyle = FontStyle.Bold;
         text.text = value;
         text.fontSize = fontSize;
         text.resizeTextForBestFit = true;
@@ -241,8 +253,12 @@ public class GameplayPauseMenu : MonoBehaviour
         text.alignment = TextAnchor.MiddleCenter;
         text.color = color;
         var outline = go.GetComponent<Outline>();
-        outline.effectColor = new Color(0f, 0f, 0f, 0.9f);
-        outline.effectDistance = new Vector2(1.5f, -1.5f);
+        outline.effectColor = new Color(0.035f, 0.025f, 0.02f, 0.96f);
+        outline.effectDistance = new Vector2(1.8f, -1.8f);
+        var shadows = go.GetComponents<Shadow>();
+        var shadow = shadows[shadows.Length - 1];
+        shadow.effectColor = new Color(0f, 0f, 0f, 0.68f);
+        shadow.effectDistance = new Vector2(2.8f, -3.2f);
         return text;
     }
 

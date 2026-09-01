@@ -16,6 +16,10 @@ public class UIManagement : MonoBehaviour
     // Start is called before the first frame update
     public void initUI()
     {
+        //Thiết lập trước Start của SunNumber để màn đặc biệt có thể đổi lượng nắng đầu.
+        GameObject.Find("Sun Text").GetComponent<Text>().text =
+            GameManagement.levelData.initialSun.ToString();
+
         //Tải tên màn chơi
         levelNameText.text = GameManagement.levelData.levelName;
 

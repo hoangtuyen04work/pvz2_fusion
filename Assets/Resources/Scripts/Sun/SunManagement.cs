@@ -19,6 +19,12 @@ public class SunManagement : MonoBehaviour
     const float leftEdge = -4.4f;
     const float rightEdge = 2.8f;
 
+    public void setDropInterval(float minimum, float maximum)
+    {
+        minInterval = Mathf.Max(0.15f, minimum);
+        maxInterval = Mathf.Max(minInterval, maximum);
+    }
+
     // Start is called before the first frame update
     void Start()
     {

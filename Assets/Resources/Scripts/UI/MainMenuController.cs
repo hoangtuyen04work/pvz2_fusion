@@ -220,7 +220,8 @@ public class MainMenuController : MonoBehaviour
             "Hành Trình Mới",
             "Thầy Luyện Xác",
             "Vùng Đất Bất Tử",
-            "Sông Băng Địa Cực"
+            "Sông Băng Địa Cực",
+            "Sân Thử Nghiệm"
         };
         string[] thumbnails =
         {
@@ -228,7 +229,8 @@ public class MainMenuController : MonoBehaviour
             "Sprites/BackGround/Background_Day",
             "Sprites/BackGround/Background_Night_Wall",
             "Sprites/BackGround/background_Night_Bone",
-            "Sprites/BackGround/Background_Ice"
+            "Sprites/BackGround/Background_Ice",
+            "Sprites/BackGround/Background_Day"
         };
 
         for (int i = 0; i < levelNames.Length; i++)
@@ -295,7 +297,7 @@ public class MainMenuController : MonoBehaviour
                 ? new Color(0.64f, 1f, 0.30f, 1f)
                 : new Color(0.74f, 0.76f, 0.70f, 1f);
 
-        string[] names = { "Mèo Miu Xuất Trận", "Hành Trình Mới", "Thầy Luyện Xác", "Vùng Đất Bất Tử", "Sông Băng Địa Cực" };
+        string[] names = { "Mèo Miu Xuất Trận", "Hành Trình Mới", "Thầy Luyện Xác", "Vùng Đất Bất Tử", "Sông Băng Địa Cực", "Sân Thử Nghiệm" };
         selectedLevelText.text = "Đã chọn: Màn " + (levelIndex + 1) + " — " + names[levelIndex];
         playLevelButton.interactable = true;
         PlayClick();

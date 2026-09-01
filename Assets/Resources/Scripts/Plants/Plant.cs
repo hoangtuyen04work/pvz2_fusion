@@ -162,6 +162,13 @@ public class Plant : MonoBehaviour
         Destroy(gameObject);
     }
 
+    // Loai cay khoi o de thay bang cay lai, khong danh dau o la trong.
+    public void removeForFusion()
+    {
+        beforeDie();
+        Destroy(gameObject);
+    }
+
     //Việc cần xử lý trước khi chết, do từng loại cây tự cài đặt
     protected virtual void beforeDie()
     {

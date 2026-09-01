@@ -17,4 +17,6 @@ public class LevelData
     public List<float> zombieInitPosY;   //Vị trí trục Y ban đầu của zombie từng hàng
 
     public List<string> plantCards;   //Dãy thẻ cây của màn này
+    public int initialSun = 50;       //Lượng nắng khi bắt đầu màn
+    public bool skipIntro = false;    //Màn chơi không có hội thoại mở đầu
 }

@@ -17,6 +17,7 @@ public class PlantGrid : MonoBehaviour
 
     bool havePlanted = false;   //Ô này đã trồng cây chưa
     GameObject nowPlant;    //Cây đang trồng hiện tại
+    bool fusionHighlighted;
 
     #endregion
 
@@ -42,6 +43,11 @@ public class PlantGrid : MonoBehaviour
         {
             nowPlant.GetComponent<Plant>().highlight();
         }
+        else if (havePlanted && toBePlanted.activeSelf && canFuse(toBePlanted.GetComponent<ToBePlanted>().plantName))
+        {
+            nowPlant.GetComponent<Plant>().highlight();
+            fusionHighlighted = true;
+        }
     }
 
     private void OnMouseExit()
@@ -54,27 +60,77 @@ public class PlantGrid : MonoBehaviour
         {
             nowPlant.GetComponent<Plant>().cancelHighlight();
         }
+        else if (havePlanted && fusionHighlighted)
+        {
+            nowPlant.GetComponent<Plant>().cancelHighlight();
+            fusionHighlighted = false;
+        }
     }
 
     private void OnMouseDown()
     {
-        if (havePlanted == false && toBePlanted.activeSelf == true)
-        {
-            plant(toBePlanted.GetComponent<ToBePlanted>().plantName);
-        }
-        else if (havePlanted == true && selectedShovel.activeSelf == true)
+        if (!tryPlaceSelectedPlant() && havePlanted == true && selectedShovel.activeSelf == true)
         {
             nowPlant.GetComponent<Plant>().die("shovelPlant");
+        }
+        else if (havePlanted && toBePlanted.activeSelf)
+        {
+            fuse(toBePlanted.GetComponent<ToBePlanted>().plantName);
         }
     }
 
     #endregion
+
+    private bool canFuse(string selectedPlant)
+    {
+        if (nowPlant == null || nowPlant.GetComponent<FireWallNutFusion>() != null) return false;
+        bool wallNutOnGrid = nowPlant.name.StartsWith("WallNut", StringComparison.OrdinalIgnoreCase);
+        bool torchWoodOnGrid = nowPlant.name.StartsWith("Torchwood", StringComparison.OrdinalIgnoreCase);
+        return (wallNutOnGrid && selectedPlant.Equals("TorchWood", StringComparison.OrdinalIgnoreCase))
+            || (torchWoodOnGrid && selectedPlant.Equals("WallNut", StringComparison.OrdinalIgnoreCase));
+    }
+
+    private void fuse(string selectedPlant)
+    {
+        if (!canFuse(selectedPlant)) return;
+
+        Plant oldPlant = nowPlant.GetComponent<Plant>();
+        fusionHighlighted = false;
+        oldPlant.removeForFusion();
+
+        nowPlant = Instantiate(Resources.Load<GameObject>("Prefabs/Plants/WallNut"),
+            transform.position + new Vector3(0, 0, 5), Quaternion.identity, transform);
+        nowPlant.name = "FireWallNut";
+        nowPlant.AddComponent<FireWallNutFusion>();
+        nowPlant.GetComponent<Plant>().initialize(this, spriteRenderer.sortingLayerName, spriteRenderer.sortingOrder);
+
+        audioSource.clip = Resources.Load<AudioClip>("Sounds/UI/SeedAndShovelBank/plant");
+        audioSource.Play();
+        GameObject.Find("Planting Management").GetComponent<PlantingManagement>().plant();
+    }
 
     #region Hàm tự định nghĩa private
 
     #endregion
 
     #region Hàm tự định nghĩa public
+
+    public bool tryPlaceSelectedPlant()
+    {
+        if (!toBePlanted.activeSelf) return false;
+        string selectedPlant = toBePlanted.GetComponent<ToBePlanted>().plantName;
+        if (!havePlanted)
+        {
+            plant(selectedPlant);
+            return true;
+        }
+        if (canFuse(selectedPlant))
+        {
+            fuse(selectedPlant);
+            return true;
+        }
+        return false;
+    }
 
     public void plant(string name)
     {
