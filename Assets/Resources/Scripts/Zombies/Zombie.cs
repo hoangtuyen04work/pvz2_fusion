@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -13,6 +13,7 @@ public class Zombie : MonoBehaviour
     //Liên quan tới máu
     public int bloodVolume;   //Lượng máu
     protected int bloodVolumeMax;
+    public int BloodVolumeMax => bloodVolumeMax; // Getter cho GameStateCollector
     private bool alive = true;
     private bool burning;
     private float burnEndTime;

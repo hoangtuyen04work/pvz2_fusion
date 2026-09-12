@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,11 +9,13 @@ public class Plant : MonoBehaviour
 
     public int bloodVolume;
     private int bloodVolumeMax;
+    public int BloodVolumeMax => bloodVolumeMax; // Getter cho GameStateCollector
 
     public PlantState state = PlantState.Normal;
     protected int warmSource = 0;  //Xung quanh có mấy nguồn sưởi ấm
 
     protected bool intensified = false;   //Có đang ở trạng thái tăng cường không
+    public bool Intensified => intensified; // Getter cho GameStateCollector
 
     protected AudioSource audioSource;   //Component AudioSource của chính nó
 

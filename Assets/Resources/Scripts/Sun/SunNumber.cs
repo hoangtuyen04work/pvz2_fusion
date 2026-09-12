@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -8,6 +8,7 @@ public class SunNumber : MonoBehaviour
     //Text số nắng
     Text myText;
     int nowSun;
+    public int NowSun => nowSun; // Getter cho GameStateCollector
 
     //Nhóm thẻ cây
     List<Card> cardGroup;

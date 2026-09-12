@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -18,6 +18,10 @@ public class PlantGrid : MonoBehaviour
     bool havePlanted = false;   //Ô này đã trồng cây chưa
     GameObject nowPlant;    //Cây đang trồng hiện tại
     bool fusionHighlighted;
+
+    // Getter cho GameStateCollector
+    public bool HavePlanted => havePlanted;
+    public GameObject NowPlant => nowPlant;
 
     #endregion
 

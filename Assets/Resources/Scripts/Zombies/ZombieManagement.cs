@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -32,6 +32,12 @@ public class ZombieManagement : MonoBehaviour
     public Caption caption;  //Component phụ đề
 
     AudioSource audioSource;   //Component AudioSource của chính nó
+
+    // Getter cho GameStateCollector
+    public int ZombieNum_now => zombieNum_now;
+    public int NowNode_index => nowNode_index;
+    public int NodeCount => nodeCount;
+    public TimeNode NowNode => nowNode;
 
     private void Awake()
     {
