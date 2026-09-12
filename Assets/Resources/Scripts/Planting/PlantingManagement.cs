@@ -11,6 +11,7 @@ public class PlantingManagement : MonoBehaviour
     ToBePlanted toBePlanted_Script;
 
     Card nowCard;  //Card của thẻ cây đang được chọn
+    string selectedPlantName;
 
     #endregion
 
@@ -37,12 +38,29 @@ public class PlantingManagement : MonoBehaviour
     public void clickPlant(string plant, Card card)
     {
         nowCard = card;
+        selectedPlantName = plant;
         toBePlanted_Script.showPlantPreview(plant);
     }
 
+    public bool hasSelectedPlant()
+    {
+        return !string.IsNullOrEmpty(selectedPlantName);
+    }
+
+    public string getSelectedPlantName()
+    {
+        return selectedPlantName;
+    }
+
+    public void clearSelectedPlant()
+    {
+        selectedPlantName = null;
+        if (toBePlanted_Object != null) toBePlanted_Object.SetActive(false);
+    }
     //Trồng cây
     public void plant()
     {
+        if (GameManagement.levelData.isTestMode) return;
         GameObject.Find("Sun Text").GetComponent<SunNumber>().subSun(nowCard.sunNeeded);
         nowCard.cooling();
     }

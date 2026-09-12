@@ -19,4 +19,5 @@ public class LevelData
     public List<string> plantCards;   //Dãy thẻ cây của màn này
     public int initialSun = 50;       //Lượng nắng khi bắt đầu màn
     public bool skipIntro = false;    //Màn chơi không có hội thoại mở đầu
+    public bool isTestMode = false;
 }

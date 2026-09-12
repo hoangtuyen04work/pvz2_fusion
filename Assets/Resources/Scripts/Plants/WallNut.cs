@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+// Cây Hạt Dẻ Tường.
 public class WallNut : Plant
 {
     float crackedPoint1, crackedPoint2;

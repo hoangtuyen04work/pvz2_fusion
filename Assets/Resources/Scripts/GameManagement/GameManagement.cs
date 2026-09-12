@@ -28,6 +28,11 @@ public class GameManagement : MonoBehaviour
             (LevelController)gameObject.AddComponent(Type.GetType("Level" + level + "Controller"));
         levelController.init();
 
+        // A selection made in the main menu overrides the level's legacy
+        // default deck. Direct scene launches still keep the old defaults.
+        if (GameSession.SelectedPlants.Count > 0)
+            levelData.plantCards = new List<string>(GameSession.SelectedPlants);
+
         //Tải ảnh nền
         background.GetComponent<SpriteRenderer>().sprite =
             Resources.Load<Sprite>("Sprites/Background/Background" + levelData.mapSuffix);

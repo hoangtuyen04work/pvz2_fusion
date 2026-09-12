@@ -17,8 +17,7 @@ public class WarmPlantRegion : MonoBehaviour
     {
         List<Collider2D> plants = new List<Collider2D>();
 
-        ContactFilter2D contactFilter = new ContactFilter2D();
-        contactFilter.NoFilter();
+        ContactFilter2D contactFilter = ContactFilter2D.noFilter;
         contactFilter.SetLayerMask(LayerMask.GetMask("Plant"));
 
         if (GetComponent<Collider2D>().Overlap(contactFilter, plants) != 0)

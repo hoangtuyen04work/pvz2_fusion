@@ -42,8 +42,8 @@ public class Card : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHand
         if(coolingState == true)
         {
             timer += Time.deltaTime;
-            if (timer / coolingTime < 1)
-                lowerImage.rectTransform.localScale = new Vector3(1, 1 - timer / coolingTime, 1);
+            if (coolingTime > 0f && timer / coolingTime < 1)
+                lowerImage.fillAmount = 1 - timer / coolingTime;
             else endCooling();
         }
     }
@@ -90,8 +90,15 @@ public class Card : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHand
 
     public void click()
     {
+        if (planting == null)
+        {
+            GameObject manager = GameObject.Find("Planting Management");
+            planting = manager != null ? manager.GetComponent<PlantingManagement>() : null;
+        }
+        if (planting == null) return;
         //Phát âm thanh
-        gameObject.GetComponent<AudioSource>().Play();
+        AudioSource audio = gameObject.GetComponent<AudioSource>();
+        if (audio != null && audio.clip != null) audio.Play();
 
         //Chuyển cho quản lý trồng cây
         planting.clickPlant(plantName, gameObject.GetComponent<Card>());

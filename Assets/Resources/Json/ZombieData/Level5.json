@@ -2,9 +2,9 @@
   "info": [
     { "deltaTime": 8, "isWave": false, "isFinalWave": false, "number": 1, "zombie": "ZombieNormal" },
     { "deltaTime": 12, "isWave": false, "isFinalWave": false, "number": 2, "zombie": "ZombieNormal" },
-    { "deltaTime": 10, "isWave": false, "isFinalWave": false, "number": 1, "zombie": "ConeZombie" },
+    { "deltaTime": 10, "isWave": false, "isFinalWave": false, "number": 1, "zombie": "FlagZombie" },
     { "deltaTime": 10, "isWave": false, "isFinalWave": false, "number": 2, "zombie": "ZombieNormal" },
-    { "deltaTime": 8, "isWave": false, "isFinalWave": false, "number": 1, "zombie": "BucketZombie" },
+    { "deltaTime": 8, "isWave": false, "isFinalWave": false, "number": 1, "zombie": "NewspaperZombie" },
     { "deltaTime": 10, "isWave": true, "isFinalWave": false, "number": 4, "zombie": "ZombieNormal" },
     { "deltaTime": 0, "isWave": false, "isFinalWave": false, "number": 2, "zombie": "ConeZombie" },
     { "deltaTime": 12, "isWave": false, "isFinalWave": false, "number": 2, "zombie": "ZombieNormal" },

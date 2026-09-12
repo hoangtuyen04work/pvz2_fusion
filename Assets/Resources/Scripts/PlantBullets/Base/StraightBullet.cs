@@ -10,6 +10,7 @@ public class StraightBullet : MonoBehaviour
 
     protected bool boomState = false;  //Đạn đã nổ chưa
     protected int row;
+    public int Row => row;
 
     // Update is called once per frame
     void Update()
