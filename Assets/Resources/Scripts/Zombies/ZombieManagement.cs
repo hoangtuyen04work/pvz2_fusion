@@ -100,10 +100,9 @@ public class ZombieManagement : MonoBehaviour
             rowList.Remove(randY);
             if (rowList.Count == 0) initRowList();
             //Sinh zombie
-            GameObject newZombie = Instantiate(zombies[zombiesName[nowNode.zombie]],
-                new Vector3(initPos_x, GameManagement.levelData.zombieInitPosY[randY], 0),
-                Quaternion.Euler(0, 0, 0),
-                transform);
+            GameObject newZombie = createZombie(nowNode.zombie,
+                new Vector3(initPos_x, GameManagement.levelData.zombieInitPosY[randY], 0));
+            if (newZombie == null) { Debug.LogError("Unknown zombie in level data: " + nowNode.zombie, this); continue; }
             newZombie.GetComponent<Zombie>().setPosRow(randY);
             addZombieNumAll();
         }
@@ -139,10 +138,9 @@ public class ZombieManagement : MonoBehaviour
     //Tạo zombie ở chế độ god mode, dùng cho hội thoại
     public void createZombieByGod(string name, int posRow)
     {
-        GameObject newZombie = Instantiate(zombies[zombiesName[name]],
-            new Vector3(initPos_x, GameManagement.levelData.zombieInitPosY[posRow], 0),
-            Quaternion.Euler(0, 0, 0),
-            transform);
+        GameObject newZombie = createZombie(name,
+            new Vector3(initPos_x, GameManagement.levelData.zombieInitPosY[posRow], 0));
+        if (newZombie == null) return;
         newZombie.GetComponent<Zombie>().setPosRow(posRow);
         newZombie.GetComponent<Zombie>().cancelSleep();
         addZombieNumAll();
@@ -192,6 +190,32 @@ public class ZombieManagement : MonoBehaviour
         }
     }
 
+    public bool SpawnTestZombie(int index, int row)
+    {
+        if (index < 0 || index >= zombies.Length || row < 0 || row >= GameManagement.levelData.landRowCount) return false;
+        GameObject created = Instantiate(zombies[index], new Vector3(initPos_x, GameManagement.levelData.zombieInitPosY[row], 0), Quaternion.identity, transform);
+        Zombie zombie = created.GetComponent<Zombie>();
+        zombie.setPosRow(row);
+        zombie.cancelSleep();
+        addZombieNumAll();
+        return true;
+    }
+
+    public bool SpawnImportedTestZombie(string name, int row)
+    {
+        if (!ImportedZombieRuntime.Supports(name) || row < 0 || row >= GameManagement.levelData.landRowCount) return false;
+        GameObject created = createZombie(name, new Vector3(initPos_x, GameManagement.levelData.zombieInitPosY[row], 0));
+        created.GetComponent<Zombie>().setPosRow(row);
+        addZombieNumAll();
+        return true;
+    }
+
+    private GameObject createZombie(string name, Vector3 position)
+    {
+        if (zombiesName.TryGetValue(name, out int index))
+            return Instantiate(zombies[index], position, Quaternion.identity, transform);
+        return ImportedZombieRuntime.Create(name, position, transform);
+    }
     #region Vùng hàm dành riêng cho màn đặc biệt
 
     //Hàm sinh zombie dành riêng cho màn 2

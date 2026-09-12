@@ -33,11 +33,6 @@ public class ToBePlanted : MonoBehaviour
         //Cây chờ trồng di chuyển theo chuột
         transform.position = mouseWorldPos;
 
-        //Bấm chuột trái, chính nó ẩn đi
-        if (Input.GetKeyDown(KeyCode.Mouse0))
-        {
-            gameObject.SetActive(false);
-        }
     }
 
     #endregion
@@ -52,6 +47,13 @@ public class ToBePlanted : MonoBehaviour
     {
         plantName = name;
         spriteRenderer.sprite = Resources.Load<Sprite>("Sprites/Plants/" + plantName);
+        if (spriteRenderer.sprite == null)
+        {
+            spriteRenderer.sprite = ImportedPlantRuntime.Preview(plantName);
+            float scale = ImportedPlantRuntime.VisualScale(plantName);
+            transform.localScale = new Vector3(scale, scale, 1f);
+        }
+        else transform.localScale = Vector3.one;
 
         //Lấy vị trí chuột hiện tại
         mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);

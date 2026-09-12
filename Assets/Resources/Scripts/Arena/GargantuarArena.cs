@@ -358,6 +358,9 @@ public sealed class ArenaPeashooter : MonoBehaviour
 {
     private const float MoveSpeed = 4.2f;
     private const float FireDelay = 0.18f;
+    private const float VisualScale = 3.7f;
+    private const float EdgeMargin = 1.5f;
+    private const float MuzzleDistance = 1.42f;
     private GargantuarArenaGame game;
     private ArenaJoystick joystick;
     private Transform visual;
@@ -380,8 +383,8 @@ public sealed class ArenaPeashooter : MonoBehaviour
         var renderer = visual.GetComponent<SpriteRenderer>();
         renderer.sprite = Resources.Load<Sprite>("Sprites/Plants/PeaShooterSingle");
         renderer.sortingOrder = 30;
-        visual.localScale = Vector3.one * 1.35f;
-        CreateShadow(transform, new Vector2(0f, -0.47f), new Vector3(0.55f, 0.25f, 1f), 20);
+        visual.localScale = Vector3.one * VisualScale;
+        CreateShadow(transform, new Vector2(0f, -1.3f), new Vector3(1.5f, 0.68f, 1f), 20);
     }
 
     public void SetJoystick(ArenaJoystick value) => joystick = value;
@@ -400,13 +403,21 @@ public sealed class ArenaPeashooter : MonoBehaviour
         }
 
         Vector3 position = transform.position;
-        position.x = Mathf.Clamp(position.x, GargantuarArenaGame.Left + 0.45f, GargantuarArenaGame.Right - 0.45f);
-        float upperEdge = GargantuarArenaGame.Top - 0.45f;
-        float lowerEdge = GargantuarArenaGame.Bottom + 0.45f;
+        float leftEdge = GargantuarArenaGame.Left + EdgeMargin;
+        float rightEdge = GargantuarArenaGame.Right - EdgeMargin;
+        position.x = Mathf.Clamp(position.x, leftEdge, rightEdge);
+        float upperEdge = GargantuarArenaGame.Top - EdgeMargin;
+        float lowerEdge = GargantuarArenaGame.Bottom + EdgeMargin;
         if (position.y > upperEdge)
+        {
             position.y = lowerEdge;
+            position.x = Random.Range(leftEdge, rightEdge);
+        }
         else if (position.y < lowerEdge)
+        {
             position.y = upperEdge;
+            position.x = Random.Range(leftEdge, rightEdge);
+        }
         transform.position = position;
 
         if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.LeftControl) || Input.GetKeyDown(KeyCode.JoystickButton0))
@@ -435,7 +446,7 @@ public sealed class ArenaPeashooter : MonoBehaviour
         if (Time.time < nextFireTime || Time.timeScale == 0f) return;
         nextFireTime = Time.time + FireDelay;
         var bullet = new GameObject("Pea", typeof(SpriteRenderer), typeof(ArenaPeaBullet));
-        bullet.transform.position = transform.position + (Vector3)(facing * 0.62f) + new Vector3(0f, 0.12f, 0f);
+        bullet.transform.position = transform.position + (Vector3)(facing * MuzzleDistance) + new Vector3(0f, 0.12f, 0f);
         var renderer = bullet.GetComponent<SpriteRenderer>();
         renderer.sprite = Resources.Load<Sprite>("Sprites/PlantBullet/PeaBullet/PeaBullet");
         renderer.sortingOrder = 50;

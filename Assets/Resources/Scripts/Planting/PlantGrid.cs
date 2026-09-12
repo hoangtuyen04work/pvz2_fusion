@@ -11,6 +11,7 @@ public class PlantGrid : MonoBehaviour
 
     GameObject toBePlanted;   //Đối tượng To Be Planted
     GameObject selectedShovel;        //Đối tượng SelectedShovel
+    PlantingManagement plantingManagement;
 
     SpriteRenderer spriteRenderer;  //Component SpriteRenderer của chính nó
     AudioSource audioSource;   //Component AudioSource của chính nó
@@ -69,46 +70,74 @@ public class PlantGrid : MonoBehaviour
 
     private void OnMouseDown()
     {
-        if (!tryPlaceSelectedPlant() && havePlanted == true && selectedShovel.activeSelf == true)
+        if (tryPlaceSelectedPlant())
+        {
+            toBePlanted.SetActive(false);
+            return;
+        }
+
+        if (havePlanted && selectedShovel.activeSelf)
         {
             nowPlant.GetComponent<Plant>().die("shovelPlant");
         }
-        else if (havePlanted && toBePlanted.activeSelf)
-        {
-            fuse(toBePlanted.GetComponent<ToBePlanted>().plantName);
-        }
     }
-
     #endregion
 
     private bool canFuse(string selectedPlant)
     {
-        if (nowPlant == null || nowPlant.GetComponent<FireWallNutFusion>() != null) return false;
+        if (string.IsNullOrEmpty(selectedPlant) || nowPlant == null ||
+            nowPlant.GetComponent<Plant>() == null ||
+            nowPlant.GetComponent<FireWallNutFusion>() != null ||
+            nowPlant.GetComponent<SunNut>() != null) return false;
         bool wallNutOnGrid = nowPlant.name.StartsWith("WallNut", StringComparison.OrdinalIgnoreCase);
         bool torchWoodOnGrid = nowPlant.name.StartsWith("Torchwood", StringComparison.OrdinalIgnoreCase);
-        return (wallNutOnGrid && selectedPlant.Equals("TorchWood", StringComparison.OrdinalIgnoreCase))
-            || (torchWoodOnGrid && selectedPlant.Equals("WallNut", StringComparison.OrdinalIgnoreCase));
+        bool sunFlowerOnGrid = nowPlant.name.StartsWith("SunFlower", StringComparison.OrdinalIgnoreCase);
+        return (wallNutOnGrid && (selectedPlant.Equals("TorchWood", StringComparison.OrdinalIgnoreCase) || selectedPlant.Equals("SunFlower", StringComparison.OrdinalIgnoreCase)))
+            || (torchWoodOnGrid && selectedPlant.Equals("WallNut", StringComparison.OrdinalIgnoreCase))
+            || (sunFlowerOnGrid && selectedPlant.Equals("WallNut", StringComparison.OrdinalIgnoreCase));
     }
 
-    private void fuse(string selectedPlant)
+    private bool fuse(string selectedPlant)
     {
-        if (!canFuse(selectedPlant)) return;
+        if (!canFuse(selectedPlant)) return false;
 
-        Plant oldPlant = nowPlant.GetComponent<Plant>();
+        bool createsFireWallNut = selectedPlant.Equals("TorchWood", StringComparison.OrdinalIgnoreCase)
+            || nowPlant.name.StartsWith("Torchwood", StringComparison.OrdinalIgnoreCase);
+        string resultPlant = createsFireWallNut ? "WallNut" : "SunNut";
+        GameObject resultPrefab = Resources.Load<GameObject>("Prefabs/Plants/" + resultPlant);
+        if (resultPrefab == null)
+        {
+            Debug.LogError("Missing fusion plant prefab: " + resultPlant, this);
+            return false;
+        }
+
+        GameObject fusedPlant = Instantiate(
+            resultPrefab,
+            transform.position + new Vector3(0, 0, 5),
+            Quaternion.identity,
+            transform);
+        Plant fusedPlantComponent = fusedPlant.GetComponent<Plant>();
+        if (fusedPlantComponent == null)
+        {
+            Debug.LogError("Fusion prefab is missing Plant component: " + resultPlant, resultPrefab);
+            Destroy(fusedPlant);
+            return false;
+        }
+
+        GameObject oldPlant = nowPlant;
+        fusedPlant.name = createsFireWallNut ? "FireWallNut" : "SunNut";
+        if (createsFireWallNut) fusedPlant.AddComponent<FireWallNutFusion>();
+        fusedPlantComponent.initialize(this, spriteRenderer.sortingLayerName, spriteRenderer.sortingOrder);
+
         fusionHighlighted = false;
-        oldPlant.removeForFusion();
-
-        nowPlant = Instantiate(Resources.Load<GameObject>("Prefabs/Plants/WallNut"),
-            transform.position + new Vector3(0, 0, 5), Quaternion.identity, transform);
-        nowPlant.name = "FireWallNut";
-        nowPlant.AddComponent<FireWallNutFusion>();
-        nowPlant.GetComponent<Plant>().initialize(this, spriteRenderer.sortingLayerName, spriteRenderer.sortingOrder);
+        nowPlant = fusedPlant;
+        oldPlant.GetComponent<Plant>().removeForFusion();
 
         audioSource.clip = Resources.Load<AudioClip>("Sounds/UI/SeedAndShovelBank/plant");
-        audioSource.Play();
-        GameObject.Find("Planting Management").GetComponent<PlantingManagement>().plant();
+        if (audioSource.clip != null) audioSource.Play();
+        plantingManagement.plant();
+        return true;
     }
-
     #region Hàm tự định nghĩa private
 
     #endregion
@@ -117,32 +146,48 @@ public class PlantGrid : MonoBehaviour
 
     public bool tryPlaceSelectedPlant()
     {
-        if (!toBePlanted.activeSelf) return false;
-        string selectedPlant = toBePlanted.GetComponent<ToBePlanted>().plantName;
+        if (plantingManagement == null)
+        {
+            GameObject managerObject = GameObject.Find("Planting Management");
+            plantingManagement = managerObject != null ? managerObject.GetComponent<PlantingManagement>() : null;
+        }
+        if (plantingManagement == null || !plantingManagement.hasSelectedPlant()) return false;
+
+        string selectedPlant = plantingManagement.getSelectedPlantName();
         if (!havePlanted)
         {
             plant(selectedPlant);
+            plantingManagement.clearSelectedPlant();
             return true;
         }
         if (canFuse(selectedPlant))
         {
-            fuse(selectedPlant);
-            return true;
+            if (fuse(selectedPlant))
+            {
+                plantingManagement.clearSelectedPlant();
+                return true;
+            }
         }
         return false;
     }
-
     public void plant(string name)
     {
         spriteRenderer.sprite = null;   //Ẩn bóng mờ
-        havePlanted = true;   //Cây đã trồng
 
         //Sinh ra cây
-        nowPlant = Instantiate(Resources.Load<GameObject>("Prefabs/Plants/" + name),
-                                transform.position + new Vector3(0, 0, 5),
-                                Quaternion.Euler(0, 0, 0),
-                                transform);
-        nowPlant.GetComponent<Plant>().initialize(
+        GameObject prefab = Resources.Load<GameObject>("Prefabs/Plants/" + name);
+        nowPlant = prefab != null
+            ? Instantiate(prefab, transform.position + new Vector3(0, 0, 5), Quaternion.identity, transform)
+            : ImportedPlantRuntime.CreatePlant(name, transform.position + new Vector3(0, 0, 5), transform);
+        Plant component = nowPlant != null ? nowPlant.GetComponent<Plant>() : null;
+        if (component == null)
+        {
+            Debug.LogError("No playable prefab or imported definition found for plant: " + name, this);
+            nowPlant = null;
+            return;
+        }
+        havePlanted = true;   //Cây đã trồng
+        component.initialize(
             this,
             spriteRenderer.sortingLayerName,
             spriteRenderer.sortingOrder
@@ -161,14 +206,15 @@ public class PlantGrid : MonoBehaviour
     //Trồng ở chế độ god mode, dùng để sinh cây tham gia hội thoại đầu màn
     public GameObject plantByGod(string name)
     {
-        havePlanted = true;   //Cây đã trồng
-
         //Sinh ra cây
-        nowPlant = Instantiate(Resources.Load<GameObject>("Prefabs/Plants/" + name),
-                                          transform.position + new Vector3(0, 0, 5),
-                                          Quaternion.Euler(0, 0, 0),
-                                          transform);
-        nowPlant.GetComponent<Plant>().initialize(
+        GameObject prefab = Resources.Load<GameObject>("Prefabs/Plants/" + name);
+        nowPlant = prefab != null
+            ? Instantiate(prefab, transform.position + new Vector3(0, 0, 5), Quaternion.identity, transform)
+            : ImportedPlantRuntime.CreatePlant(name, transform.position + new Vector3(0, 0, 5), transform);
+        Plant component = nowPlant != null ? nowPlant.GetComponent<Plant>() : null;
+        if (component == null) return null;
+        havePlanted = true;
+        component.initialize(
             this,
             spriteRenderer.sortingLayerName,
             spriteRenderer.sortingOrder

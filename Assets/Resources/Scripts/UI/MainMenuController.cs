@@ -318,7 +318,7 @@ public class MainMenuController : MonoBehaviour
         }
 
         GameSession.SelectedLevel = selectedLevel;
-        StartCoroutine(LoadSceneWithFade("GameScene"));
+        PlantSelectionOverlay.Show(selectedLevel, () => StartCoroutine(LoadSceneWithFade("GameScene")));
     }
 
     private void ShowOptions() => OpenModal(optionsPanel);
@@ -493,6 +493,7 @@ public class MainMenuController : MonoBehaviour
 public static class GameSession
 {
     public static int SelectedLevel = -1;
+    public static readonly List<string> SelectedPlants = new List<string>();
 }
 
 public class MenuButtonMotion : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler

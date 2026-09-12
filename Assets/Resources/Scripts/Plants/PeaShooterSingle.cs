@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+// Cây Đậu Bắn một nòng.
 public class PeaShooterSingle : Plant
 {
     public GameObject pea;  //Prefab đạn

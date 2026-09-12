@@ -1,6 +1,6 @@
-using UnityEngine;
+﻿using UnityEngine;
 
-// Thanh phan fusion: hinh anh thong nhat cua Oc Cho Lua va suc manh TorchWood.
+// Cây Óc Chó Lửa: thành phần cây lai, kết hợp độ bền Hạt Dẻ Tường và ngọn lửa Liễu Đuốc.
 public class FireWallNutFusion : MonoBehaviour
 {
     public int biteBurnDamage = 35;
@@ -11,13 +11,18 @@ public class FireWallNutFusion : MonoBehaviour
     private WarmPlantRegion warmRegion;
     private SpriteRenderer bodyRenderer;
     private Vector3 baseScale;
+    private Plant plant;
+    private int maximumHealth;
+    private int damageArtworkState = -1;
 
     private void Start()
     {
-        row = GetComponent<Plant>().row;
+        plant = GetComponent<Plant>();
+        row = plant.row;
         useFusionArtwork();
         cloneTorchwoodFlame();
         createWarmRegion();
+        createPeaIgnitionRegion();
     }
 
     private void cloneTorchwoodFlame()
@@ -50,13 +55,14 @@ public class FireWallNutFusion : MonoBehaviour
         Animator animator = GetComponent<Animator>();
         if (animator != null) animator.enabled = false;
         bodyRenderer = GetComponent<SpriteRenderer>();
-        Sprite fusionSprite = Resources.Load<Sprite>("Sprites/Plants/FireWallNut/FireWallNut");
+        Sprite fusionSprite = Resources.Load<Sprite>("Sprites/Plants/FireWallNut/FireWallNutV2");
         if (fusionSprite != null) bodyRenderer.sprite = fusionSprite;
         baseScale = transform.localScale;
     }
 
     private void Update()
     {
+        updateDamageArtwork();
         // Nhip tho nhe, giu than va lua la mot khoi thong nhat nhu tranh mau.
         float breathe = Mathf.Sin(Time.time * 3.2f);
         transform.localScale = new Vector3(
@@ -70,6 +76,26 @@ public class FireWallNutFusion : MonoBehaviour
         }
     }
 
+    private void updateDamageArtwork()
+    {
+        if (plant == null || bodyRenderer == null) return;
+        if (maximumHealth <= 0) maximumHealth = plant.bloodVolume;
+        if (maximumHealth <= 0) return;
+
+        float healthRatio = plant.bloodVolume / (float)maximumHealth;
+        int nextState = healthRatio <= 1f / 3f ? 2 : healthRatio <= 2f / 3f ? 1 : 0;
+        if (nextState == damageArtworkState) return;
+
+        string path = nextState == 0 ? "Sprites/Plants/FireWallNut/FireWallNutV2"
+            : nextState == 1 ? "Sprites/Plants/FireWallNut/FireWallNutDamaged"
+            : "Sprites/Plants/FireWallNut/FireWallNutCritical";
+        Sprite artwork = Resources.Load<Sprite>(path);
+        if (artwork != null)
+        {
+            bodyRenderer.sprite = artwork;
+            damageArtworkState = nextState;
+        }
+    }
     private void createWarmRegion()
     {
         Rigidbody2D body = GetComponent<Rigidbody2D>();
@@ -84,23 +110,59 @@ public class FireWallNutFusion : MonoBehaviour
         warmRegion = region.AddComponent<WarmPlantRegion>();
     }
 
+    private void createPeaIgnitionRegion()
+    {
+        GameObject region = new GameObject("FirePeaIgnitionRegion");
+        region.transform.SetParent(transform, false);
+
+        BoxCollider2D collider = region.AddComponent<BoxCollider2D>();
+        collider.isTrigger = true;
+        collider.size = new Vector2(0.42f, 0.68f);
+        collider.offset = new Vector2(0.04f, -0.1f);
+
+        region.AddComponent<FireWallNutPeaIgniter>().initialize(row, firePeaDamage);
+    }
+
     public void OnBitten(Zombie zombie)
     {
         zombie.applyBurn(biteBurnDamage, biteBurnDuration);
     }
 
-    private void OnTriggerEnter2D(Collider2D collision)
-    {
-        if (!collision.CompareTag("Pea")) return;
-        GameObject firePea = Resources.Load<GameObject>("Prefabs/PlantBullet/FirePea");
-        if (firePea == null) return;
-        Instantiate(firePea, collision.transform.position, Quaternion.identity)
-            .GetComponent<StraightBullet>().initialize(row, firePeaDamage);
-        Destroy(collision.gameObject);
-    }
-
     private void OnDestroy()
     {
         if (warmRegion != null) warmRegion.stopWarm();
+    }
+}
+// Vùng đốt đạn của Cây Óc Chó Lửa.
+public class FireWallNutPeaIgniter : MonoBehaviour
+{
+    private int row;
+    private int firePeaDamage;
+
+    public void initialize(int row, int damage)
+    {
+        this.row = row;
+        firePeaDamage = damage;
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        ImportedProjectile imported = collision.GetComponent<ImportedProjectile>();
+        if (imported != null)
+        {
+            imported.PassThroughTorchwood(row, firePeaDamage, this);
+            return;
+        }
+        if (!collision.CompareTag("Pea")) return;
+
+        StraightBullet pea = collision.GetComponent<StraightBullet>();
+        if (pea == null || pea.Row != row) return;
+
+        GameObject firePea = Resources.Load<GameObject>("Prefabs/PlantBullet/FirePea");
+        if (firePea == null) return;
+
+        Instantiate(firePea, collision.transform.position, Quaternion.identity)
+            .GetComponent<StraightBullet>().initialize(row, firePeaDamage);
+        Destroy(collision.gameObject);
     }
 }

@@ -1,7 +1,7 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
-// Màn sandbox để thử cây và cơ chế fusion, không có phần hướng dẫn.
+// MÃ n sandbox Ä‘á»ƒ thá»­ cÃ¢y vÃ  cÆ¡ cháº¿ fusion, khÃ´ng cÃ³ pháº§n hÆ°á»›ng dáº«n.
 public class Level5Controller : LevelController
 {
     public override void init()
@@ -9,7 +9,7 @@ public class Level5Controller : LevelController
         GameManagement.levelData = new LevelData()
         {
             level = 5,
-            levelName = "Sân Thử Nghiệm",
+            levelName = "SÃ¢n Thá»­ Nghiá»‡m",
             mapSuffix = "_Day",
             rowCount = 5,
             landRowCount = 5,
@@ -20,6 +20,7 @@ public class Level5Controller : LevelController
             plantCards = new List<string>
             {
                 "SunFlower",
+                "SunNut",
                 "PeaShooter",
                 "WallNut",
                 "Squash",
@@ -27,8 +28,9 @@ public class Level5Controller : LevelController
                 "MiaoMiao",
                 "SnowKing"
             },
-            initialSun = 2000,
-            skipIntro = true
+            initialSun = 0,
+            skipIntro = true,
+            isTestMode = true
         };
     }
 
@@ -36,5 +38,8 @@ public class Level5Controller : LevelController
     {
         SunManagement sun = GameObject.Find("Sun Management").GetComponent<SunManagement>();
         sun.setDropInterval(0.8f, 1.4f);
+
+        GameObject.Find("Zombie Management").AddComponent<TestZombieSpawner>();
     }
 }
+

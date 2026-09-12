@@ -13,10 +13,13 @@ public class Zombie : MonoBehaviour
     //Liên quan tới máu
     public int bloodVolume;   //Lượng máu
     protected int bloodVolumeMax;
-    private bool alive = true;
+    protected bool alive = true;
     private bool burning;
     private float burnEndTime;
     private int burnDamagePerTick;
+    private bool slowed;
+    private float slowEndTime;
+    private float slowMultiplier = 1f;
 
     //Liên quan tới tấn công
     public int attackPower;  //Sức tấn công
@@ -59,6 +62,7 @@ public class Zombie : MonoBehaviour
     // Update is called once per frame
     protected virtual void Update()
     {
+        UpdateTimedStatusEffects();
         if (myAnimator.GetBool("Walk") == true)
         {
             transform.Translate(-speed * Time.deltaTime, 0, 0);
@@ -102,6 +106,8 @@ public class Zombie : MonoBehaviour
         //Cây bị tấn công
         if (plant != null)
         {
+            ImportedPlant imported = plant.GetComponent<ImportedPlant>();
+            if (imported != null && imported.OnBitten(this)) return;
             plant.beAttacked(attackPower, "beEated");
             FireWallNutFusion fusion = plant.GetComponent<FireWallNutFusion>();
             if (fusion != null) fusion.OnBitten(this);
@@ -153,6 +159,11 @@ public class Zombie : MonoBehaviour
         beAttacked(10);
     }
 
+    protected void UpdateTimedStatusEffects()
+    {
+        if (slowed && Time.time >= slowEndTime) ClearSlow();
+    }
+
     public void applyBurn(int damagePerTick, float duration)
     {
         burnDamagePerTick = Mathf.Max(burnDamagePerTick, damagePerTick);
@@ -163,6 +174,30 @@ public class Zombie : MonoBehaviour
             InvokeRepeating("burnTick", 0f, 1f);
             setBurnColor(true);
         }
+    }
+
+    public void ApplySlow(float multiplier, float duration)
+    {
+        multiplier = Mathf.Clamp(multiplier, 0.1f, 1f);
+        if (!slowed)
+        {
+            slowed = true;
+            slowMultiplier = multiplier;
+            speed *= slowMultiplier;
+            if (myAnimator != null) myAnimator.speed *= slowMultiplier;
+        }
+        slowEndTime = Mathf.Max(slowEndTime, Time.time + duration);
+        state = ZombieState.Cold;
+    }
+
+    private void ClearSlow()
+    {
+        if (!slowed) return;
+        speed /= slowMultiplier;
+        if (myAnimator != null) myAnimator.speed /= slowMultiplier;
+        slowed = false;
+        slowMultiplier = 1f;
+        if (state == ZombieState.Cold) state = ZombieState.Normal;
     }
 
     private void burnTick()

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// Cây Liễu Đuốc.
 public class TorchWood : Plant
 {
     public GameObject firePea;
@@ -18,14 +19,22 @@ public class TorchWood : Plant
 
         warm();
 
-        contactFilter.NoFilter();
+        contactFilter = ContactFilter2D.noFilter;
         contactFilter.SetLayerMask(LayerMask.GetMask("Zombie"));
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        ImportedProjectile imported = collision.GetComponent<ImportedProjectile>();
+        if (imported != null)
+        {
+            imported.PassThroughTorchwood(row, firePeaHurt, this);
+            return;
+        }
         if(collision.tag == "Pea")
         {
+            StraightBullet pea = collision.GetComponent<StraightBullet>();
+            if (pea == null || pea.Row != row) return;
             //���ɻ��㶹
             Instantiate(firePea,
                         collision.transform.position,
