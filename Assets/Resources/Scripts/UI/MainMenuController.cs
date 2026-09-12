@@ -7,6 +7,8 @@ using UnityEngine.UI;
 
 public class MainMenuController : MonoBehaviour
 {
+    private const int GargantuarArenaLevelIndex = 6;
+
     public Font menuFont;
     public Sprite stoneButtonNormal;
     public Sprite stoneButtonHighlighted;
@@ -221,7 +223,8 @@ public class MainMenuController : MonoBehaviour
             "Thầy Luyện Xác",
             "Vùng Đất Bất Tử",
             "Sông Băng Địa Cực",
-            "Sân Thử Nghiệm"
+            "Sân Thử Nghiệm",
+            "Đấu Trường Gargantuar"
         };
         string[] thumbnails =
         {
@@ -230,6 +233,7 @@ public class MainMenuController : MonoBehaviour
             "Sprites/BackGround/Background_Night_Wall",
             "Sprites/BackGround/background_Night_Bone",
             "Sprites/BackGround/Background_Ice",
+            "Sprites/BackGround/Background_Day",
             "Sprites/BackGround/Background_Day"
         };
 
@@ -297,7 +301,7 @@ public class MainMenuController : MonoBehaviour
                 ? new Color(0.64f, 1f, 0.30f, 1f)
                 : new Color(0.74f, 0.76f, 0.70f, 1f);
 
-        string[] names = { "Mèo Miu Xuất Trận", "Hành Trình Mới", "Thầy Luyện Xác", "Vùng Đất Bất Tử", "Sông Băng Địa Cực", "Sân Thử Nghiệm" };
+        string[] names = { "Mèo Miu Xuất Trận", "Hành Trình Mới", "Thầy Luyện Xác", "Vùng Đất Bất Tử", "Sông Băng Địa Cực", "Sân Thử Nghiệm", "Đấu Trường Gargantuar" };
         selectedLevelText.text = "Đã chọn: Màn " + (levelIndex + 1) + " — " + names[levelIndex];
         playLevelButton.interactable = true;
         PlayClick();
@@ -306,6 +310,13 @@ public class MainMenuController : MonoBehaviour
     private void PlaySelectedLevel()
     {
         if (selectedLevel < 0 || transitioning) return;
+
+        if (selectedLevel == GargantuarArenaLevelIndex)
+        {
+            StartCoroutine(LoadSceneWithFade(GargantuarArenaBootstrap.SceneName));
+            return;
+        }
+
         GameSession.SelectedLevel = selectedLevel;
         StartCoroutine(LoadSceneWithFade("GameScene"));
     }

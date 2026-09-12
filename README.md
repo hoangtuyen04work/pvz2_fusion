@@ -1,4 +1,10 @@
 # PvZ-Unity
+
+## Màn Đấu trường Gargantuar
+
+Chọn **Phiêu lưu** ở menu chính để vào màn chơi duy nhất mới. Điều khiển Peashooter bằng **WASD**, **phím mũi tên** hoặc joystick trên màn hình; nhấn **Space**, **Ctrl**, nút A trên tay cầm hoặc nút **BẮN** để bắn theo hướng đang quay.
+
+Gargantuar có 200 máu, mỗi viên đậu gây 20 sát thương. Hạ một Gargantuar được 100 điểm; nếu nó vượt biên trái, nó sẽ trở lại từ biên phải ở vị trí dọc ngẫu nhiên và giữ nguyên lượng máu. Peashooter có ba mạng và điểm cao nhất được lưu giữa các lượt chơi.
 Bản dựng lại game Plants vs. Zombies (PvZ) bằng Unity với độ tái hiện cao. Dự án mới hoàn thiện luồng chơi của các màn, chưa dựng lại toàn bộ luồng game của bản gốc. Có bổ sung một số cây, zombie và màn chơi mới do tác giả tự thiết kế; một phần tài nguyên được lấy từ trên mạng.
 
 
