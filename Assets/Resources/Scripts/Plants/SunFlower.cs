@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -24,8 +24,12 @@ public class SunFlower : Plant
         //Phát âm thanh
         audioSource.Play();
 
-        //Sinh ra mặt trời
-        Instantiate(flowersunPrefab, transform.position, Quaternion.Euler(0, 0, 0), sunManagement);
+        //Chỉ máy chủ sinh mặt trời, máy khách nhận lệnh sinh qua mạng
+        if (NetSession.IsAuthority)
+        {
+            //Sinh ra mặt trời
+            Instantiate(flowersunPrefab, transform.position, Quaternion.Euler(0, 0, 0), sunManagement);
+        }
 
         Invoke("createSun", createSunSpeed);
     }

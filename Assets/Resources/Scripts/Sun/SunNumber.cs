@@ -58,23 +58,53 @@ public class SunNumber : MonoBehaviour
         RefreshText();
     }
 
+    //Số nắng hiện có, để bộ đồng bộ kiểm tra xem có đủ trồng cây không
+    public int Current { get { return nowSun; } }
+
+    //Dãy thẻ cây của màn này
+    public List<Card> Cards { get { return cardGroup; } }
+
     public void addSun(int sunNum)
     {
+        //Máy khách không tự cộng nắng, nó nhận tổng số nắng từ máy chủ
+        if (!NetSession.IsAuthority) return;
+
         nowSun += sunNum;
-        RefreshText();
-        //Cập nhật trạng thái thẻ cây
-        updateCard();
+        applySun();
+        NetGameplay.NotifySunTotal(nowSun);
     }
 
     public void subSun(int sunNum)
     {
-        if(nowSun >= sunNum)
+        if (!NetSession.IsAuthority) return;
+
+        subSunAuthoritative(sunNum);
+        NetGameplay.NotifySunTotal(nowSun);
+    }
+
+    //Trừ nắng mà không tự phát tin, dùng khi bộ đồng bộ muốn gộp chung một lần gửi
+    public void subSunAuthoritative(int sunNum)
+    {
+        if (nowSun >= sunNum)
         {
             nowSun -= sunNum;
-            RefreshText();
-            //Cập nhật trạng thái thẻ cây
-            updateCard();
+            applySun();
         }
+    }
+
+    //Máy chủ báo tổng số nắng mới
+    public void setSun(int value)
+    {
+        nowSun = value;
+        applySun();
+    }
+
+    //Cập nhật chữ số nắng và trạng thái thẻ cây
+    private void applySun()
+    {
+        RefreshText();
+        //Cập nhật trạng thái thẻ cây
+        updateCard();
     }
 
     private void updateCard()
@@ -87,6 +117,7 @@ public class SunNumber : MonoBehaviour
     }
     private void RefreshText()
     {
+        if (myText == null) myText = GetComponent<Text>();
         if (myText != null)
         {
             if (myText.font == null) myText.font = Resources.Load<Font>("Fonts/Baloo2");

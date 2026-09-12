@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -13,11 +13,14 @@ public class FlowerSun : SunBase
     {
         base.Start();
 
-        float xOffset = Random.Range(-0.4f, 0.4f);
+        float xOffset = netRandom(-0.4f, 0.4f);
         highestPoint = transform.position +
                         new Vector3(xOffset, 0.5f, 0);
         lowestPoint = transform.position +
                         new Vector3(xOffset, -0.5f, 0);
+
+        //Ghi danh với bộ đồng bộ sau khi đã có đủ thông tin ngẫu nhiên
+        NetGameplay.RegisterSun(this);
     }
 
     public override void drop()

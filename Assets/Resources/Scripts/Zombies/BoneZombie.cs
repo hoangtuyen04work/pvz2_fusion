@@ -36,8 +36,9 @@ public class BoneZombie : Zombie
         //Chuyển animation
         myAnimator.SetBool("Walk", false);
         myAnimator.SetBool("Die", true);
-        //Hồi sinh sau một khoảng thời gian ngẫu nhiên
-        Invoke("revive", Random.Range(20.0f, 30.0f));
+        //Hồi sinh sau một khoảng thời gian ngẫu nhiên.
+        //Chơi mạng thì dùng số cố định để hai máy hồi sinh cùng lúc.
+        Invoke("revive", NetSession.IsOnline ? 25f : Random.Range(20.0f, 30.0f));
     }
 
     private void revive()

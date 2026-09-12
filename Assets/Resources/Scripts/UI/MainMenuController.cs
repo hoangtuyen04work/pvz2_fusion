@@ -103,7 +103,12 @@ public class MainMenuController : MonoBehaviour
 
         levelPanel = BuildLevelSelection(menuFrame);
         optionsPanel = BuildModal(menuFrame, "TÙY CHỌN", "Âm thanh và thiết lập nâng cao sẽ được bổ sung trong bản cập nhật tiếp theo.");
-        helpPanel = BuildModal(menuFrame, "TRỢ GIÚP", "Chọn PHIÊU LƯU để bắt đầu. Trong màn chơi, hãy chọn thẻ cây rồi nhấn vào ô đất để trồng cây chống lại zombie.");
+        helpPanel = BuildModal(menuFrame, "TRỢ GIÚP",
+            "Chọn PHIÊU LƯU để chơi một mình: chọn thẻ cây rồi nhấn vào ô đất để trồng cây chống zombie.\n\n"
+            + "CHƠI MẠNG: vào PHIÊU LƯU rồi bấm nút CHƠI MẠNG ở góc trái trên bảng chọn màn. Một người bấm TẠO PHÒNG rồi đọc địa chỉ hiện trên màn hình, người kia bấm THAM GIA và gõ địa chỉ đó vào.\n\n"
+            + "Chế độ ĐỒNG ĐỘI: hai người cùng trồng cây, dùng chung kho nắng và dãy thẻ.\n"
+            + "Chế độ ĐỐI KHÁNG: chủ phòng giữ phe Cây, người tham gia chỉ huy phe Zombie, tích não để thả quân theo từng hàng.\n\n"
+            + "Hai máy phải cùng mạng nội bộ. Nếu chơi qua Internet thì cần mở cổng 7777 hoặc dùng phần mềm tạo mạng ảo.");
 
         fadeImage = CreateImage("Chuyển cảnh", canvasObject.transform, null);
         Stretch(fadeImage.rectTransform);
@@ -130,6 +135,14 @@ public class MainMenuController : MonoBehaviour
         motion.highlightMenuText = true;
         motion.menuController = this;
         motion.hoverRect = textRect;
+    }
+
+    // Mở sảnh chờ chơi mạng, mang theo màn đang chọn để chủ phòng khỏi phải chọn lại.
+    private void OpenNetLobby()
+    {
+        if (transitioning) return;
+        PlayClick();
+        NetLobbyUI.Open(selectedLevel);
     }
 
     private GameObject BuildModal(Transform parent, string title, string body)
@@ -171,7 +184,16 @@ public class MainMenuController : MonoBehaviour
         panel.GetComponent<Image>().color = new Color(0.075f, 0.10f, 0.055f, 0.975f);
 
         var title = CreateText("Tiêu đề", panel.transform, "CHỌN MÀN CHƠI", 42, TextAnchor.MiddleCenter, new Color(0.62f, 1f, 0.25f));
-        SetAnchors(title.rectTransform, 0.12f, 0.855f, 0.88f, 0.97f);
+        SetAnchors(title.rectTransform, 0.27f, 0.855f, 0.73f, 0.97f);
+
+        // Góc trái trên: lối vào chế độ chơi mạng hai người, dùng chung màn đang chọn bên dưới.
+        var netButton = CreateStoneButton("Chơi mạng", panel.transform, "CHƠI MẠNG", 22, OpenNetLobby);
+        SetAnchors(netButton.GetComponent<RectTransform>(), 0.032f, 0.878f, 0.235f, 0.968f);
+
+        var netHint = CreateText("Chú thích chơi mạng", panel.transform, "2 người", 17,
+            TextAnchor.MiddleCenter, new Color(0.72f, 0.78f, 0.66f));
+        SetAnchors(netHint.rectTransform, 0.032f, 0.828f, 0.235f, 0.874f);
+        netHint.raycastTarget = false;
 
         var close = CreateStoneButton("Đóng chọn màn", panel.transform, "X", 26, () => CloseModal(panel));
         SetAnchors(close.GetComponent<RectTransform>(), 0.91f, 0.88f, 0.975f, 0.965f);

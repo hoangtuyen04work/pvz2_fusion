@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -31,6 +31,9 @@ public class SunManagement : MonoBehaviour
         if (GameManagement.levelData.isDay)
             createFunc = "createSun";
         else createFunc = "createMoon";
+
+        //Máy khách không tự sinh mặt trời, nó nhận lệnh sinh từ máy chủ
+        if (!NetSession.IsAuthority) return;
 
         Invoke(createFunc, Random.Range(minInterval, maxInterval));
     }
@@ -71,11 +74,16 @@ public class SunManagement : MonoBehaviour
 
     private void clickSun()
     {
+        //Phe zombie trong chế độ đối kháng không nhặt được nắng
+        if (NetSession.IsOnline && !NetSession.ControlsPlants) return;
+
         Vector2 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         Collider2D[] allSun = Physics2D.OverlapPointAll(mouseWorldPos, LayerMask.GetMask("Sun"));
         if (allSun.Length > 0)
         {
-            allSun[allSun.Length - 1].gameObject.GetComponent<SunBase>().bePickedUp();
+            //Chơi mạng thì máy chủ mới quyết định mặt trời có được nhặt hay không
+            NetGameplay.RequestSunPickup(
+                allSun[allSun.Length - 1].gameObject.GetComponent<SunBase>());
         }
     }
 }

@@ -94,12 +94,24 @@ public class GameplayPauseMenu : MonoBehaviour
         var title = CreateText("Tiêu đề", overlay.transform, "TẠM DỪNG", 39, new Color(0.64f, 1f, 0.25f));
         Center(title.rectTransform, new Vector2(290f, 58f), new Vector2(0f, 154f));
 
-        CreatePauseActionButton(overlay.transform, "TIẾP TỤC", new Vector2(0f, 82f), Resume);
-        CreatePauseActionButton(overlay.transform, "CHƠI LẠI", new Vector2(0f, 17f), RestartLevel);
-        CreatePauseActionButton(overlay.transform, "VỀ MENU CHÍNH", new Vector2(0f, -48f), ReturnToMainMenu);
-        CreatePauseActionButton(overlay.transform, "THOÁT GAME", new Vector2(0f, -113f), QuitGame);
+        if (NetSession.IsOnline)
+        {
+            // Chơi mạng thì không cho chơi lại một mình, vì máy kia sẽ lạc mất trận đấu.
+            CreatePauseActionButton(overlay.transform, "TIẾP TỤC", new Vector2(0f, 60f), Resume);
+            CreatePauseActionButton(overlay.transform, "RỜI TRẬN", new Vector2(0f, -5f), ReturnToMainMenu);
+            CreatePauseActionButton(overlay.transform, "THOÁT GAME", new Vector2(0f, -70f), QuitGame);
+        }
+        else
+        {
+            CreatePauseActionButton(overlay.transform, "TIẾP TỤC", new Vector2(0f, 82f), Resume);
+            CreatePauseActionButton(overlay.transform, "CHƠI LẠI", new Vector2(0f, 17f), RestartLevel);
+            CreatePauseActionButton(overlay.transform, "VỀ MENU CHÍNH", new Vector2(0f, -48f), ReturnToMainMenu);
+            CreatePauseActionButton(overlay.transform, "THOÁT GAME", new Vector2(0f, -113f), QuitGame);
+        }
 
-        var hint = CreateText("Gợi ý", overlay.transform, "Nhấn ESC để tiếp tục", 18, new Color(0.78f, 0.80f, 0.72f));
+        var hint = CreateText("Gợi ý", overlay.transform,
+            NetSession.IsOnline ? "Trận đấu vẫn chạy tiếp khi bảng này mở" : "Nhấn ESC để tiếp tục",
+            18, new Color(0.78f, 0.80f, 0.72f));
         Center(hint.rectTransform, new Vector2(280f, 34f), new Vector2(0f, -172f));
 
         overlay.SetActive(false);
@@ -112,6 +124,9 @@ public class GameplayPauseMenu : MonoBehaviour
 
     private void OnApplicationFocus(bool hasFocus)
     {
+        // Chơi mạng thì không tự tạm dừng khi mất tiêu điểm, nếu không người kia sẽ bị đứng hình theo
+        if (NetSession.IsOnline) return;
+
         if (!hasFocus && !isPaused && Time.timeScale > 0f)
             Pause();
     }
@@ -130,8 +145,14 @@ public class GameplayPauseMenu : MonoBehaviour
         pauseButton.SetActive(false);
         overlay.SetActive(true);
         overlayGroup.alpha = 0f;
-        Time.timeScale = 0f;
-        AudioListener.pause = true;
+
+        // Chơi mạng thì thế giới vẫn phải chạy, bằng không máy kia sẽ bị treo cùng
+        if (!NetSession.IsOnline)
+        {
+            Time.timeScale = 0f;
+            AudioListener.pause = true;
+        }
+
         PlayClick();
         StartCoroutine(FadeOverlay(0f, 1f, 0.18f, false));
     }

@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -47,6 +47,9 @@ public class Card : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHand
             else endCooling();
         }
     }
+
+    //Thẻ có đang hồi chiêu không, bộ đồng bộ cần biết để duyệt yêu cầu trồng cây
+    public bool IsCooling { get { return coolingState; } }
 
     public void cooling()
     {

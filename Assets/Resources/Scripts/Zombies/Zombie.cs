@@ -35,6 +35,10 @@ public class Zombie : MonoBehaviour
 
     bool sleep = true;   //Có đứng yên lúc đầu không
 
+    //Hai giá trị ngẫu nhiên do máy chủ quyết định, để hai máy sinh ra zombie giống hệt nhau
+    [HideInInspector] public float netSpeedScale = 0f;   //Hệ số tăng tốc, 0 nghĩa là tự bốc ngẫu nhiên
+    [HideInInspector] public float netSleepTime = -1f;   //Thời gian đứng yên lúc đầu, âm nghĩa là tự bốc
+
     protected virtual void Awake()
     {
         //Lấy component
@@ -49,11 +53,11 @@ public class Zombie : MonoBehaviour
         if (sleep == true)
         {
             gameObject.SetActive(false);
-            Invoke("activate", Random.Range(0.0f, 5.0f));
+            Invoke("activate", netSleepTime >= 0f ? netSleepTime : Random.Range(0.0f, 5.0f));
         }
 
-        //Thêm mức tăng tốc độ ngẫu nhiên
-        float increase = Random.Range(1.0f, 1.5f);
+        //Thêm mức tăng tốc độ ngẫu nhiên, chơi mạng thì lấy đúng hệ số máy chủ gửi sang
+        float increase = netSpeedScale > 0f ? netSpeedScale : Random.Range(1.0f, 1.5f);
         speed *= increase;
         myAnimator.speed *= increase;
 
@@ -64,6 +68,10 @@ public class Zombie : MonoBehaviour
     protected virtual void Update()
     {
         UpdateTimedStatusEffects();
+
+        //Máy khách không tự cho zombie đi, vị trí do NetZombieView kéo theo máy chủ
+        if (!NetSession.IsAuthority) return;
+
         if (myAnimator.GetBool("Walk") == true)
         {
             transform.Translate(-speed * Time.deltaTime, 0, 0);
@@ -84,6 +92,8 @@ public class Zombie : MonoBehaviour
         }
         else if (collision.tag == "GameOverLine")
         {
+            //Chỉ máy chủ được tuyên bố thua, máy khách chờ gói tin kết thúc
+            if (!NetSession.IsAuthority) return;
             GameObject.Find("Game Management").GetComponent<GameManagement>().gameOver();
         }
     }
@@ -104,6 +114,9 @@ public class Zombie : MonoBehaviour
 
     public virtual void attack()
     {
+        //Máy khách chỉ diễn hoạt ảnh gặm, sát thương do máy chủ tính
+        if (!NetSession.IsAuthority) return;
+
         //Cây bị tấn công
         if (plant != null)
         {
@@ -117,6 +130,9 @@ public class Zombie : MonoBehaviour
 
     protected virtual void die()
     {
+        //Máy chủ báo cho máy khách trước khi xác biến mất
+        NetGameplay.NotifyZombieDead(this, false);
+
         //Vô hiệu collider
         gameObject.GetComponent<Collider2D>().enabled = false;
         //Giảm một zombie trên toàn màn
@@ -138,6 +154,9 @@ public class Zombie : MonoBehaviour
     //Bị tấn công
     public virtual void beAttacked(int hurt)
     {
+        //Chơi mạng: máu do máy chủ giữ, máy khách nhận số máu qua gói đồng bộ
+        if (!NetSession.IsAuthority) return;
+
         bloodVolume -= hurt;
         if (bloodVolume <= 0 && alive == true)
         {
@@ -226,14 +245,33 @@ public class Zombie : MonoBehaviour
 
     public virtual void beSquashed()
     {
+        //Máy khách chờ máy chủ báo, không tự nghiền chết zombie
+        if (!NetSession.IsAuthority) return;
+
         bloodVolume -= 1800;
         if(bloodVolume <= 0)
         {
+            NetGameplay.NotifyZombieDead(this, true);
             //Giảm một zombie trên toàn màn
             GameObject.Find("Zombie Management").GetComponent<ZombieManagement>().minusZombieNumAll();
             //Zombie biến mất
             Destroy(gameObject);
         }
+    }
+
+    //Máy chủ báo zombie này đã chết, máy khách diễn lại y hệt
+    public void applyNetworkDeath(bool squashed)
+    {
+        if (squashed)
+        {
+            GameObject.Find("Zombie Management").GetComponent<ZombieManagement>().minusZombieNumAll();
+            Destroy(gameObject);
+            return;
+        }
+
+        if (!alive) return;
+        bloodVolume = 0;
+        die();
     }
 
     public void beParasiticed(Plant parasiticPlant)

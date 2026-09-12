@@ -35,6 +35,9 @@ public class Plant : MonoBehaviour
 
     public virtual int beAttacked(int hurt, string form)
     {
+        //Chơi mạng: chỉ máy chủ tính máu, máy khách đợi máy chủ báo cây chết
+        if (!NetSession.IsAuthority) return bloodVolume;
+
         bloodVolume -= hurt;
         if (bloodVolume <= 0)
         {

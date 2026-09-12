@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -14,6 +14,11 @@ public abstract class SunBase : MonoBehaviour
 
     //Dùng để cộng thêm nắng
     SunNumber sunControl;
+
+    //Phần dành cho chơi mạng: id do máy chủ cấp, và giá trị ngẫu nhiên do máy chủ quyết định
+    [HideInInspector] public int netId;
+    [HideInInspector] public float netParam;
+    [HideInInspector] public bool netParamSet;
 
     // Start is called before the first frame update
     protected virtual void Start()
@@ -35,6 +40,17 @@ public abstract class SunBase : MonoBehaviour
 
     public abstract void drop();
 
+    //Bốc một số ngẫu nhiên, nhưng nếu máy chủ đã gửi sẵn giá trị thì dùng đúng giá trị đó,
+    //nhờ vậy mặt trời ở hai máy rơi giống hệt nhau.
+    protected float netRandom(float min, float max)
+    {
+        if (netParamSet) return netParam;
+
+        netParam = Random.Range(min, max);
+        netParamSet = true;
+        return netParam;
+    }
+
     public void bePickedUp()
     {
         dropState = false;
@@ -52,7 +68,8 @@ public abstract class SunBase : MonoBehaviour
         }
         else   //Tới điểm cuối, cộng số nắng, huỷ GameObject này
         {
-            sunControl.addSun(sunNumber);
+            //Chỉ máy chủ cộng nắng, máy khách nhận tổng số nắng qua gói tin
+            if (NetSession.IsAuthority) sunControl.addSun(sunNumber);
             Destroy(gameObject);
         }
     }

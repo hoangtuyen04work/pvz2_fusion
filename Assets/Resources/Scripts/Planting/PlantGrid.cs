@@ -74,15 +74,11 @@ public class PlantGrid : MonoBehaviour
 
     private void OnMouseDown()
     {
-        if (tryPlaceSelectedPlant())
-        {
-            toBePlanted.SetActive(false);
-            return;
-        }
+        if (tryPlaceSelectedPlant()) return;
 
-        if (havePlanted && selectedShovel.activeSelf)
+        if (havePlanted == true && selectedShovel.activeSelf == true)
         {
-            nowPlant.GetComponent<Plant>().die("shovelPlant");
+            digOut();
         }
     }
     #endregion
@@ -139,7 +135,6 @@ public class PlantGrid : MonoBehaviour
 
         audioSource.clip = Resources.Load<AudioClip>("Sounds/UI/SeedAndShovelBank/plant");
         if (audioSource.clip != null) audioSource.Play();
-        plantingManagement.plant();
         return true;
     }
     #region Hàm tự định nghĩa private
@@ -150,30 +145,86 @@ public class PlantGrid : MonoBehaviour
 
     public bool tryPlaceSelectedPlant()
     {
-        if (plantingManagement == null)
-        {
-            GameObject managerObject = GameObject.Find("Planting Management");
-            plantingManagement = managerObject != null ? managerObject.GetComponent<PlantingManagement>() : null;
-        }
+        ensurePlantingManagement();
         if (plantingManagement == null || !plantingManagement.hasSelectedPlant()) return false;
 
         string selectedPlant = plantingManagement.getSelectedPlantName();
-        if (!havePlanted)
+
+        //Chơi mạng thì thao tác phải đi qua máy chủ, không được tự trồng tại chỗ
+        if (NetSession.IsOnline)
         {
-            plant(selectedPlant);
+            if (!NetSession.ControlsPlants) return false;
+            if (!canAccept(selectedPlant)) return false;
+            if (!NetGameplay.RequestPlace(gameObject.name, selectedPlant)) return false;
             plantingManagement.clearSelectedPlant();
             return true;
         }
-        if (canFuse(selectedPlant))
+
+        if (!placePlant(selectedPlant)) return false;
+        plantingManagement.clearSelectedPlant();
+        chargeLocal();
+        return true;
+    }
+
+    private void ensurePlantingManagement()
+    {
+        if (plantingManagement != null) return;
+        GameObject managerObject = GameObject.Find("Planting Management");
+        plantingManagement = managerObject != null ? managerObject.GetComponent<PlantingManagement>() : null;
+    }
+
+    //Ô này có nhận được cây đang chọn không: hoặc còn trống, hoặc ghép được với cây đang có
+    private bool canAccept(string plantName)
+    {
+        return !havePlanted || canFuse(plantName);
+    }
+
+    //Đặt cây xuống ô, không đụng gì tới nắng và hồi chiêu. Trả về true nếu đặt được.
+    public bool placePlant(string plantName)
+    {
+        if (!havePlanted)
         {
-            if (fuse(selectedPlant))
-            {
-                plantingManagement.clearSelectedPlant();
-                return true;
-            }
+            plant(plantName);
+            return true;
+        }
+        if (canFuse(plantName))
+        {
+            if (!fuse(plantName)) return false;
+            return true;
         }
         return false;
     }
+
+    //Trừ nắng và cho thẻ vào hồi chiêu ở chế độ chơi đơn
+    private void chargeLocal()
+    {
+        ensurePlantingManagement();
+        if (plantingManagement != null) plantingManagement.plant();
+    }
+
+    //Bấm xẻng lên ô này
+    private void digOut()
+    {
+        if (NetSession.IsOnline && !NetSession.ControlsPlants) return;
+        //Máy khách chỉ gửi yêu cầu, máy chủ mới thật sự đào
+        if (NetGameplay.RequestShovel(gameObject.name)) return;
+        removePlantByShovel();
+    }
+
+    //Đào cây khỏi ô, dùng cho cả thao tác tại chỗ lẫn yêu cầu từ máy khách
+    public void removePlantByShovel()
+    {
+        if (!havePlanted || nowPlant == null) return;
+        nowPlant.GetComponent<Plant>().die("shovelPlant");
+    }
+
+    //Máy chủ báo cây trên ô này đã biến mất
+    public void removePlantFromNetwork(string reason)
+    {
+        if (!havePlanted || nowPlant == null) return;
+        nowPlant.GetComponent<Plant>().die(reason);
+    }
+
     public void plant(string name)
     {
         spriteRenderer.sprite = null;   //Ẩn bóng mờ
@@ -201,10 +252,6 @@ public class PlantGrid : MonoBehaviour
         audioSource.clip =
             Resources.Load<AudioClip>("Sounds/UI/SeedAndShovelBank/plant");
         audioSource.Play();
-
-        //Gửi thông điệp tới PlantingManagement để xử lý các sự kiện liên quan UI
-        GameObject.Find("Planting Management").GetComponent<PlantingManagement>().plant();
-
     }
 
     //Trồng ở chế độ god mode, dùng để sinh cây tham gia hội thoại đầu màn
@@ -230,6 +277,9 @@ public class PlantGrid : MonoBehaviour
     public void plantDie(string reason)
     {
         havePlanted = false;   //Không còn cây nữa
+
+        //Máy chủ báo cho máy khách biết cây trên ô này đã mất
+        NetGameplay.NotifyPlantRemoved(this, reason);
 
         AudioClip clip = null;
         if (reason != "") clip = Resources.Load<AudioClip>("Sounds/Plants/" + reason);

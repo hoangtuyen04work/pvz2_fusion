@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -20,8 +20,10 @@ public class GameManagement : MonoBehaviour
 
     private void Awake()
     {
-        // Nếu vào từ bảng chọn màn, ưu tiên level mà người chơi vừa chọn.
-        if (GameSession.SelectedLevel >= 0)
+        // Chơi mạng thì màn do chủ phòng quyết định, sau đó mới tới bảng chọn màn.
+        if (NetSession.IsOnline && NetSession.Level >= 0)
+            level = NetSession.Level;
+        else if (GameSession.SelectedLevel >= 0)
             level = GameSession.SelectedLevel;
 
         levelController = 
@@ -54,7 +56,8 @@ public class GameManagement : MonoBehaviour
 
         //Màn test hoặc màn không có prefab hội thoại sẽ vào gameplay trực tiếp.
         UnityEngine.Object dialog = Resources.Load<UnityEngine.Object>("Prefabs/UI/DialogPanel/DialogPanel-Level" + level);
-        if (!levelData.skipIntro && dialog != null)
+        //Chơi mạng thì bỏ hội thoại mở màn, tránh hai máy lệch nhịp
+        if (!levelData.skipIntro && !NetSession.SkipIntroDialog && dialog != null)
         {
             Instantiate(dialog, Vector3.zero, Quaternion.identity, GameObject.Find("TopCanvas").transform);
         }
@@ -92,11 +95,14 @@ public class GameManagement : MonoBehaviour
 
     public void gameOver()
     {
+        //Máy chủ báo kết quả cho máy khách trước khi hiện bảng kết thúc
+        NetGameplay.NotifyGameEnd(true);
         endMenuPanel.GetComponent<EndMenu>().gameOver();
     }
 
     public void win()
     {
+        NetGameplay.NotifyGameEnd(false);
         endMenuPanel.GetComponent<EndMenu>().win();
     }
 }
