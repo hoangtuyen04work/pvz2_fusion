@@ -40,15 +40,27 @@ public sealed class GargantuarArenaGame : MonoBehaviour
     private Text livesText;
     private Text bossText;
     private Image bossFill;
+    private Text armorText;
+    private Text goldText;
+    private Text skillText;
     private GameObject pauseOverlay;
     private GameObject gameOverOverlay;
     private AudioSource audioSource;
     private Font font;
+    private ArenaMusic music;
     private int score;
     private int kills;
     private int lives = 3;
+    private int armor = 2;
+    private int gold;
     private bool paused;
     private bool ended;
+
+    /// <summary>Đối tượng A do người chơi điều khiển.</summary>
+    public ArenaPeashooter Player => player;
+
+    /// <summary>Đối tượng B phía địch, dùng cho vùng cấm và các kỹ năng nhắm vào nó.</summary>
+    public ArenaGargantuar Boss => gargantuar;
 
     private void Awake()
     {
@@ -58,17 +70,33 @@ public sealed class GargantuarArenaGame : MonoBehaviour
         audioSource.playOnAwake = false;
         font = Resources.Load<Font>("Fonts/Baloo2");
 
+        music = gameObject.AddComponent<ArenaMusic>();
+
         BuildCameraAndWorld();
         BuildPlayer();
         BuildInterface();
         BuildGargantuar();
+        BuildZoneAndPickups();
         UpdateHud();
+    }
+
+    private void BuildZoneAndPickups()
+    {
+        var zoneObject = new GameObject("Danger Zone", typeof(ArenaDangerZone));
+        zoneObject.GetComponent<ArenaDangerZone>().Initialize(this, 1.95f);
+
+        var spawnerObject = new GameObject("Pickup Spawner", typeof(ArenaPickupSpawner));
+        spawnerObject.GetComponent<ArenaPickupSpawner>().Initialize(this);
     }
 
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape) && !ended)
             SetPaused(!paused);
+
+        //Thời gian chờ kỹ năng đổi liên tục nên làm mới riêng, không gọi cả UpdateHud
+        if (skillText != null && player != null)
+            skillText.text = player.CooldownLabel();
     }
 
     private void BuildCameraAndWorld()
@@ -135,10 +163,25 @@ public sealed class GargantuarArenaGame : MonoBehaviour
         bestText = CreateText("Best", canvasObject.transform, string.Empty, 22, TextAnchor.MiddleLeft, new Color(1f, 0.86f, 0.3f));
         SetAnchors(bestText.rectTransform, 0.025f, 0.885f, 0.23f, 0.94f);
         livesText = CreateText("Lives", canvasObject.transform, string.Empty, 28, TextAnchor.MiddleRight, Color.white);
-        SetAnchors(livesText.rectTransform, 0.78f, 0.93f, 0.91f, 0.99f);
+        SetAnchors(livesText.rectTransform, 0.70f, 0.93f, 0.82f, 0.99f);
+
+        //Hai thông tin HUD bổ sung: giáp và vàng
+        armorText = CreateText("Armor", canvasObject.transform, string.Empty, 24, TextAnchor.MiddleLeft, new Color(0.62f, 0.86f, 1f));
+        SetAnchors(armorText.rectTransform, 0.025f, 0.84f, 0.23f, 0.895f);
+        goldText = CreateText("Gold", canvasObject.transform, string.Empty, 24, TextAnchor.MiddleLeft, new Color(1f, 0.82f, 0.28f));
+        SetAnchors(goldText.rectTransform, 0.025f, 0.795f, 0.23f, 0.85f);
+
+        //Bảng thời gian chờ của bốn kỹ năng
+        skillText = CreateText("Skills", canvasObject.transform, string.Empty, 22, TextAnchor.MiddleCenter, new Color(0.86f, 1f, 0.66f));
+        SetAnchors(skillText.rectTransform, 0.26f, 0.80f, 0.74f, 0.855f);
 
         var pause = CreateButton("Pause", canvasObject.transform, "Ⅱ", new Color(0.16f, 0.32f, 0.10f, 0.94f), TogglePause);
-        SetAnchors(pause.GetComponent<RectTransform>(), 0.925f, 0.925f, 0.98f, 0.985f);
+        SetAnchors(pause.GetComponent<RectTransform>(), 0.94f, 0.925f, 0.99f, 0.985f);
+
+        //Bốn đối tượng SoundOn / SoundOff / MusicOn / MusicOff
+        var toggleHolder = new GameObject("Audio Toggles", typeof(ArenaAudioToggle));
+        toggleHolder.transform.SetParent(transform, false);
+        toggleHolder.GetComponent<ArenaAudioToggle>().Build(canvasObject.transform, music);
 
         var bossTrack = CreateImage("Boss Health Track", canvasObject.transform, new Color(0.08f, 0.06f, 0.035f, 0.92f));
         SetAnchors(bossTrack.rectTransform, 0.34f, 0.865f, 0.66f, 0.907f);
@@ -161,11 +204,23 @@ public sealed class GargantuarArenaGame : MonoBehaviour
         player.SetJoystick(joystick);
 
         var fire = CreateButton("Fire", canvasObject.transform, "BẮN", new Color(0.82f, 0.23f, 0.07f, 0.94f), player.Fire);
-        SetAnchors(fire.GetComponent<RectTransform>(), 0.815f, 0.07f, 0.955f, 0.255f);
+        SetAnchors(fire.GetComponent<RectTransform>(), 0.845f, 0.075f, 0.965f, 0.235f);
         fire.AddComponent<ArenaPulseButton>();
 
-        var hint = CreateText("Hint", canvasObject.transform, "WASD / PHÍM MŨI TÊN để di chuyển  •  SPACE / CTRL để bắn", 21, TextAnchor.MiddleCenter, new Color(1f, 1f, 1f, 0.86f));
-        SetAnchors(hint.rectTransform, 0.23f, 0.012f, 0.77f, 0.065f);
+        //Nút cảm ứng cho hai cơ chế tấn công còn lại và hai cơ chế phòng thủ
+        AddSkillButton(canvasObject.transform, "FlameButton", "LỬA",
+            new Color(0.86f, 0.44f, 0.06f, 0.94f), player.FireFlame, 0.845f, 0.255f, 0.902f, 0.375f);
+        AddSkillButton(canvasObject.transform, "KnifeButton", "DAO",
+            new Color(0.40f, 0.66f, 0.14f, 0.94f), player.ThrowKnife, 0.908f, 0.255f, 0.965f, 0.375f);
+        AddSkillButton(canvasObject.transform, "ShieldButton", "KHIÊN",
+            new Color(0.58f, 0.42f, 0.16f, 0.94f), player.RaiseShield, 0.845f, 0.395f, 0.902f, 0.515f);
+        AddSkillButton(canvasObject.transform, "FreezeButton", "BĂNG",
+            new Color(0.20f, 0.52f, 0.74f, 0.94f), player.CastFreeze, 0.908f, 0.395f, 0.965f, 0.515f);
+
+        var hint = CreateText("Hint", canvasObject.transform,
+            "WASD di chuyển  •  SPACE bắn đậu  •  F phun lửa  •  G dao lá  •  Q khiên  •  E băng giá",
+            20, TextAnchor.MiddleCenter, new Color(1f, 1f, 1f, 0.86f));
+        SetAnchors(hint.rectTransform, 0.20f, 0.012f, 0.80f, 0.065f);
 
         pauseOverlay = BuildOverlay(canvasObject.transform, "TẠM DỪNG", false);
         gameOverOverlay = BuildOverlay(canvasObject.transform, "HẾT LƯỢT!", true);
@@ -206,21 +261,41 @@ public sealed class GargantuarArenaGame : MonoBehaviour
         return overlay;
     }
 
+    private void AddSkillButton(Transform parent, string name, string label, Color color,
+        UnityEngine.Events.UnityAction action, float xMin, float yMin, float xMax, float yMax)
+    {
+        var button = CreateButton(name, parent, label, color, action);
+        SetAnchors(button.GetComponent<RectTransform>(), xMin, yMin, xMax, yMax);
+        button.GetComponentInChildren<Text>().fontSize = 20;
+        button.AddComponent<ArenaPulseButton>();
+    }
+
     public void PlayerHit(Vector2 gargantuarPosition)
     {
         if (ended || player.IsInvulnerable) return;
+
+        //Cơ chế phòng thủ 1: còn khiên thì đòn bị chặn hoàn toàn
+        if (player.IsShielded)
+        {
+            ArenaFloatingText.Show(player.transform.position, "KHIÊN CHẶN!", new Color(0.95f, 0.86f, 0.5f));
+            player.TakeHit(gargantuarPosition);
+            return;
+        }
+
+        //Giáp ăn đòn trước, hết giáp mới mất mạng
+        if (armor > 0)
+        {
+            armor--;
+            ArenaFloatingText.Show(player.transform.position, "-1 GIÁP", new Color(0.62f, 0.86f, 1f));
+            player.TakeHit(gargantuarPosition);
+            UpdateHud();
+            return;
+        }
+
         lives--;
         player.TakeHit(gargantuarPosition);
         UpdateHud();
-        if (lives <= 0)
-        {
-            ended = true;
-            int best = Mathf.Max(PlayerPrefs.GetInt("GargantuarArenaBest", 0), score);
-            PlayerPrefs.SetInt("GargantuarArenaBest", best);
-            PlayerPrefs.Save();
-            gameOverOverlay.SetActive(true);
-            Time.timeScale = 0f;
-        }
+        if (lives <= 0) EndRun();
     }
 
     public void GargantuarHit(int health, int maximum)
@@ -241,15 +316,68 @@ public sealed class GargantuarArenaGame : MonoBehaviour
 
     public void PlayHitSound()
     {
-        var clip = Resources.Load<AudioClip>("Sounds/Zombies/bodyhit1");
-        if (clip != null) audioSource.PlayOneShot(clip, 0.75f);
+        ArenaSfx.Play(audioSource, "Sounds/Zombies/bodyhit1", 0.75f);
     }
+
+    #region Hiệu ứng vật phẩm gọi vào
+
+    public void AddScore(int amount)
+    {
+        score += amount;
+        UpdateHud();
+    }
+
+    public void AddGold(int amount)
+    {
+        gold += amount;
+        UpdateHud();
+    }
+
+    public void AddArmor(int amount)
+    {
+        armor = Mathf.Min(armor + amount, 5);
+        UpdateHud();
+    }
+
+    public void AddLife(int amount)
+    {
+        lives = Mathf.Min(lives + amount, 9);
+        UpdateHud();
+    }
+
+    /// <summary>Bẫy lửa: trừ giáp, không còn giáp thì trừ mạng.</summary>
+    public void TrapHit(Vector2 at)
+    {
+        if (ended || player.IsInvulnerable || player.IsShielded) return;
+
+        if (armor > 0) armor--;
+        else lives--;
+
+        player.TakeHit(at);
+        UpdateHud();
+
+        if (lives <= 0) EndRun();
+    }
+
+    #endregion
 
     private void UpdateHud()
     {
         scoreText.text = "ĐIỂM  " + score + "   •   HẠ  " + kills;
         bestText.text = "KỶ LỤC  " + Mathf.Max(PlayerPrefs.GetInt("GargantuarArenaBest", 0), score);
         livesText.text = "MẠNG  " + new string('♥', Mathf.Max(0, lives));
+        armorText.text = "GIÁP  " + (armor > 0 ? new string('▰', armor) : "trống");
+        goldText.text = "VÀNG  " + gold;
+    }
+
+    private void EndRun()
+    {
+        ended = true;
+        int best = Mathf.Max(PlayerPrefs.GetInt("GargantuarArenaBest", 0), score);
+        PlayerPrefs.SetInt("GargantuarArenaBest", best);
+        PlayerPrefs.Save();
+        gameOverOverlay.SetActive(true);
+        Time.timeScale = 0f;
     }
 
     private void TogglePause() => SetPaused(!paused);
@@ -361,6 +489,15 @@ public sealed class ArenaPeashooter : MonoBehaviour
     private const float VisualScale = 3.7f;
     private const float EdgeMargin = 1.5f;
     private const float MuzzleDistance = 1.42f;
+
+    //Thời gian chờ của từng cơ chế tấn công và phòng thủ
+    private const float FlameDelay = 0.62f;
+    private const float KnifeDelay = 1.15f;
+    private const float ShieldDelay = 8f;
+    private const float ShieldDuration = 3.2f;
+    private const float FreezeDelay = 10f;
+    private const float FreezeDuration = 2.6f;
+
     private GargantuarArenaGame game;
     private ArenaJoystick joystick;
     private Transform visual;
@@ -369,7 +506,23 @@ public sealed class ArenaPeashooter : MonoBehaviour
     private float invulnerableUntil;
     private AudioSource audioSource;
 
+    private float nextFlameTime;
+    private float nextKnifeTime;
+    private float nextShieldTime;
+    private float nextFreezeTime;
+    private ArenaShield shield;
+
+    //Bẫy lửa làm chậm chân trong một khoảng thời gian
+    private float slowUntil;
+    private float slowFactor = 1f;
+
     public bool IsInvulnerable => Time.time < invulnerableUntil;
+
+    /// <summary>Đang có khiên Đậu Tường che thì mọi đòn đều bị chặn.</summary>
+    public bool IsShielded => shield != null;
+
+    /// <summary>Tốc độ di chuyển hiện tại, đã tính cả hiệu ứng chậm chân.</summary>
+    public float CurrentSpeed => MoveSpeed * (Time.time < slowUntil ? slowFactor : 1f);
 
     public void Initialize(GargantuarArenaGame owner)
     {
@@ -398,7 +551,7 @@ public sealed class ArenaPeashooter : MonoBehaviour
         if (input.sqrMagnitude > 0.04f)
         {
             facing = input.normalized;
-            transform.position += (Vector3)(input * MoveSpeed * Time.deltaTime);
+            transform.position += (Vector3)(input * CurrentSpeed * Time.deltaTime);
             UpdateFacing();
         }
 
@@ -422,15 +575,24 @@ public sealed class ArenaPeashooter : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.LeftControl) || Input.GetKeyDown(KeyCode.JoystickButton0))
             Fire();
+        if (Input.GetKey(KeyCode.F)) FireFlame();            //Giữ phím để phun liên tục
+        if (Input.GetKeyDown(KeyCode.G)) ThrowKnife();
+        if (Input.GetKeyDown(KeyCode.Q)) RaiseShield();
+        if (Input.GetKeyDown(KeyCode.E)) CastFreeze();
 
+        var renderer = visual.GetComponent<SpriteRenderer>();
         if (IsInvulnerable)
         {
             float alpha = Mathf.PingPong(Time.time * 9f, 0.75f) + 0.25f;
-            visual.GetComponent<SpriteRenderer>().color = new Color(1f, 1f, 1f, alpha);
+            renderer.color = new Color(1f, 1f, 1f, alpha);
+        }
+        else if (Time.time < slowUntil)
+        {
+            renderer.color = new Color(0.72f, 0.78f, 1f);   //Xanh tái khi bị chậm chân
         }
         else
         {
-            visual.GetComponent<SpriteRenderer>().color = Color.white;
+            renderer.color = Color.white;
         }
     }
 
@@ -452,7 +614,86 @@ public sealed class ArenaPeashooter : MonoBehaviour
         renderer.sortingOrder = 50;
         bullet.transform.localScale = Vector3.one * 1.05f;
         bullet.GetComponent<ArenaPeaBullet>().Initialize(game, facing);
-        if (audioSource.clip != null) audioSource.PlayOneShot(audioSource.clip, 0.7f);
+        ArenaSfx.Play(audioSource, audioSource.clip, 0.7f);
+    }
+
+    #region Cơ chế tấn công 2 và 3
+
+    /// <summary>Phun lửa: ba tia loe, tầm ngắn, bắn được liên tục.</summary>
+    public void FireFlame()
+    {
+        if (Time.time < nextFlameTime || Time.timeScale == 0f) return;
+        nextFlameTime = Time.time + FlameDelay;
+        ArenaFlame.Spawn(game, transform.position + (Vector3)(facing * MuzzleDistance), facing);
+        ArenaSfx.Play(audioSource, "Sounds/Plants/fire", 0.55f);
+    }
+
+    /// <summary>Phóng dao lá: sát thương nặng, nạp lâu, bay xuyên qua mục tiêu.</summary>
+    public void ThrowKnife()
+    {
+        if (Time.time < nextKnifeTime || Time.timeScale == 0f) return;
+        nextKnifeTime = Time.time + KnifeDelay;
+        ArenaKnife.Spawn(game, transform.position + (Vector3)(facing * MuzzleDistance), facing);
+        ArenaSfx.Play(audioSource, "Sounds/Plants/KnifeKill", 0.6f);
+    }
+
+    #endregion
+
+    #region Cơ chế phòng thủ 1 và 2
+
+    /// <summary>Dựng khiên Đậu Tường chặn mọi đòn trong vài giây.</summary>
+    public void RaiseShield()
+    {
+        if (Time.time < nextShieldTime || Time.timeScale == 0f || shield != null) return;
+        nextShieldTime = Time.time + ShieldDelay;
+        shield = ArenaShield.Spawn(transform, ShieldDuration);
+        ArenaSfx.Play(audioSource, "Sounds/Zombies/createiceshield", 0.7f);
+    }
+
+    /// <summary>Đóng băng Gargantuar, vô hiệu hoá nó trong một khoảng ngắn.</summary>
+    public void CastFreeze()
+    {
+        if (Time.time < nextFreezeTime || Time.timeScale == 0f) return;
+        var boss = game != null ? game.Boss : null;
+        if (boss == null || !boss.CanBeHit) return;
+
+        nextFreezeTime = Time.time + FreezeDelay;
+        boss.Freeze(FreezeDuration);
+        ArenaSfx.Play(audioSource, "Sounds/Plants/frozen", 0.8f);
+    }
+
+    #endregion
+
+    /// <summary>Bẫy lửa làm chậm chân: factor là phần tốc độ còn lại.</summary>
+    public void ApplySlow(float factor, float duration)
+    {
+        slowFactor = Mathf.Clamp(factor, 0.15f, 1f);
+        slowUntil = Mathf.Max(slowUntil, Time.time + duration);
+    }
+
+    /// <summary>Hộp quà có thể hồi sạch thời gian chờ của mọi kỹ năng.</summary>
+    public void ResetCooldowns()
+    {
+        nextFireTime = 0f;
+        nextFlameTime = 0f;
+        nextKnifeTime = 0f;
+        nextShieldTime = 0f;
+        nextFreezeTime = 0f;
+    }
+
+    /// <summary>Dòng chữ trạng thái kỹ năng để HUD hiển thị.</summary>
+    public string CooldownLabel()
+    {
+        return "F LỬA " + Remaining(nextFlameTime)
+            + "   G DAO " + Remaining(nextKnifeTime)
+            + "   Q KHIÊN " + Remaining(nextShieldTime)
+            + "   E BĂNG " + Remaining(nextFreezeTime);
+    }
+
+    private static string Remaining(float readyAt)
+    {
+        float left = readyAt - Time.time;
+        return left <= 0f ? "SẴN" : left.ToString("0.0") + "s";
     }
 
     public void TakeHit(Vector2 source)
@@ -460,6 +701,11 @@ public sealed class ArenaPeashooter : MonoBehaviour
         invulnerableUntil = Time.time + 1.5f;
         Vector2 push = ((Vector2)transform.position - source).normalized;
         transform.position += (Vector3)(push * 0.8f);
+    }
+
+    private void OnDestroy()
+    {
+        if (shield != null) Destroy(shield.gameObject);
     }
 
     internal static void CreateShadow(Transform parent, Vector2 position, Vector3 scale, int order)
@@ -523,12 +769,25 @@ public sealed class ArenaGargantuar : MonoBehaviour
     private float nextThumpTime;
     private float nextAttackTime;
     private float flashUntil;
+    private float frozenUntil;
     private float visualAlpha = 1f;
     private bool alive;
     private bool attacking;
     private bool transitioning;
 
     public bool CanBeHit => alive && !transitioning;
+
+    /// <summary>Đang bị kỹ năng băng giá khoá cứng.</summary>
+    public bool IsFrozen => Time.time < frozenUntil;
+
+    /// <summary>Cơ chế phòng thủ của người chơi gọi vào đây để vô hiệu hoá nó một lúc.</summary>
+    public void Freeze(float seconds)
+    {
+        if (!alive) return;
+        frozenUntil = Mathf.Max(frozenUntil, Time.time + seconds);
+        ArenaFloatingText.Show(transform.position + new Vector3(0f, 1.2f, 0f),
+            "ĐÓNG BĂNG!", new Color(0.62f, 0.9f, 1f));
+    }
     public Vector2 HitCenter => (Vector2)transform.position + new Vector2(0f, 0.35f);
 
     public void Initialize(GargantuarArenaGame owner, Transform target)
@@ -584,11 +843,24 @@ public sealed class ArenaGargantuar : MonoBehaviour
     {
         if (!alive) return;
 
+        bool frozen = IsFrozen;
         bool showingHurtFrame = Time.time < flashUntil;
-        if (!showingHurtFrame)
-            SetColor(Color.white);
+        if (frozen) SetColor(new Color(0.55f, 0.78f, 1f));
+        else if (!showingHurtFrame) SetColor(Color.white);
 
         if (transitioning) return;
+
+        if (frozen)
+        {
+            //Đứng cứng tại chỗ: không bước, không đánh, không dộng chân
+            SetFrame(0);
+            visual.localPosition = Vector3.zero;
+            visual.localRotation = Quaternion.identity;
+            nextThumpTime = Time.time + 0.5f;
+            nextAttackTime = Mathf.Max(nextAttackTime, Time.time + 0.35f);
+            return;
+        }
+
         if (attacking) return;
 
         if (Time.time >= nextSteerTime)
@@ -621,8 +893,7 @@ public sealed class ArenaGargantuar : MonoBehaviour
         if (Time.time >= nextThumpTime)
         {
             nextThumpTime = Time.time + 1.45f;
-            var thump = Resources.Load<AudioClip>("Sounds/Zombies/GargantuarArena/thump");
-            if (thump != null) audioSource.PlayOneShot(thump, 0.42f);
+            ArenaSfx.Play(audioSource, "Sounds/Zombies/GargantuarArena/thump", 0.42f);
         }
 
         if (transform.position.x < GargantuarArenaGame.Left - 1.35f)
@@ -671,8 +942,7 @@ public sealed class ArenaGargantuar : MonoBehaviour
             yield return null;
         }
 
-        var thump = Resources.Load<AudioClip>("Sounds/Zombies/GargantuarArena/thump");
-        if (thump != null) audioSource.PlayOneShot(thump, 0.9f);
+        ArenaSfx.Play(audioSource, "Sounds/Zombies/GargantuarArena/thump", 0.9f);
         if (Vector2.Distance(HitCenter, (Vector2)player.position) < 1.48f)
             game.PlayerHit(transform.position);
 
@@ -711,8 +981,7 @@ public sealed class ArenaGargantuar : MonoBehaviour
         transitioning = true;
         SetFrame(6);
         game.GargantuarKilled();
-        var death = Resources.Load<AudioClip>("Sounds/Zombies/GargantuarArena/death");
-        if (death != null) audioSource.PlayOneShot(death, 0.85f);
+        ArenaSfx.Play(audioSource, "Sounds/Zombies/GargantuarArena/death", 0.85f);
         float elapsed = 0f;
         while (elapsed < 0.55f)
         {
