@@ -1,4 +1,5 @@
 #if UNITY_EDITOR
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -6,7 +7,10 @@ using UnityEngine.UI;
 
 /// <summary>
 /// Tool tiện ích trên Unity Editor: Tự động thiết lập GameObject AI Advisor
-/// và toàn bộ hệ thống UI (Nút bấm, Panel lời khuyên, Loading, Kết nối) chỉ với 1 cú click.
+/// và toàn bộ hệ thống UI (Nút bấm hoạt họa, Panel lời khuyên, Loading, Kết nối) chỉ với 1 cú click.
+/// Vị trí:
+/// - Nút nhân vật hoạt họa: Góc dưới bên trái (cạnh xe 3 bánh / hiên nhà).
+/// - Panel lời khuyên AI: Mép dưới sân cỏ (tránh che nút Tùy chọn và hàng cây).
 /// </summary>
 public static class AIAdvisorSetupEditor
 {
@@ -65,40 +69,118 @@ public static class AIAdvisorSetupEditor
         rtRoot.offsetMax = Vector2.zero;
         Undo.RegisterCreatedObjectUndo(uiRoot, "Tạo AIAdvisor_UIRoot");
 
-        // --- 4.1. Tạo Nút "Hỏi Trợ Lý" (Top-Right) ---
+        // --- 4.1. Tạo Nút Trợ Lý Hoạt Họa (Bottom-Left: cạnh xe 3 bánh / hiên nhà) ---
         GameObject btnObj = new GameObject("AskAdvisor_Button", typeof(RectTransform), typeof(Image), typeof(Button));
         btnObj.transform.SetParent(uiRoot.transform, false);
         RectTransform rtBtn = btnObj.GetComponent<RectTransform>();
-        rtBtn.anchorMin = new Vector2(1, 1);
-        rtBtn.anchorMax = new Vector2(1, 1);
-        rtBtn.pivot = new Vector2(1, 1);
-        rtBtn.anchoredPosition = new Vector2(-20, -20);
-        rtBtn.sizeDelta = new Vector2(160, 46);
+        rtBtn.anchorMin = new Vector2(0.5f, 0f);
+        rtBtn.anchorMax = new Vector2(0.5f, 0f);
+        rtBtn.pivot = new Vector2(0.5f, 0.5f);
+        rtBtn.anchoredPosition = new Vector2(-235f, 55f); // Tọa độ chuẩn khớp vùng tròn đỏ
+        rtBtn.sizeDelta = new Vector2(74f, 74f);
 
         Image btnImg = btnObj.GetComponent<Image>();
-        btnImg.color = new Color(0.12f, 0.45f, 0.22f, 0.95f); // Xanh lá đậm PvZ
+        btnImg.color = new Color(0.12f, 0.32f, 0.18f, 0.95f); // Nền xanh rêu sẫm PvZ
+        
+        // Viền vàng kim nổi bật
+        Outline btnOutline = btnObj.AddComponent<Outline>();
+        btnOutline.effectColor = new Color(0.95f, 0.78f, 0.22f, 0.95f);
+        btnOutline.effectDistance = new Vector2(2f, -2f);
+
         Button btn = btnObj.GetComponent<Button>();
         ColorBlock colors = btn.colors;
-        colors.normalColor = new Color(0.12f, 0.45f, 0.22f, 0.95f);
-        colors.highlightedColor = new Color(0.18f, 0.60f, 0.30f, 1f);
-        colors.pressedColor = new Color(0.08f, 0.35f, 0.15f, 1f);
+        colors.normalColor = Color.white;
+        colors.highlightedColor = new Color(1.1f, 1.1f, 1.1f, 1f);
+        colors.pressedColor = new Color(0.85f, 0.85f, 0.85f, 1f);
         btn.colors = colors;
 
-        GameObject btnTextObj = new GameObject("Text", typeof(RectTransform), typeof(Text));
-        btnTextObj.transform.SetParent(btnObj.transform, false);
-        RectTransform rtBtnText = btnTextObj.GetComponent<RectTransform>();
-        rtBtnText.anchorMin = Vector2.zero;
-        rtBtnText.anchorMax = Vector2.one;
-        rtBtnText.offsetMin = Vector2.zero;
-        rtBtnText.offsetMax = Vector2.zero;
+        // Avatar nhân vật hoạt họa (Crazy Dave / Cartoon sprite)
+        GameObject avatarObj = new GameObject("Avatar_Image", typeof(RectTransform), typeof(Image));
+        avatarObj.transform.SetParent(btnObj.transform, false);
+        RectTransform rtAvatar = avatarObj.GetComponent<RectTransform>();
+        rtAvatar.anchorMin = Vector2.zero;
+        rtAvatar.anchorMax = Vector2.one;
+        rtAvatar.offsetMin = new Vector2(3f, 3f);
+        rtAvatar.offsetMax = new Vector2(-3f, -3f);
 
-        Text btnText = btnTextObj.GetComponent<Text>();
-        btnText.text = "💡 Hỏi Trợ Lý";
-        btnText.font = font;
-        btnText.fontSize = 18;
-        btnText.fontStyle = FontStyle.Bold;
-        btnText.alignment = TextAnchor.MiddleCenter;
-        btnText.color = Color.white;
+        Image avatarImg = avatarObj.GetComponent<Image>();
+        avatarImg.preserveAspect = true;
+        avatarImg.raycastTarget = false;
+
+        // Tự động nạp sprite mặc định của Crazy Dave
+        Sprite defaultSprite = Resources.Load<Sprite>("Sprites/CrazyDave/Enter/CrazyDave_Enter0018");
+        if (defaultSprite == null)
+            defaultSprite = Resources.Load<Sprite>("Sprites/CrazyDave/Idle/CrazyDave_Idle0001");
+        if (defaultSprite == null)
+            defaultSprite = Resources.Load<Sprite>("Sprites/Icon");
+        avatarImg.sprite = defaultSprite;
+
+        // Badge góc "AI" nhỏ xinh báo hiệu nút trợ lý
+        GameObject badgeObj = new GameObject("Badge", typeof(RectTransform), typeof(Image));
+        badgeObj.transform.SetParent(btnObj.transform, false);
+        RectTransform rtBadge = badgeObj.GetComponent<RectTransform>();
+        rtBadge.anchorMin = new Vector2(1f, 1f);
+        rtBadge.anchorMax = new Vector2(1f, 1f);
+        rtBadge.pivot = new Vector2(0.8f, 0.8f);
+        rtBadge.anchoredPosition = Vector2.zero;
+        rtBadge.sizeDelta = new Vector2(26f, 18f);
+
+        Image badgeImg = badgeObj.GetComponent<Image>();
+        badgeImg.color = new Color(0.88f, 0.22f, 0.16f, 0.95f); // Đỏ nổi bật
+        badgeImg.raycastTarget = false;
+
+        GameObject badgeTextObj = new GameObject("Text", typeof(RectTransform), typeof(Text));
+        badgeTextObj.transform.SetParent(badgeObj.transform, false);
+        RectTransform rtBadgeText = badgeTextObj.GetComponent<RectTransform>();
+        rtBadgeText.anchorMin = Vector2.zero;
+        rtBadgeText.anchorMax = Vector2.one;
+        rtBadgeText.offsetMin = Vector2.zero;
+        rtBadgeText.offsetMax = Vector2.zero;
+
+        Text badgeText = badgeTextObj.GetComponent<Text>();
+        badgeText.text = "AI";
+        badgeText.font = font;
+        badgeText.fontSize = 11;
+        badgeText.fontStyle = FontStyle.Bold;
+        badgeText.alignment = TextAnchor.MiddleCenter;
+        badgeText.color = Color.white;
+        badgeText.raycastTarget = false;
+
+        // Gắn component hoạt họa sống động UIAnimatedAdvisor
+        UIAnimatedAdvisor animAdvisor = btnObj.AddComponent<UIAnimatedAdvisor>();
+        animAdvisor.avatarImage = avatarImg;
+        animAdvisor.enableBreathing = true;
+        animAdvisor.breathingFrequency = 3.2f;
+        animAdvisor.breathingScaleAmount = 0.05f;
+        animAdvisor.floatingYAmount = 2.5f;
+
+        // Nạp chuỗi frame Idle (Crazy Dave) nếu có
+        List<Sprite> idles = new List<Sprite>();
+        for (int i = 1; i <= 6; i++)
+        {
+            Sprite s = Resources.Load<Sprite>($"Sprites/CrazyDave/Idle/CrazyDave_Idle{i:D4}");
+            if (s != null) idles.Add(s);
+        }
+        animAdvisor.idleFrames = idles.ToArray();
+
+        // Nạp chuỗi frame Talk (Crazy Dave) nếu có
+        List<Sprite> talks = new List<Sprite>();
+        for (int i = 1; i <= 6; i++)
+        {
+            Sprite s = Resources.Load<Sprite>($"Sprites/CrazyDave/Talk/CrazyDave_Talk{i:D4}");
+            if (s != null) talks.Add(s);
+        }
+        animAdvisor.talkFrames = talks.ToArray();
+
+        // Nạp âm thanh thoại ngắn vui nhộn của Dave
+        List<AudioClip> voiceClips = new List<AudioClip>();
+        for (int i = 1; i <= 3; i++)
+        {
+            AudioClip c = Resources.Load<AudioClip>($"Sounds/CrazyDave/CrazyDave_Short{i}");
+            if (c != null) voiceClips.Add(c);
+        }
+        animAdvisor.clickVoiceClips = voiceClips.ToArray();
+        animAdvisor.SetBasePosition(new Vector2(-235f, 55f));
 
         // --- 4.2. Tạo Backdrop / Raycast Blocker (Full-Screen) ---
         // Phủ kín màn hình để chặn click nhầm vào cây/nắng trong lúc game tạm dừng,
@@ -121,18 +203,23 @@ public static class AIAdvisorSetupEditor
         backdropBtn.colors = backdropColors;
         backdropObj.SetActive(false);
 
-        // --- 4.3. Tạo Panel Lời Khuyên (Top-Center) ---
+        // --- 4.3. Tạo Panel Lời Khuyên (Bottom-Center: dải ngang mép dưới sân cỏ) ---
         GameObject panelObj = new GameObject("Advisor_Panel", typeof(RectTransform), typeof(Image));
         panelObj.transform.SetParent(uiRoot.transform, false);
         RectTransform rtPanel = panelObj.GetComponent<RectTransform>();
-        rtPanel.anchorMin = new Vector2(0.5f, 1f);
-        rtPanel.anchorMax = new Vector2(0.5f, 1f);
-        rtPanel.pivot = new Vector2(0.5f, 1f);
-        rtPanel.anchoredPosition = new Vector2(0, -75);
-        rtPanel.sizeDelta = new Vector2(680, 115);
+        rtPanel.anchorMin = new Vector2(0.5f, 0f);
+        rtPanel.anchorMax = new Vector2(0.5f, 0f);
+        rtPanel.pivot = new Vector2(0.5f, 0.5f);
+        rtPanel.anchoredPosition = new Vector2(25f, 48f); // Khớp chuẩn dải chữ nhật đỏ
+        rtPanel.sizeDelta = new Vector2(440f, 72f);
 
         Image panelImg = panelObj.GetComponent<Image>();
-        panelImg.color = new Color(0.06f, 0.10f, 0.16f, 0.94f); // Dark Slate sang trọng
+        panelImg.color = new Color(0.08f, 0.12f, 0.16f, 0.94f); // Dark Slate sang trọng
+
+        // Viền vàng kim tinh tế
+        Outline panelOutline = panelObj.AddComponent<Outline>();
+        panelOutline.effectColor = new Color(0.85f, 0.68f, 0.25f, 0.92f);
+        panelOutline.effectDistance = new Vector2(2f, -2f);
 
         // Text Lời Khuyên
         GameObject advTextObj = new GameObject("AdviceText", typeof(RectTransform), typeof(Text));
@@ -140,16 +227,16 @@ public static class AIAdvisorSetupEditor
         RectTransform rtAdvText = advTextObj.GetComponent<RectTransform>();
         rtAdvText.anchorMin = Vector2.zero;
         rtAdvText.anchorMax = Vector2.one;
-        rtAdvText.offsetMin = new Vector2(24, 12);
-        rtAdvText.offsetMax = new Vector2(-48, -12);
+        rtAdvText.offsetMin = new Vector2(16f, 6f);
+        rtAdvText.offsetMax = new Vector2(-36f, -6f);
 
         Text advText = advTextObj.GetComponent<Text>();
         advText.text = "Lời khuyên chiến thuật từ AI sẽ xuất hiện tại đây...";
         advText.font = font;
-        advText.fontSize = 19;
+        advText.fontSize = 15;
         advText.fontStyle = FontStyle.Bold;
         advText.alignment = TextAnchor.MiddleLeft;
-        advText.color = new Color(1f, 0.96f, 0.82f); // Vàng kem dễ đọc
+        advText.color = new Color(1f, 0.96f, 0.85f); // Vàng kem dễ đọc
         advText.horizontalOverflow = HorizontalWrapMode.Wrap;
         advText.verticalOverflow = VerticalWrapMode.Truncate;
 
@@ -173,10 +260,10 @@ public static class AIAdvisorSetupEditor
         Text loadText = loadingTextObj.GetComponent<Text>();
         loadText.text = "⏳ Đang phân tích chiến thuật...";
         loadText.font = font;
-        loadText.fontSize = 18;
+        loadText.fontSize = 15;
         loadText.fontStyle = FontStyle.Italic;
         loadText.alignment = TextAnchor.MiddleCenter;
-        loadText.color = new Color(0.4f, 0.85f, 1f); // Xanh dương sáng
+        loadText.color = new Color(0.35f, 0.88f, 1f); // Xanh dương sáng
         loadingPanelObj.SetActive(false);
 
         // Error Text
@@ -185,13 +272,13 @@ public static class AIAdvisorSetupEditor
         RectTransform rtErrText = errTextObj.GetComponent<RectTransform>();
         rtErrText.anchorMin = Vector2.zero;
         rtErrText.anchorMax = Vector2.one;
-        rtErrText.offsetMin = new Vector2(24, 12);
-        rtErrText.offsetMax = new Vector2(-48, -12);
+        rtErrText.offsetMin = new Vector2(16f, 6f);
+        rtErrText.offsetMax = new Vector2(-36f, -6f);
 
         Text errText = errTextObj.GetComponent<Text>();
         errText.text = "";
         errText.font = font;
-        errText.fontSize = 16;
+        errText.fontSize = 14;
         errText.alignment = TextAnchor.MiddleCenter;
         errText.color = new Color(1f, 0.4f, 0.4f); // Đỏ cảnh báo
         errTextObj.SetActive(false);
@@ -200,11 +287,11 @@ public static class AIAdvisorSetupEditor
         GameObject closeBtnObj = new GameObject("Close_Button", typeof(RectTransform), typeof(Image), typeof(Button));
         closeBtnObj.transform.SetParent(panelObj.transform, false);
         RectTransform rtClose = closeBtnObj.GetComponent<RectTransform>();
-        rtClose.anchorMin = new Vector2(1, 1);
-        rtClose.anchorMax = new Vector2(1, 1);
-        rtClose.pivot = new Vector2(1, 1);
-        rtClose.anchoredPosition = new Vector2(-8, -8);
-        rtClose.sizeDelta = new Vector2(28, 28);
+        rtClose.anchorMin = new Vector2(1f, 1f);
+        rtClose.anchorMax = new Vector2(1f, 1f);
+        rtClose.pivot = new Vector2(1f, 1f);
+        rtClose.anchoredPosition = new Vector2(-6f, -6f);
+        rtClose.sizeDelta = new Vector2(22f, 22f);
 
         Image closeImg = closeBtnObj.GetComponent<Image>();
         closeImg.color = new Color(0.3f, 0.35f, 0.4f, 0.7f);
@@ -221,7 +308,7 @@ public static class AIAdvisorSetupEditor
         Text closeText = closeTextObj.GetComponent<Text>();
         closeText.text = "✕";
         closeText.font = font;
-        closeText.fontSize = 15;
+        closeText.fontSize = 13;
         closeText.fontStyle = FontStyle.Bold;
         closeText.alignment = TextAnchor.MiddleCenter;
         closeText.color = Color.white;
@@ -234,6 +321,7 @@ public static class AIAdvisorSetupEditor
         advisorUI.backdropButton = backdropBtn;
         advisorUI.adviceText = advText;
         advisorUI.askButton = btn;
+        advisorUI.animatedAdvisor = animAdvisor;
         advisorUI.loadingPanel = loadingPanelObj;
         advisorUI.loadingText = loadText;
         advisorUI.errorText = errText;
@@ -252,10 +340,10 @@ public static class AIAdvisorSetupEditor
         EditorUtility.DisplayDialog(
             "Cài đặt hoàn tất!",
             "✅ Đã thiết lập AI Advisor thành công vào Scene!\n\n" +
-            "• Server URL: http://localhost:8000/analyze\n" +
-            "• Chế độ Mock: Đã tắt (Use Mock Mode = false)\n" +
-            "• Đã tạo nút [💡 Hỏi Trợ Lý] và Panel hiển thị lời khuyên.\n\n" +
-            "Hãy nhấn Ctrl + S để lưu Scene, khởi động server Python và bấm Play ▶️ để thử nghiệm!",
+            "• Vị trí nút hoạt họa: Góc dưới bên trái (cạnh hiên nhà).\n" +
+            "• Vị trí khung lời khuyên: Dải mép dưới sân cỏ.\n" +
+            "• Nút TÙY CHỌN ở góc trên đã hoàn toàn thông thoáng!\n\n" +
+            "Hãy nhấn Ctrl + S để lưu Scene và bấm Play ▶️ để thử nghiệm!",
             "Tuyệt vời!"
         );
     }

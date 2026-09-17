@@ -35,6 +35,9 @@ public class AIAdvisorUI : MonoBehaviour
     [Tooltip("Nút người chơi nhấn để hỏi trợ lý")]
     public Button askButton;
 
+    [Tooltip("Component hoạt họa nhân vật trợ lý (tùy chọn)")]
+    public UIAnimatedAdvisor animatedAdvisor;
+
     [Tooltip("Panel/Spinner hiển thị khi đang chờ AI trả lời")]
     public GameObject loadingPanel;
 
@@ -83,6 +86,11 @@ public class AIAdvisorUI : MonoBehaviour
 
     private void Start()
     {
+        if (animatedAdvisor == null && askButton != null)
+        {
+            animatedAdvisor = askButton.GetComponent<UIAnimatedAdvisor>();
+        }
+
         // Thiết lập nút Hỏi trợ lý
         if (askButton != null)
         {
@@ -139,7 +147,21 @@ public class AIAdvisorUI : MonoBehaviour
     // -------------------------------------------------------
     private void OnAskButtonClicked()
     {
+        // Nếu panel đang mở và không trong quá trình gửi request -> bấm lại sẽ đóng panel
+        if (advisorPanel != null && advisorPanel.activeSelf && !isWaiting)
+        {
+            ClosePanel();
+            return;
+        }
+
         if (isWaiting) return;  // Đang chờ phản hồi thì không gửi thêm
+
+        // Kích hoạt hiệu ứng phản hồi nhún nhảy và âm thanh hoạt họa
+        if (animatedAdvisor != null)
+        {
+            animatedAdvisor.PlayClickReaction();
+            animatedAdvisor.SetThinking(true);
+        }
 
         // 1. Thu thập game state tại đúng thời điểm bấm nút (trạng thái chính xác nhất)
         string gameStateJson = collector.CollectAsJson();
@@ -159,7 +181,6 @@ public class AIAdvisorUI : MonoBehaviour
         SetLoadingVisible(true);
 
         if (loadingText != null) loadingText.text = MSG_LOADING;
-        if (askButton != null) askButton.interactable = false;
         isWaiting = true;
 
         // 4. Gửi request lên server AI
@@ -174,6 +195,12 @@ public class AIAdvisorUI : MonoBehaviour
         isWaiting = false;
         SetLoadingVisible(false);
         if (askButton != null) askButton.interactable = true;
+
+        if (animatedAdvisor != null)
+        {
+            animatedAdvisor.SetThinking(false);
+            animatedAdvisor.SetSpeaking(true);
+        }
 
         if (adviceText != null)
         {
@@ -197,6 +224,13 @@ public class AIAdvisorUI : MonoBehaviour
         isWaiting = false;
         SetLoadingVisible(false);
         if (askButton != null) askButton.interactable = true;
+
+        if (animatedAdvisor != null)
+        {
+            animatedAdvisor.SetThinking(false);
+            animatedAdvisor.SetSpeaking(false);
+        }
+
         SetAdviceVisible(false);
         SetErrorVisible(MSG_ERROR_PREFIX + errorMessage);
         Debug.LogWarning("[AIAdvisor] Lỗi: " + errorMessage);
@@ -214,6 +248,12 @@ public class AIAdvisorUI : MonoBehaviour
         if (isPausedByAdvisor)
         {
             SetGamePaused(false);
+        }
+
+        if (animatedAdvisor != null)
+        {
+            animatedAdvisor.SetThinking(false);
+            animatedAdvisor.SetSpeaking(false);
         }
 
         if (backdropButton != null) backdropButton.gameObject.SetActive(false);
