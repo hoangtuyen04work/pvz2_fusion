@@ -47,17 +47,25 @@ public class AIAdvisorUI : MonoBehaviour
     [Tooltip("Nút đóng panel trợ lý (tùy chọn)")]
     public Button closeButton;
 
+    [Tooltip("Nút nền để click ra ngoài đóng panel (tùy chọn)")]
+    public Button backdropButton;
+
     [Header("Cài đặt hiển thị")]
     [Tooltip("Thời gian fade in/out của text lời khuyên (giây)")]
     public float fadeDuration = 0.4f;
 
     [Tooltip("Thời gian tự động ẩn lời khuyên sau khi hiện (0 = không tự ẩn)")]
-    public float autoHideAfterSeconds = 0f;
+    public float autoHideAfterSeconds = 8f;
+
+    [Header("Cài đặt Tạm dừng Game (Tactical Pause)")]
+    [Tooltip("Tự động tạm dừng game khi AI đang suy nghĩ và trả lời")]
+    public bool pauseGameWhileAdvising = true;
 
     // ---- Component nội bộ ----
     private GameStateCollector collector;
     private AIServiceConnector connector;
     private bool isWaiting = false;
+    private bool isPausedByAdvisor = false;
 
     // ---- Các thông điệp hiển thị ----
     private const string MSG_LOADING = "Đang phân tích chiến thuật...";
@@ -89,8 +97,13 @@ public class AIAdvisorUI : MonoBehaviour
         if (closeButton != null)
             closeButton.onClick.AddListener(ClosePanel);
 
+        // Thiết lập nút backdrop (nhấn ra ngoài để đóng)
+        if (backdropButton != null)
+            backdropButton.onClick.AddListener(ClosePanel);
+
         // Ẩn UI ban đầu
         if (advisorPanel != null) advisorPanel.SetActive(false);
+        if (backdropButton != null) backdropButton.gameObject.SetActive(false);
         SetLoadingVisible(false);
         SetAdviceVisible(false);
         SetErrorVisible(null);
@@ -98,11 +111,26 @@ public class AIAdvisorUI : MonoBehaviour
 
     private void OnDestroy()
     {
+        // Khôi phục timeScale nếu object bị hủy khi đang pause
+        if (isPausedByAdvisor)
+        {
+            SetGamePaused(false);
+        }
+
         // Hủy đăng ký sự kiện tránh memory leak
         if (connector != null)
         {
             connector.OnAdviceReceived -= HandleAdviceReceived;
             connector.OnError -= HandleError;
+        }
+    }
+
+    private void OnDisable()
+    {
+        // Khôi phục timeScale nếu script bị disable
+        if (isPausedByAdvisor)
+        {
+            SetGamePaused(false);
         }
     }
 
@@ -113,7 +141,18 @@ public class AIAdvisorUI : MonoBehaviour
     {
         if (isWaiting) return;  // Đang chờ phản hồi thì không gửi thêm
 
-        // Mở panel và chuyển sang trạng thái loading
+        // 1. Thu thập game state tại đúng thời điểm bấm nút (trạng thái chính xác nhất)
+        string gameStateJson = collector.CollectAsJson();
+        Debug.Log("[AIAdvisor] Game State JSON:\n" + gameStateJson);
+
+        // 2. Tạm dừng toàn bộ màn chơi ngay lập tức (Zombie, cây, đạn, nắng dừng di chuyển)
+        if (pauseGameWhileAdvising)
+        {
+            SetGamePaused(true);
+        }
+
+        // 3. Mở panel và chuyển sang trạng thái loading
+        if (backdropButton != null) backdropButton.gameObject.SetActive(true);
         if (advisorPanel != null) advisorPanel.SetActive(true);
         SetAdviceVisible(false);
         SetErrorVisible(null);
@@ -123,9 +162,7 @@ public class AIAdvisorUI : MonoBehaviour
         if (askButton != null) askButton.interactable = false;
         isWaiting = true;
 
-        // Thu thập game state và gửi lên AI
-        string gameStateJson = collector.CollectAsJson();
-        Debug.Log("[AIAdvisor] Game State JSON:\n" + gameStateJson);  // Để debug dễ dàng
+        // 4. Gửi request lên server AI
         connector.RequestAdvice(gameStateJson);
     }
 
@@ -146,8 +183,9 @@ public class AIAdvisorUI : MonoBehaviour
 
         SetErrorVisible(null);
 
-        // Tự động ẩn sau một khoảng thời gian (mặc định 6 giây nếu để 0)
-        float hideDelay = autoHideAfterSeconds > 0 ? autoHideAfterSeconds : 6f;
+        // Màn chơi vẫn TIẾP TỤC TẠM DỪNG để người chơi đọc chiến thuật.
+        // Tự động tắt sau khoảng thời gian (dùng thời gian thực Realtime)
+        float hideDelay = autoHideAfterSeconds > 0 ? autoHideAfterSeconds : 8f;
         StartCoroutine(AutoHideAfter(hideDelay));
     }
 
@@ -162,18 +200,49 @@ public class AIAdvisorUI : MonoBehaviour
         SetAdviceVisible(false);
         SetErrorVisible(MSG_ERROR_PREFIX + errorMessage);
         Debug.LogWarning("[AIAdvisor] Lỗi: " + errorMessage);
+
+        // Tự động đóng và khôi phục game sau 4 giây thời gian thực nếu gặp lỗi
+        StartCoroutine(AutoHideAfter(4f));
     }
 
     // -------------------------------------------------------
-    // Đóng panel trợ lý
+    // Đóng panel trợ lý và khôi phục nhịp độ game
     // -------------------------------------------------------
     public void ClosePanel()
     {
+        // Khôi phục nhịp độ game tiếp tục chạy
+        if (isPausedByAdvisor)
+        {
+            SetGamePaused(false);
+        }
+
+        if (backdropButton != null) backdropButton.gameObject.SetActive(false);
         if (advisorPanel != null) advisorPanel.SetActive(false);
         SetAdviceVisible(false);
         SetLoadingVisible(false);
         SetErrorVisible(null);
         StopAllCoroutines();
+        isWaiting = false;
+        if (askButton != null) askButton.interactable = true;
+    }
+
+    // -------------------------------------------------------
+    // Điều khiển tạm dừng / tiếp tục game
+    // -------------------------------------------------------
+    private void SetGamePaused(bool pause)
+    {
+        if (pause)
+        {
+            Time.timeScale = 0f;
+            isPausedByAdvisor = true;
+            Debug.Log("[AIAdvisor] Game đã TẠM DỪNG (Tactical Pause) để AI tư vấn.");
+        }
+        else
+        {
+            Time.timeScale = 1f;
+            isPausedByAdvisor = false;
+            Debug.Log("[AIAdvisor] Game đã TIẾP TỤC (Resume).");
+        }
     }
 
     // -------------------------------------------------------
@@ -199,7 +268,7 @@ public class AIAdvisorUI : MonoBehaviour
     }
 
     // -------------------------------------------------------
-    // Animation fade in text lời khuyên
+    // Animation fade in text lời khuyên (dùng unscaledDeltaTime khi pause)
     // -------------------------------------------------------
     private IEnumerator FadeInText(Text target, string content)
     {
@@ -211,7 +280,7 @@ public class AIAdvisorUI : MonoBehaviour
         float elapsed = 0f;
         while (elapsed < fadeDuration)
         {
-            elapsed += Time.deltaTime;
+            elapsed += Time.unscaledDeltaTime;
             c.a = Mathf.Clamp01(elapsed / fadeDuration);
             target.color = c;
             yield return null;
@@ -220,9 +289,12 @@ public class AIAdvisorUI : MonoBehaviour
         target.color = c;
     }
 
+    // -------------------------------------------------------
+    // Đếm ngược tự tắt dùng thời gian thực (không bị ảnh hưởng bởi Time.timeScale = 0)
+    // -------------------------------------------------------
     private IEnumerator AutoHideAfter(float seconds)
     {
-        yield return new WaitForSeconds(seconds);
+        yield return new WaitForSecondsRealtime(seconds);
         ClosePanel();
     }
 }

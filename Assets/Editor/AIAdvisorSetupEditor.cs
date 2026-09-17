@@ -100,7 +100,28 @@ public static class AIAdvisorSetupEditor
         btnText.alignment = TextAnchor.MiddleCenter;
         btnText.color = Color.white;
 
-        // --- 4.2. Tạo Panel Lời Khuyên (Top-Center) ---
+        // --- 4.2. Tạo Backdrop / Raycast Blocker (Full-Screen) ---
+        // Phủ kín màn hình để chặn click nhầm vào cây/nắng trong lúc game tạm dừng,
+        // đồng thời cho phép người chơi click ra ngoài vùng panel để đóng nhanh lời khuyên.
+        GameObject backdropObj = new GameObject("Advisor_Backdrop", typeof(RectTransform), typeof(Image), typeof(Button));
+        backdropObj.transform.SetParent(uiRoot.transform, false);
+        RectTransform rtBackdrop = backdropObj.GetComponent<RectTransform>();
+        rtBackdrop.anchorMin = Vector2.zero;
+        rtBackdrop.anchorMax = Vector2.one;
+        rtBackdrop.offsetMin = Vector2.zero;
+        rtBackdrop.offsetMax = Vector2.zero;
+
+        Image backdropImg = backdropObj.GetComponent<Image>();
+        backdropImg.color = new Color(0f, 0f, 0f, 0.40f); // Làm mờ nhẹ nền game
+        Button backdropBtn = backdropObj.GetComponent<Button>();
+        ColorBlock backdropColors = backdropBtn.colors;
+        backdropColors.normalColor = new Color(0f, 0f, 0f, 0.40f);
+        backdropColors.highlightedColor = new Color(0f, 0f, 0f, 0.40f);
+        backdropColors.pressedColor = new Color(0f, 0f, 0f, 0.48f);
+        backdropBtn.colors = backdropColors;
+        backdropObj.SetActive(false);
+
+        // --- 4.3. Tạo Panel Lời Khuyên (Top-Center) ---
         GameObject panelObj = new GameObject("Advisor_Panel", typeof(RectTransform), typeof(Image));
         panelObj.transform.SetParent(uiRoot.transform, false);
         RectTransform rtPanel = panelObj.GetComponent<RectTransform>();
@@ -210,6 +231,7 @@ public static class AIAdvisorSetupEditor
 
         // --- 5. Liên kết tất cả vào AIAdvisorUI ---
         advisorUI.advisorPanel = panelObj;
+        advisorUI.backdropButton = backdropBtn;
         advisorUI.adviceText = advText;
         advisorUI.askButton = btn;
         advisorUI.loadingPanel = loadingPanelObj;
@@ -217,7 +239,8 @@ public static class AIAdvisorSetupEditor
         advisorUI.errorText = errText;
         advisorUI.closeButton = closeBtn;
         advisorUI.fadeDuration = 0.4f;
-        advisorUI.autoHideAfterSeconds = 7f;
+        advisorUI.autoHideAfterSeconds = 8f;
+        advisorUI.pauseGameWhileAdvising = true;
 
         EditorUtility.SetDirty(advisorObj);
         EditorUtility.SetDirty(advisorUI);

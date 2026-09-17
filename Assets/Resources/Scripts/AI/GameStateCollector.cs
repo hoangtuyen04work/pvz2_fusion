@@ -94,7 +94,8 @@ public class GameStateCollector : MonoBehaviour
             {
                 gridCol = Mathf.Clamp(parsedCol, 0, 8);
             }
-            int gridRow = Mathf.Clamp(grid.row, 0, 4);
+            // Chuẩn hóa hàng theo quy ước 0-indexed từ trên xuống dưới (trong game gốc: row 0 ở dưới cùng, row 4 ở trên cùng)
+            int gridRow = Mathf.Clamp(4 - grid.row, 0, 4);
 
             if (grid.HavePlanted && grid.NowPlant != null)
             {
@@ -141,7 +142,7 @@ public class GameStateCollector : MonoBehaviour
                 snapshot.zombies.Add(new ZombieInfo
                 {
                     type = child.name.Replace("(Clone)", "").Trim(),
-                    row = Mathf.Clamp(zombie.pos_row, 0, 4),
+                    row = Mathf.Clamp(4 - zombie.pos_row, 0, 4),
                     posX = child.transform.position.x,
                     hp = Mathf.Max(0, zombie.bloodVolume),
                     maxHp = Mathf.Max(1, zombie.BloodVolumeMax),
