@@ -34,14 +34,15 @@ public class MiaoMiao : MultiImagePlant
                 Physics2D.LinecastAll(transform.position, castEndPoint, LayerMask.GetMask("Zombie"));
             foreach(RaycastHit2D hitResult in hitResults)
             {
-                if(hitResult.transform.GetComponent<Zombie>().pos_row == row)
+                Zombie zombie=hitResult.transform.GetComponent<Zombie>();
+                if(zombie!=null && !zombie.IsHypnotized && zombie.pos_row == row)
                 {
                     //Bắn hạt ký sinh
                     Instantiate(parasiticSeed,
                                 transform.position + bulletOffset,
                                 Quaternion.Euler(0, 0, 0))
                         .GetComponent<ParasiticSeed>()
-                        .initialize(hitResult.transform.GetComponent<Zombie>(), this, row);
+                        .initialize(zombie, this, row);
                     audioSource.Play();
                     prepareParasitic = false;
                     return;

@@ -78,6 +78,11 @@ public static class ImportedPvZPlayModeSmoke
         Invoke(menu, "PlaySelectedLevel");
         PlantSelectionOverlay overlay = UnityEngine.Object.FindAnyObjectByType<PlantSelectionOverlay>();
         if (overlay == null) throw new InvalidOperationException("Plant selection overlay was not created.");
+        if (overlay.GetComponentInChildren<ScrollRect>() == null)
+            throw new InvalidOperationException("Plant selection overlay is missing its vertical scroll view.");
+        foreach (SeedPacketView packet in overlay.GetComponentsInChildren<SeedPacketView>(true))
+            if (packet.name.StartsWith("SunNut", StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("SunNut must not appear in the plant selection list.");
         foreach (string key in new[] { "SunFlower", "RepeaterPea", "SnowPea", "CherryBomb", "SunShroom", "Spikeweed" })
             Invoke(overlay, "Toggle", key);
         Invoke(overlay, "Confirm");
@@ -114,13 +119,14 @@ public static class ImportedPvZPlayModeSmoke
         GameObject torchA = new GameObject("Smoke Torch A");
         GameObject torchB = new GameObject("Smoke Torch B");
         ImportedProjectile snowProjectile = ImportedProjectile.Create("SnowPea", Vector3.zero, 0, 20, 10f);
-        snowProjectile.PassThroughTorchwood(0, 30, torchA);
-        if (snowProjectile.AppliesSlow || snowProjectile.IsFire)
+        GameObject firstSnowResult = snowProjectile.PassThroughTorchwood(0, 30, torchA);
+        if (firstSnowResult != null || snowProjectile.AppliesSlow || snowProjectile.IsFire)
             throw new InvalidOperationException("Snow pea did not thaw correctly at the first Torchwood.");
-        snowProjectile.PassThroughTorchwood(0, 30, torchB);
-        if (!snowProjectile.IsFire || snowProjectile.Damage != 30)
-            throw new InvalidOperationException("Thawed pea did not ignite at the second Torchwood.");
-        UnityEngine.Object.Destroy(snowProjectile.gameObject);
+        GameObject snowFire = snowProjectile.PassThroughTorchwood(0, 30, torchB);
+        if (snowFire == null || snowFire.GetComponent<FirePea>() == null ||
+            snowFire.GetComponent<StraightBullet>()?.hurt != 30)
+            throw new InvalidOperationException("Thawed pea did not become the canonical FirePea at the second Torchwood.");
+        if (snowFire != null) UnityEngine.Object.Destroy(snowFire);
         UnityEngine.Object.Destroy(torchA);
         UnityEngine.Object.Destroy(torchB);
 

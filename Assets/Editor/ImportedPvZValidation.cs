@@ -11,6 +11,7 @@ public static class ImportedPvZValidation
         var errors = new List<string>();
         ValidateTextures(errors);
         ValidatePlants(errors);
+        ValidateCorePlantBehaviors(errors);
         ValidateZombies(errors);
         ValidateSunDisplay(errors);
         ValidateProjectiles(errors);
@@ -19,7 +20,7 @@ public static class ImportedPvZValidation
         if (errors.Count > 0)
             throw new InvalidOperationException("Imported PvZ validation failed:\n- " + string.Join("\n- ", errors));
 
-        Debug.Log("Imported PvZ validation passed: all sprites, 21 loadout entries, 13 imported plants, and 2 imported zombies are valid.");
+        Debug.Log("Imported PvZ validation passed: all sprites, loadout entries, plant behaviors/animations, and imported zombies are valid.");
     }
 
     private static void ValidateTextures(List<string> errors)
@@ -35,6 +36,10 @@ public static class ImportedPvZValidation
                 errors.Add("Texture is not imported as Sprite: " + path);
             else if (Math.Abs(importer.spritePixelsPerUnit - 250f) > 0.01f)
                 errors.Add("Unexpected pixels-per-unit: " + path);
+            else if (importer.alphaSource != TextureImporterAlphaSource.FromInput || !importer.alphaIsTransparency)
+                errors.Add("Texture does not preserve source transparency: " + path);
+            else if (importer.textureCompression != TextureImporterCompression.Uncompressed)
+                errors.Add("Character texture compression can create white alpha fringes: " + path);
         }
     }
 
@@ -63,6 +68,12 @@ public static class ImportedPvZValidation
             UnityEngine.Object.DestroyImmediate(packetRoot);
 
             if (!ImportedPlantRuntime.Supports(entry.Key)) continue;
+            if (!ImportedPlantRuntime.TryGetDefinition(entry.Key, out ImportedPlantDefinition definition) ||
+                Resources.LoadAll<Sprite>(definition.framePath).Length == 0 ||
+                Resources.LoadAll<Sprite>(definition.attackPath).Length == 0)
+                errors.Add("Missing imported idle/attack animation frames: " + entry.Key);
+            else if (!string.IsNullOrEmpty(definition.secondaryPath) && Resources.LoadAll<Sprite>(definition.secondaryPath).Length == 0)
+                errors.Add("Missing imported secondary animation frames: " + entry.Key);
             GameObject instance = ImportedPlantRuntime.CreatePlant(entry.Key, Vector3.zero, null);
             if (instance == null || instance.GetComponent<Plant>() == null || instance.GetComponent<SpriteRenderer>()?.sprite == null || instance.GetComponent<Collider2D>() == null)
                 errors.Add("Invalid imported plant factory result: " + entry.Key);
@@ -72,6 +83,54 @@ public static class ImportedPvZValidation
                 ValidateShooterTargeting(instance.GetComponent<ImportedPlant>(), errors);
             if (instance != null) UnityEngine.Object.DestroyImmediate(instance);
         }
+
+
+        foreach (string key in new[] { "SunFlower", "PeaShooter", "WallNut", "Squash", "TorchWood", "MiaoMiao", "SnowKing" })
+        {
+            string prefabName = key == "PeaShooter" ? "PeaShooterSingle" : key;
+            GameObject prefab = Resources.Load<GameObject>("Prefabs/Plants/" + prefabName);
+            Animator animator = prefab != null ? prefab.GetComponentInChildren<Animator>(true) : null;
+            if (prefab == null || animator == null || animator.runtimeAnimatorController == null || animator.runtimeAnimatorController.animationClips.Length == 0)
+                errors.Add("Legacy/basic plant is missing its animation controller or clips: " + key);
+        }
+    }
+
+    private static void ValidateCorePlantBehaviors(List<string> errors)
+    {
+        if (!ImportedPlantRuntime.TryGetDefinition("SunShroom", out ImportedPlantDefinition sunShroom) ||
+            Math.Abs(sunShroom.initialDelay - 7f) > 0.01f || Math.Abs(sunShroom.interval - 24f) > 0.01f ||
+            string.IsNullOrEmpty(sunShroom.secondaryPath))
+            errors.Add("Sun-shroom must produce first sun after 7 seconds, repeat every 24 seconds, and have a grown animation.");
+
+        if (!ImportedPlantRuntime.TryGetDefinition("Chomper", out ImportedPlantDefinition chomper) ||
+            Math.Abs(chomper.interval - 42f) > 0.01f || string.IsNullOrEmpty(chomper.secondaryPath))
+            errors.Add("Chomper must use its digest animation during the 42-second chew cooldown.");
+
+        if (!ImportedPlantRuntime.TryGetDefinition("Threepeater", out ImportedPlantDefinition threepeater) ||
+            threepeater.rows == null || threepeater.rows.Length != 3 ||
+            threepeater.rows[0] != -1 || threepeater.rows[1] != 0 || threepeater.rows[2] != 1)
+            errors.Add("Threepeater must cover the lane above, its own lane, and the lane below.");
+
+        GameObject spikeweedObject = ImportedPlantRuntime.CreatePlant("Spikeweed", Vector3.zero, null);
+        ImportedPlant spikeweed = spikeweedObject != null ? spikeweedObject.GetComponent<ImportedPlant>() : null;
+        if (spikeweed == null || spikeweed.CanBeEaten)
+            errors.Add("Spikeweed must be ignored by normal zombie eating behavior.");
+        if (spikeweedObject != null) UnityEngine.Object.DestroyImmediate(spikeweedObject);
+
+        GameObject zombieObject = new GameObject("Plant Behavior Zombie", typeof(Animator), typeof(AudioSource), typeof(BoxCollider2D));
+        Zombie zombie = zombieObject.AddComponent<Zombie>();
+        zombie.speed = 1f;
+        zombie.bloodVolume = 200;
+        zombie.Hypnotize();
+        if (!zombie.IsHypnotized || zombie.transform.localScale.x >= 0f)
+            errors.Add("Hypno-shroom support must turn a zombie around without removing its remaining health.");
+        zombie.ApplyFreeze(3.25f, 16f);
+        if (zombie.speed > 0.02f)
+            errors.Add("Ice-shroom support must immobilize zombies before the chilled period.");
+        zombie.Thaw();
+        if (Math.Abs(zombie.speed - 1f) > 0.01f)
+            errors.Add("Fire/Jalapeno must fully thaw a frozen zombie.");
+        UnityEngine.Object.DestroyImmediate(zombieObject);
     }
 
     private static void ValidateShooterTargeting(ImportedPlant shooter, List<string> errors)
@@ -132,20 +191,22 @@ public static class ImportedPvZValidation
         GameObject secondTorchwood = new GameObject("Projectile Test Torchwood B");
 
         ImportedProjectile normal = ImportedProjectile.Create("RepeaterPea", Vector3.zero, 2, 20, 0f);
-        if (normal.GetComponent<SpriteRenderer>()?.sprite == null || normal.GetComponent<SpriteRenderer>().bounds.size.x < 0.30f ||
+        if (normal.GetComponent<SpriteRenderer>()?.sprite?.name != "PeaBullet" || normal.GetComponent<SpriteRenderer>().bounds.size.x < 0.30f ||
             normal.GetComponent<CircleCollider2D>() == null || normal.GetComponent<Rigidbody2D>() == null || !normal.CompareTag("Pea"))
-            errors.Add("Normal imported pea is missing its visual size, physics, or Pea identity.");
-        normal.PassThroughTorchwood(2, 30, firstTorchwood);
-        if (!normal.IsFire || normal.Damage != 30 || normal.AppliesSlow)
-            errors.Add("Normal pea does not become a valid fire pea.");
+            errors.Add("Imported pea does not use the original PeaBullet visual, physics, or Pea identity.");
+        GameObject normalFire = normal.PassThroughTorchwood(2, 30, firstTorchwood);
+        if (normalFire == null || normalFire.GetComponent<FirePea>() == null ||
+            normalFire.GetComponent<StraightBullet>()?.hurt != 30)
+            errors.Add("Normal pea was not replaced by the canonical FirePea prefab.");
 
         ImportedProjectile frozen = ImportedProjectile.Create("SnowPea", Vector3.zero, 1, 20, 0f);
-        frozen.PassThroughTorchwood(1, 30, firstTorchwood);
-        if (frozen.IsFire || frozen.AppliesSlow)
+        GameObject firstFrozenResult = frozen.PassThroughTorchwood(1, 30, firstTorchwood);
+        if (firstFrozenResult != null || frozen.IsFire || frozen.AppliesSlow)
             errors.Add("The first Torchwood must thaw a snow pea without igniting it.");
-        frozen.PassThroughTorchwood(1, 30, secondTorchwood);
-        if (!frozen.IsFire || frozen.Damage != 30)
-            errors.Add("A thawed pea must ignite at the next Torchwood.");
+        GameObject frozenFire = frozen.PassThroughTorchwood(1, 30, secondTorchwood);
+        if (frozenFire == null || frozenFire.GetComponent<FirePea>() == null ||
+            frozenFire.GetComponent<StraightBullet>()?.hurt != 30)
+            errors.Add("A thawed pea must become the canonical FirePea at the next Torchwood.");
 
         ImportedProjectile spore = ImportedProjectile.Create("ScaredyShroom", Vector3.zero, 0, 20, 0f);
         Sprite sporeSprite = spore.GetComponent<SpriteRenderer>()?.sprite;
@@ -154,13 +215,15 @@ public static class ImportedPvZValidation
             errors.Add("Mushroom spores must use spore artwork and ignore Torchwood.");
 
         ImportedProjectile otherRow = ImportedProjectile.Create("Threepeater", Vector3.zero, 3, 20, 0f);
-        otherRow.PassThroughTorchwood(2, 30, firstTorchwood);
-        if (otherRow.IsFire) errors.Add("Torchwood ignited a projectile from another row.");
+        GameObject otherRowFire = otherRow.PassThroughTorchwood(2, 30, firstTorchwood);
+        if (otherRowFire != null || otherRow.IsFire) errors.Add("Torchwood ignited a projectile from another row.");
 
-        UnityEngine.Object.DestroyImmediate(normal.gameObject);
-        UnityEngine.Object.DestroyImmediate(frozen.gameObject);
+        if (normal != null) UnityEngine.Object.DestroyImmediate(normal.gameObject);
+        if (frozen != null) UnityEngine.Object.DestroyImmediate(frozen.gameObject);
         UnityEngine.Object.DestroyImmediate(spore.gameObject);
         UnityEngine.Object.DestroyImmediate(otherRow.gameObject);
+        if (normalFire != null) UnityEngine.Object.DestroyImmediate(normalFire);
+        if (frozenFire != null) UnityEngine.Object.DestroyImmediate(frozenFire);
         UnityEngine.Object.DestroyImmediate(firstTorchwood);
         UnityEngine.Object.DestroyImmediate(secondTorchwood);
     }

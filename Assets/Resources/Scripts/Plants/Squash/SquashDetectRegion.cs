@@ -10,6 +10,8 @@ public class SquashDetectRegion : MonoBehaviour
     {
         if (collision.tag == "Zombie")
         {
+            Zombie zombie=collision.GetComponent<Zombie>();
+            if(zombie==null || zombie.IsHypnotized) return;
             if (squash.collider_Idle.enabled == true)
             {
                 //Khoá mục tiêu zombie
@@ -25,9 +27,9 @@ public class SquashDetectRegion : MonoBehaviour
             }
             else if (squash.collider_attack.enabled == true)
             {
-                if (collision.GetComponent<Zombie>().pos_row == squash.row)
+                if (zombie.pos_row == squash.row)
                 {
-                    collision.GetComponent<Zombie>().beSquashed();
+                    zombie.beSquashed();
                 }
             }
         }

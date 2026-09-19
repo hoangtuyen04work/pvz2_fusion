@@ -38,10 +38,11 @@ public class ThrowBullet : MonoBehaviour
 
     protected virtual void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.tag == "Zombie" && boom == false && row == collision.GetComponent<Zombie>().pos_row)
+        Zombie zombie = collision.GetComponent<Zombie>();
+        if (collision.tag == "Zombie" && zombie != null && !zombie.IsHypnotized && boom == false && row == zombie.pos_row)
         {
             blast();
-            attack(collision.GetComponent<Zombie>());
+            attack(zombie);
         }
         else if (collision.tag == "BulletDisappearLine")
         {

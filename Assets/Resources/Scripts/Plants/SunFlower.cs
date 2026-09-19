@@ -16,7 +16,7 @@ public class SunFlower : Plant
 
         sunManagement = GameObject.Find("Sun Management").GetComponent<Transform>();
 
-        Invoke("createSun", 5);
+        Invoke("createSun", 7f);
     }
 
     private void createSun()

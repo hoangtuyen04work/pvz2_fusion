@@ -59,6 +59,7 @@ public sealed class ImportedZombie : Zombie
     {
         UpdateTimedStatusEffects();
         if (!alive) return;
+        if (UpdateHypnotizedBehavior()) return;
         if (!attacking)
             transform.Translate(-speed * Time.deltaTime, 0f, 0f);
         else if (plant == null)
@@ -72,8 +73,10 @@ public sealed class ImportedZombie : Zombie
 
     protected override void OnTriggerEnter2D(Collider2D collision)
     {
+        if (IsHypnotized) return;
         Plant hit = collision.GetComponent<Plant>();
-        if (hit != null && hit.row == pos_row && collision.transform.position.x < transform.position.x + eatOffset)
+        ImportedPlant imported = hit != null ? hit.GetComponent<ImportedPlant>() : null;
+        if (hit != null && (imported == null || imported.CanBeEaten) && hit.row == pos_row && collision.transform.position.x < transform.position.x + eatOffset)
         {
             plant = hit;
             attacking = true;
@@ -88,7 +91,13 @@ public sealed class ImportedZombie : Zombie
 
     protected override void OnTriggerExit2D(Collider2D collision)
     {
+        if (IsHypnotized) return;
         if (collision.GetComponent<Plant>() == plant) StopAttacking();
+    }
+
+    protected override void OnHypnotized()
+    {
+        StopAttacking();
     }
 
     private void StopAttacking()

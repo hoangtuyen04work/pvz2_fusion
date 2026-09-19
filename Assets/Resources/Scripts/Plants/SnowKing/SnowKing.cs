@@ -33,7 +33,8 @@ public class SnowKing : MultiImagePlant
                 Physics2D.LinecastAll(transform.position, castEndPoint, LayerMask.GetMask("Zombie"));
         foreach (RaycastHit2D hitResult in hitResults)
         {
-            if (hitResult.transform.GetComponent<Zombie>().pos_row == row)
+            Zombie zombie=hitResult.transform.GetComponent<Zombie>();
+            if (zombie!=null && !zombie.IsHypnotized && zombie.pos_row == row)
             {
                 int bulletIndex = Random.Range(0, bullets.Count);
                 Instantiate(
@@ -41,7 +42,7 @@ public class SnowKing : MultiImagePlant
                     transform.position + bulletOffset,
                     Quaternion.Euler(0, 0, 0)
                 ).GetComponent<ThrowBullet>()
-                    .initialize(hitResult.transform.GetComponent<Zombie>(), this, row);
+                    .initialize(zombie, this, row);
                 audioSource.Play();
                 break;
             }

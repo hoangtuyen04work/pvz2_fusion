@@ -23,10 +23,11 @@ public class StraightBullet : MonoBehaviour
 
     protected virtual void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.tag == "Zombie" && boomState == false && row == collision.GetComponent<Zombie>().pos_row)
+        Zombie zombie = collision.GetComponent<Zombie>();
+        if (collision.tag == "Zombie" && zombie != null && !zombie.IsHypnotized && boomState == false && row == zombie.pos_row)
         {
             boom();
-            attack(collision.GetComponent<Zombie>());
+            attack(zombie);
         }
         else if (collision.tag == "BulletDisappearLine")
         {

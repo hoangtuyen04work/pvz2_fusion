@@ -32,8 +32,8 @@ public static class PlantLoadoutCatalog
     {
         new PlantLoadoutEntry("SunFlower", "SunFlower", "Sunflower", "Sprites/Plants/SunFlower", 50, 7.5f),
         new PlantLoadoutEntry("PeaShooter", "PeaShooterSingle", "Peashooter", "Sprites/Plants/PeaShooterSingle", 100, 7.5f),
-        new PlantLoadoutEntry("WallNut", "WallNut", "Wall-nut", "Sprites/Plants/WallNut", 50, 25f),
-        new PlantLoadoutEntry("Squash", "Squash", "Squash", "Sprites/Plants/Squash", 50, 25f),
+        new PlantLoadoutEntry("WallNut", "WallNut", "Wall-nut", "Sprites/Plants/WallNut", 50, 30f),
+        new PlantLoadoutEntry("Squash", "Squash", "Squash", "Sprites/Plants/Squash", 50, 30f),
         new PlantLoadoutEntry("TorchWood", "TorchWood", "Torchwood", "Sprites/Plants/TorchWood", 175, 7.5f),
         new PlantLoadoutEntry("MiaoMiao", "MiaoMiao", "Miao Miao", "Sprites/Plants/MiaoMiao", 200, 7.5f),
         new PlantLoadoutEntry("SnowKing", "SnowKing", "Snow King", "Sprites/Plants/SnowKing", 275, 7.5f),
@@ -58,6 +58,11 @@ public static class PlantLoadoutCatalog
         foreach (var candidate in All)
             if (string.Equals(candidate.Key, key, StringComparison.OrdinalIgnoreCase)) { entry=candidate; return true; }
         entry=null; return false;
+    }
+
+    public static bool IsSelectionChoice(string key)
+    {
+        return !string.Equals(key, "SunNut", StringComparison.OrdinalIgnoreCase);
     }
 }
 
@@ -104,18 +109,60 @@ public sealed class PlantSelectionOverlay : MonoBehaviour
         var selectedLayout=selectedObject.GetComponent<HorizontalLayoutGroup>(); selectedLayout.spacing=7; selectedLayout.childAlignment=TextAnchor.MiddleCenter; selectedLayout.childControlWidth=selectedLayout.childControlHeight=false; selectedLayout.childForceExpandWidth=selectedLayout.childForceExpandHeight=false; selectedBank=selectedObject.transform;
         var hint=TextObject("Hint",panel.transform,"Pick up to 6 plants. Click a selected packet to remove it.",18,TextAnchor.MiddleCenter,new Color(.9f,.92f,.76f)); Anchor(hint.rectTransform,.12f,.69f,.88f,.74f);
 
-        var gridObject = new GameObject("Plant Grid", typeof(RectTransform), typeof(GridLayoutGroup));
-        gridObject.transform.SetParent(panel.transform, false);
-        Anchor(gridObject.GetComponent<RectTransform>(), 0.08f, 0.17f, 0.92f, 0.69f);
+        var scrollObject = new GameObject("Plant Scroll View", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(ScrollRect));
+        scrollObject.transform.SetParent(panel.transform, false);
+        Anchor(scrollObject.GetComponent<RectTransform>(), 0.08f, 0.17f, 0.92f, 0.69f);
+        scrollObject.GetComponent<Image>().color = new Color(.24f, .18f, .08f, .92f);
+
+        var viewportObject = new GameObject("Viewport", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(RectMask2D));
+        viewportObject.transform.SetParent(scrollObject.transform, false);
+        var viewport = viewportObject.GetComponent<RectTransform>();
+        Anchor(viewport, 0.01f, 0.025f, 0.96f, 0.975f);
+        viewportObject.GetComponent<Image>().color = new Color(.11f, .17f, .065f, .95f);
+
+        var gridObject = new GameObject("Plant Grid", typeof(RectTransform), typeof(GridLayoutGroup), typeof(ContentSizeFitter));
+        gridObject.transform.SetParent(viewportObject.transform, false);
+        var content = gridObject.GetComponent<RectTransform>();
+        content.anchorMin = new Vector2(0f, 1f);
+        content.anchorMax = new Vector2(1f, 1f);
+        content.pivot = new Vector2(.5f, 1f);
+        content.anchoredPosition = Vector2.zero;
+        content.sizeDelta = Vector2.zero;
         var grid = gridObject.GetComponent<GridLayoutGroup>();
         grid.padding = new RectOffset(8, 8, 2, 2);
         grid.spacing = new Vector2(14f, 8f);
         grid.cellSize = SeedPacketFactory.ChoiceSize;
         grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
         grid.constraintCount = 7;
+        gridObject.GetComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        var scrollbarObject = new GameObject("Scrollbar", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Scrollbar));
+        scrollbarObject.transform.SetParent(scrollObject.transform, false);
+        Anchor(scrollbarObject.GetComponent<RectTransform>(), .965f, .025f, .992f, .975f);
+        scrollbarObject.GetComponent<Image>().color = new Color(.16f, .10f, .035f, 1f);
+        var handle = ImageObject("Handle", scrollbarObject.transform, null, new Color(.72f, .52f, .18f, 1f));
+        Stretch(handle.rectTransform);
+        var scrollbar = scrollbarObject.GetComponent<Scrollbar>();
+        scrollbar.handleRect = handle.rectTransform;
+        scrollbar.targetGraphic = handle;
+        scrollbar.direction = Scrollbar.Direction.BottomToTop;
+
+        var scrollRect = scrollObject.GetComponent<ScrollRect>();
+        scrollRect.viewport = viewport;
+        scrollRect.content = content;
+        scrollRect.horizontal = false;
+        scrollRect.vertical = true;
+        scrollRect.movementType = ScrollRect.MovementType.Clamped;
+        scrollRect.inertia = true;
+        scrollRect.decelerationRate = .12f;
+        scrollRect.scrollSensitivity = 32f;
+        scrollRect.verticalScrollbar = scrollbar;
+        scrollRect.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHide;
+        scrollRect.verticalNormalizedPosition = 1f;
 
         foreach (var entry in PlantLoadoutCatalog.All)
-            CreateChoice(entry, gridObject.transform);
+            if (PlantLoadoutCatalog.IsSelectionChoice(entry.Key))
+                CreateChoice(entry, gridObject.transform);
 
         status = TextObject("Status", panel.transform, string.Empty, 23, TextAnchor.MiddleLeft, Color.white);
         Anchor(status.rectTransform, 0.06f, 0.055f, 0.64f, 0.16f);
@@ -123,7 +170,8 @@ public sealed class PlantSelectionOverlay : MonoBehaviour
         Anchor(confirm.GetComponent<RectTransform>(), 0.70f, 0.055f, 0.91f, 0.16f);
 
         foreach (string key in GameSession.SelectedPlants)
-            if (selected.Count < PlantLoadoutCatalog.MaxSelected && PlantLoadoutCatalog.TryGet(key, out _) && !selected.Contains(key))
+            if (selected.Count < PlantLoadoutCatalog.MaxSelected && PlantLoadoutCatalog.IsSelectionChoice(key) &&
+                PlantLoadoutCatalog.TryGet(key, out _) && !selected.Contains(key))
                 selected.Add(key);
         UpdateState();
     }
@@ -135,6 +183,7 @@ public sealed class PlantSelectionOverlay : MonoBehaviour
 
     private void Toggle(string key)
     {
+        if (!PlantLoadoutCatalog.IsSelectionChoice(key)) return;
         if (selected.Contains(key)) selected.Remove(key);
         else if (selected.Count < PlantLoadoutCatalog.MaxSelected) selected.Add(key);
         UpdateState();

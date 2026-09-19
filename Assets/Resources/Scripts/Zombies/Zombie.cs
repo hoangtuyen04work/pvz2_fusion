@@ -21,6 +21,14 @@ public class Zombie : MonoBehaviour
     private bool slowed;
     private float slowEndTime;
     private float slowMultiplier = 1f;
+    private bool frozen;
+    private float freezeEndTime;
+    private bool hypnotized;
+    private float nextHypnotizedScan;
+    private float nextHypnotizedBite;
+    private Zombie hypnotizedTarget;
+
+    public bool IsHypnotized => hypnotized;
 
     //Liên quan tới tấn công
     public int attackPower;  //Sức tấn công
@@ -72,6 +80,8 @@ public class Zombie : MonoBehaviour
         //Máy khách không tự cho zombie đi, vị trí do NetZombieView kéo theo máy chủ
         if (!NetSession.IsAuthority) return;
 
+        if (UpdateHypnotizedBehavior()) return;
+
         if (myAnimator.GetBool("Walk") == true)
         {
             transform.Translate(-speed * Time.deltaTime, 0, 0);
@@ -80,8 +90,13 @@ public class Zombie : MonoBehaviour
 
     protected virtual void OnTriggerEnter2D(Collider2D collision)
     {
+        if (hypnotized) return;
+        Plant candidate = collision.GetComponent<Plant>();
+        ImportedPlant importedCandidate = candidate != null ? candidate.GetComponent<ImportedPlant>() : null;
         if (collision.tag == "Plant" 
-            && collision.GetComponent<Plant>().row == pos_row 
+            && candidate != null
+            && (importedCandidate == null || importedCandidate.CanBeEaten)
+            && candidate.row == pos_row
             && collision.transform.position.x < transform.position.x + eatOffset
             && myAnimator.GetBool("Attack") == false)
         {
@@ -100,6 +115,7 @@ public class Zombie : MonoBehaviour
 
     protected virtual void OnTriggerExit2D(Collider2D collision)
     {
+        if (hypnotized) return;
         if (collision.tag == "Plant" && collision.GetComponent<Plant>().row == pos_row)
         {
             myAnimator.SetBool("Attack", false);
@@ -115,7 +131,7 @@ public class Zombie : MonoBehaviour
     public virtual void attack()
     {
         //Máy khách chỉ diễn hoạt ảnh gặm, sát thương do máy chủ tính
-        if (!NetSession.IsAuthority) return;
+        if (!NetSession.IsAuthority || hypnotized) return;
 
         //Cây bị tấn công
         if (plant != null)
@@ -176,11 +192,23 @@ public class Zombie : MonoBehaviour
     //Bị thiêu, gọi khi trúng đòn lửa
     public virtual void beBurned()
     {
+        Thaw();
         beAttacked(10);
     }
 
     protected void UpdateTimedStatusEffects()
     {
+        if (frozen && Time.time >= freezeEndTime)
+        {
+            float previousMultiplier = slowMultiplier;
+            slowMultiplier = 0.5f;
+            if (previousMultiplier > 0f)
+            {
+                speed = speed / previousMultiplier * slowMultiplier;
+                if (myAnimator != null) myAnimator.speed = myAnimator.speed / previousMultiplier * slowMultiplier;
+            }
+            frozen = false;
+        }
         if (slowed && Time.time >= slowEndTime) ClearSlow();
     }
 
@@ -210,6 +238,25 @@ public class Zombie : MonoBehaviour
         state = ZombieState.Cold;
     }
 
+    public void ApplyFreeze(float immobilizeDuration, float chilledDuration)
+    {
+        if (slowed) ClearSlow();
+        slowed = true;
+        frozen = true;
+        slowMultiplier = 0.01f;
+        speed *= slowMultiplier;
+        if (myAnimator != null) myAnimator.speed *= slowMultiplier;
+        freezeEndTime = Time.time + Mathf.Max(0f, immobilizeDuration);
+        slowEndTime = freezeEndTime + Mathf.Max(0f, chilledDuration);
+        state = ZombieState.Cold;
+    }
+
+    public void Thaw()
+    {
+        if (slowed) ClearSlow();
+        frozen = false;
+    }
+
     private void ClearSlow()
     {
         if (!slowed) return;
@@ -217,7 +264,93 @@ public class Zombie : MonoBehaviour
         if (myAnimator != null) myAnimator.speed /= slowMultiplier;
         slowed = false;
         slowMultiplier = 1f;
-        if (state == ZombieState.Cold) state = ZombieState.Normal;
+        if (state == ZombieState.Cold) state = hypnotized ? ZombieState.Hypnotized : ZombieState.Normal;
+    }
+
+    public void Hypnotize()
+    {
+        if (hypnotized || !alive) return;
+        hypnotized = true;
+        plant = null;
+        state = ZombieState.Hypnotized;
+        nextHypnotizedBite = Time.time;
+        Vector3 scale = transform.localScale;
+        scale.x = -Mathf.Abs(scale.x);
+        transform.localScale = scale;
+        foreach (SpriteRenderer renderer in GetComponentsInChildren<SpriteRenderer>(true))
+        {
+            Color color = renderer.color;
+            renderer.color = new Color(0.72f, 1f, 0.72f, color.a);
+        }
+        OnHypnotized();
+    }
+
+    protected virtual void OnHypnotized()
+    {
+        SetAnimatorBoolIfPresent("Attack", false);
+        SetAnimatorBoolIfPresent("Walk", true);
+    }
+
+    protected bool UpdateHypnotizedBehavior()
+    {
+        if (!hypnotized) return false;
+        if (!NetSession.IsAuthority) return true;
+
+        if (Time.time >= nextHypnotizedScan)
+        {
+            nextHypnotizedScan = Time.time + 0.15f;
+            hypnotizedTarget = null;
+            float nearest = float.MaxValue;
+            foreach (Zombie candidate in FindObjectsByType<Zombie>())
+            {
+                if (candidate == this || candidate.IsHypnotized || !candidate.alive ||
+                    !candidate.gameObject.activeInHierarchy || candidate.pos_row != pos_row) continue;
+                float distance = candidate.transform.position.x - transform.position.x;
+                if (distance >= -0.15f && distance < nearest)
+                {
+                    nearest = distance;
+                    hypnotizedTarget = candidate;
+                }
+            }
+        }
+
+        if (hypnotizedTarget != null && hypnotizedTarget.alive &&
+            Mathf.Abs(hypnotizedTarget.transform.position.x-transform.position.x) <= 0.62f)
+        {
+            SetAnimatorBoolIfPresent("Walk", false);
+            SetAnimatorBoolIfPresent("Attack", true);
+            if (Time.time >= nextHypnotizedBite)
+            {
+                hypnotizedTarget.playAudioOfBeingAttacked();
+                hypnotizedTarget.beAttacked(attackPower);
+                nextHypnotizedBite = Time.time + 1f;
+            }
+        }
+        else
+        {
+            SetAnimatorBoolIfPresent("Attack", false);
+            SetAnimatorBoolIfPresent("Walk", true);
+            transform.Translate(speed * Time.deltaTime, 0f, 0f, Space.World);
+        }
+
+        if (transform.position.x > 7f)
+        {
+            GameObject manager = GameObject.Find("Zombie Management");
+            if (manager != null) manager.GetComponent<ZombieManagement>()?.minusZombieNumAll();
+            Destroy(gameObject);
+        }
+        return true;
+    }
+
+    private void SetAnimatorBoolIfPresent(string parameter, bool value)
+    {
+        if (myAnimator == null) return;
+        foreach (AnimatorControllerParameter item in myAnimator.parameters)
+            if (item.type == AnimatorControllerParameterType.Bool && item.name == parameter)
+            {
+                myAnimator.SetBool(parameter, value);
+                return;
+            }
     }
 
     private void burnTick()
@@ -348,4 +481,4 @@ public class Zombie : MonoBehaviour
 
 }
 
-public enum ZombieState { Normal, Cold, Parasiticed }
+public enum ZombieState { Normal, Cold, Parasiticed, Hypnotized }
