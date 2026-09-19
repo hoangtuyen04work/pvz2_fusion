@@ -5,7 +5,7 @@ using UnityEngine.U2D.Animation;
 
 public class NormalZombie : Zombie
 {
-    bool haveArm = true;   //是否有胳膊
+    bool haveArm = true;   //Có còn tay không
 
     private void fallArm()
     {
@@ -17,7 +17,7 @@ public class NormalZombie : Zombie
         haveArm = false;
     }
 
-    //被攻击
+    //Bị tấn công
     public override void beAttacked(int hurt)
     {
         base.beAttacked(hurt);

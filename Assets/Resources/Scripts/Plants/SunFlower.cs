@@ -1,12 +1,12 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class SunFlower : Plant
 {
-    public GameObject flowersunPrefab;   //向日葵太阳预制体
+    public GameObject flowersunPrefab;   //Prefab mặt trời của Hướng Dương
 
-    Transform sunManagement;   //太阳管理器对象Tranform组件，为所有太阳父对象
+    Transform sunManagement;   //Component Transform của đối tượng quản lý mặt trời, là cha của mọi mặt trời
     float createSunSpeed = 24f;
 
     // Start is called before the first frame update
@@ -16,16 +16,20 @@ public class SunFlower : Plant
 
         sunManagement = GameObject.Find("Sun Management").GetComponent<Transform>();
 
-        Invoke("createSun", 5);
+        Invoke("createSun", 7f);
     }
 
     private void createSun()
     {
-        //播放音效
+        //Phát âm thanh
         audioSource.Play();
 
-        //生成太阳
-        Instantiate(flowersunPrefab, transform.position, Quaternion.Euler(0, 0, 0), sunManagement);
+        //Chỉ máy chủ sinh mặt trời, máy khách nhận lệnh sinh qua mạng
+        if (NetSession.IsAuthority)
+        {
+            //Sinh ra mặt trời
+            Instantiate(flowersunPrefab, transform.position, Quaternion.Euler(0, 0, 0), sunManagement);
+        }
 
         Invoke("createSun", createSunSpeed);
     }

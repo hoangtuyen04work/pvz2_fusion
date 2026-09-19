@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.U2D.Animation;
@@ -7,8 +7,8 @@ public class SnowZombie : Zombie
 {
     public GameObject iceShield;
 
-    bool haveIce = false;   //ÊÇ·ñÒÑ´´Ôì¹ı±ù¿é
-    bool haveArm = true;   //ÊÇ·ñÓĞ¸ì²²
+    bool haveIce = false;   //ÄÃ£ táº¡o khá»‘i bÄƒng láº§n nÃ o chÆ°a
+    bool haveArm = true;   //CÃ³ cÃ²n tay khÃ´ng
 
     private void fallArm()
     {
@@ -18,7 +18,7 @@ public class SnowZombie : Zombie
             .SetCategoryAndLabel("Arm", "Incomplete");
     }
 
-    //´´Ôì±ù¶Ü£¬ÓµÓĞ±ù¶ÜÆÚ¼äÃ¿Ãë»Ö¸´5µãÑªÁ¿£¬Ö±ÖÁ»ØÂú¼ÌĞøĞĞ¶¯
+    //Táº¡o khiÃªn bÄƒng, trong lÃºc cÃ³ khiÃªn má»—i giÃ¢y há»“i 5 mÃ¡u, tá»›i khi Ä‘áº§y mÃ¡u thÃ¬ tiáº¿p tá»¥c hÃ nh Ä‘á»™ng
     public void createIce()
     {
         myAnimator.SetBool("CreateIce", false);
@@ -29,7 +29,7 @@ public class SnowZombie : Zombie
             .GetComponent<IceShield>().init(pos_row, gameObject);
     }
 
-    //ÑªÁ¿»Ö¸´º¯Êı
+    //HÃ m há»“i mÃ¡u
     public void recover()
     {
         bloodVolume += 5;
@@ -52,14 +52,14 @@ public class SnowZombie : Zombie
     {
         base.attack();
 
-        //Ò»¶¨¼¸ÂÊÍÂ³öº®Æø¶³½áÖ²Îï
+        //CÃ³ xÃ¡c suáº¥t phun hÆ¡i láº¡nh Ä‘Ã³ng bÄƒng cÃ¢y
         if(Random.Range(1,6) == 1 && plant != null && plant.state != PlantState.Cold)
         {
             myAnimator.SetBool("FrozePlant", true);
         }
     }
 
-    //²¥·Å½©Ê¬¿ĞÒ§µÄÒôĞ§
+    //PhÃ¡t Ã¢m thanh zombie gáº·m
     public override void PlayEatAudio()
     {
         audioSource.PlayOneShot(
@@ -67,7 +67,7 @@ public class SnowZombie : Zombie
         );
     }
 
-    //±»¹¥»÷
+    //Bá»‹ táº¥n cÃ´ng
     public override void beAttacked(int hurt)
     {
         base.beAttacked(hurt);
@@ -84,7 +84,7 @@ public class SnowZombie : Zombie
         }
     }
 
-    //ÓÉÓÚ¸÷¸ö½©Ê¬Í·²¿·Ö¿ÉÄÜ²»Í¬£¬¹Ê¸Ãº¯ÊıÓÉ×ÓÀàÖØĞ´
+    //VÃ¬ pháº§n Ä‘áº§u cá»§a má»—i zombie cÃ³ thá»ƒ khÃ¡c nhau nÃªn hÃ m nÃ y do lá»›p con ghi Ä‘Ã¨
     protected override void hideHead()
     {
         transform.Find("head").gameObject.SetActive(false);

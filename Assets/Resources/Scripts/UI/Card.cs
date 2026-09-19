@@ -1,26 +1,27 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
-public class Card : MonoBehaviour
+public class Card : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
-    //冷却贴图
+    //Ảnh hồi chiêu
     public GameObject upperImageObj;
     public Image lowerImage;
     public GameObject lowerImageObj;
 
-    public Button myButton;   //自身Button组件
+    public Button myButton;   //Component Button của chính nó
 
-    //冷却时间与冷却状态
+    //Thời gian và trạng thái hồi chiêu
     public float coolingTime;
     float timer;
     bool coolingState = true;
 
-    //阳光是否充足状态
+    //Trạng thái nắng có đủ hay không
     bool sunEnough;
 
-    //种植相关
+    //Liên quan tới trồng cây
     PlantingManagement planting;
     public string plantName;
     public int sunNeeded;
@@ -28,7 +29,7 @@ public class Card : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        //该组件须由管理对象加载，故在Start获取
+        //Component này phải do đối tượng quản lý tải, nên lấy trong Start
         planting = GameObject.Find("Planting Management").GetComponent<PlantingManagement>();
 
         if (coolingTime > 10f) cooling();
@@ -41,11 +42,14 @@ public class Card : MonoBehaviour
         if(coolingState == true)
         {
             timer += Time.deltaTime;
-            if (timer / coolingTime < 1)
-                lowerImage.rectTransform.localScale = new Vector3(1, 1 - timer / coolingTime, 1);
+            if (coolingTime > 0f && timer / coolingTime < 1)
+                lowerImage.fillAmount = 1 - timer / coolingTime;
             else endCooling();
         }
     }
+
+    //Thẻ có đang hồi chiêu không, bộ đồng bộ cần biết để duyệt yêu cầu trồng cây
+    public bool IsCooling { get { return coolingState; } }
 
     public void cooling()
     {
@@ -89,10 +93,42 @@ public class Card : MonoBehaviour
 
     public void click()
     {
-        //播放音效
-        gameObject.GetComponent<AudioSource>().Play();
+        if (planting == null)
+        {
+            GameObject manager = GameObject.Find("Planting Management");
+            planting = manager != null ? manager.GetComponent<PlantingManagement>() : null;
+        }
+        if (planting == null) return;
+        //Phát âm thanh
+        AudioSource audio = gameObject.GetComponent<AudioSource>();
+        if (audio != null && audio.clip != null) audio.Play();
 
-        //转给种植管理
+        //Chuyển cho quản lý trồng cây
         planting.clickPlant(plantName, gameObject.GetComponent<Card>());
+    }
+
+    public void OnBeginDrag(PointerEventData eventData)
+    {
+        if (myButton == null || !myButton.enabled) return;
+        click();
+    }
+
+    public void OnDrag(PointerEventData eventData)
+    {
+        // ToBePlanted tu di theo chuot; interface nay giu drag hoat dong tren UI.
+    }
+
+    public void OnEndDrag(PointerEventData eventData)
+    {
+        GameObject preview = GameObject.Find("To Be Planted");
+        if (preview == null || !preview.activeSelf || Camera.main == null) return;
+
+        Vector3 world = Camera.main.ScreenToWorldPoint(eventData.position);
+        foreach (Collider2D hit in Physics2D.OverlapPointAll(new Vector2(world.x, world.y)))
+        {
+            PlantGrid grid = hit.GetComponent<PlantGrid>();
+            if (grid != null && grid.tryPlaceSelectedPlant()) break;
+        }
+        preview.SetActive(false);
     }
 }

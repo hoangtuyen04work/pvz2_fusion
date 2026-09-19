@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.U2D.Animation;
@@ -15,8 +15,8 @@ public class ConeZombie : Zombie
         audioOfBeingAttacked = "Sounds/Zombies/conehit";
     }
 
-    //±»¹¥»÷
-    //×´Ì¬±¸×¢£º640ÂúÑª,500Â·ÕÏËğÉË1,350Â·ÕÏËğÉË2,200Â·ÕÏµôÂä,100¸ì²²µôÂä
+    //Bá»‹ táº¥n cÃ´ng
+    //Ghi chÃº tráº¡ng thÃ¡i: 640 Ä‘áº§y mÃ¡u, 500 nÃ³n cá»c há»ng 1, 350 nÃ³n cá»c há»ng 2, 200 nÃ³n cá»c rÆ¡i, 100 rá»¥ng tay
     public override void beAttacked(int hurt)
     {
         base.beAttacked(hurt);

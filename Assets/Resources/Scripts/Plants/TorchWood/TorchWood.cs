@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// Cây Liễu Đuốc.
 public class TorchWood : Plant
 {
     public GameObject firePea;
@@ -18,14 +19,22 @@ public class TorchWood : Plant
 
         warm();
 
-        contactFilter.NoFilter();
+        contactFilter = ContactFilter2D.noFilter;
         contactFilter.SetLayerMask(LayerMask.GetMask("Zombie"));
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        ImportedProjectile imported = collision.GetComponent<ImportedProjectile>();
+        if (imported != null)
+        {
+            imported.PassThroughTorchwood(row, firePeaHurt, this);
+            return;
+        }
         if(collision.tag == "Pea")
         {
+            StraightBullet pea = collision.GetComponent<StraightBullet>();
+            if (pea == null || pea.Row != row) return;
             //���ɻ��㶹
             Instantiate(firePea,
                         collision.transform.position,
@@ -34,7 +43,7 @@ public class TorchWood : Plant
             //�����㶹
             Destroy(collision.gameObject);
         }
-        else if(collision.tag == "Zombie" && collision.GetComponent<Zombie>().pos_row == row)
+        else if(collision.tag == "Zombie" && !collision.GetComponent<Zombie>().IsHypnotized && collision.GetComponent<Zombie>().pos_row == row)
         {
             zombieNum++;
             if(zombieNum == 1)
@@ -46,7 +55,7 @@ public class TorchWood : Plant
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if (collision.tag == "Zombie" && collision.GetComponent<Zombie>().pos_row == row)
+        if (collision.tag == "Zombie" && !collision.GetComponent<Zombie>().IsHypnotized && collision.GetComponent<Zombie>().pos_row == row)
         {
             zombieNum--;
             if (zombieNum <= 0)
@@ -58,24 +67,32 @@ public class TorchWood : Plant
 
     private void burnZombie()
     {
+        int eligible=0;
         if(burnRegionCollider.Overlap(contactFilter, zombies) != 0)
         {
             foreach(Collider2D collider in zombies)
             {
-                if ( collider.GetComponent<Zombie>().pos_row == row)
-                    collider.GetComponent<Zombie>().beBurned();
+                Zombie zombie=collider.GetComponent<Zombie>();
+                if (zombie!=null && !zombie.IsHypnotized && zombie.pos_row == row)
+                {
+                    eligible++;
+                    zombie.beBurned();
+                }
             }
         }
-        else
+        zombieNum=eligible;
+        if(eligible==0)
         {
-            zombieNum = 0;
             CancelInvoke();
         }
     }
 
     protected override void beforeDie()
     {
-        transform.Find("WarmPlantRegion").GetComponent<WarmPlantRegion>().stopWarm();
+        Transform region = transform.Find("WarmPlantRegion");
+        if (region == null) return;
+        WarmPlantRegion warmRegion = region.GetComponent<WarmPlantRegion>();
+        if (warmRegion != null) warmRegion.stopWarm();
     }
 
     protected override void intensify_specific()

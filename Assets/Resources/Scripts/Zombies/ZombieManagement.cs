@@ -1,41 +1,47 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class ZombieManagement : MonoBehaviour
 {
-    //僵尸相关
-    public GameObject[] zombies;   //可生成僵尸列表
-    Dictionary<string, int> zombiesName = new Dictionary<string, int>();   //僵尸名称与对象索引的字典
+    //Liên quan tới zombie
+    public GameObject[] zombies;   //Danh sách zombie có thể sinh ra
+    Dictionary<string, int> zombiesName = new Dictionary<string, int>();   //Từ điển ánh xạ tên zombie sang chỉ số đối tượng
 
-    //僵尸数量相关
-    int zombieNum_now = 0;   //全场现有僵尸数量，用于确保场上僵尸清零后再产生一波
+    //Liên quan tới số lượng zombie
+    int zombieNum_now = 0;   //Số zombie hiện có trên màn, dùng để đảm bảo hết sạch zombie rồi mới sinh đợt mới
 
-    //僵尸生成相关
-    List<int> rowList = new List<int>();  //可生成僵尸行列表
-                                          //在某行上生成后就把该行剔除，以避免僵尸一直出现在某一行
-    public string generateFunc = "generateZombies";  //僵尸生成函数的名称，便于调用特殊关卡的生成函数
+    //Liên quan tới việc sinh zombie
+    List<int> rowList = new List<int>();  //Danh sách hàng có thể sinh zombie
+                                          //Sinh ở hàng nào thì loại hàng đó ra, tránh việc zombie cứ xuất hiện mãi ở một hàng
+    public string generateFunc = "generateZombies";  //Tên hàm sinh zombie, tiện gọi hàm sinh riêng của các màn đặc biệt
 
-    //僵尸初始位置
+    //Vị trí ban đầu của zombie
     float initPos_x = 6.0f;
 
-    //时间轴相关
-    TimeNodes timeNodes;   //从json读取出来的时间节点列表
-    int nowNode_index = 0;   //当前是第几个时间节点
-    int nodeCount = 0;  //总共有几个时间节点
-    TimeNode nowNode;   //当前时间节点
-    bool waitWave = false;   //是否正在等待一波僵尸的生成
-    bool isOver = false;   //关卡是否结束
-    DecreasingSlider flagMeter;   //关卡进度条组件
+    //Liên quan tới trục thời gian
+    TimeNodes timeNodes;   //Danh sách mốc thời gian đọc từ json
+    int nowNode_index = 0;   //Hiện đang ở mốc thời gian thứ mấy
+    int nodeCount = 0;  //Tổng cộng có bao nhiêu mốc thời gian
+    TimeNode nowNode;   //Mốc thời gian hiện tại
+    bool waitWave = false;   //Có đang chờ sinh một đợt zombie không
+    bool isOver = false;   //Màn chơi đã kết thúc chưa
+    DecreasingSlider flagMeter;   //Component thanh tiến trình màn chơi
 
-    //字幕相关
-    public Caption caption;  //字幕组件
+    //Liên quan tới phụ đề
+    public Caption caption;  //Component phụ đề
 
-    AudioSource audioSource;   //自身AudioSource组件
+    AudioSource audioSource;   //Component AudioSource của chính nó
+
+    // Getter cho GameStateCollector
+    public int ZombieNum_now => zombieNum_now;
+    public int NowNode_index => nowNode_index;
+    public int NodeCount => nodeCount;
+    public TimeNode NowNode => nowNode;
 
     private void Awake()
     {
-        //获取对象与组件
+        //Lấy đối tượng và component
         audioSource = GetComponent<AudioSource>();
         flagMeter = GameObject.Find("FlagMeter-Slider").GetComponent<DecreasingSlider>();
     }
@@ -43,22 +49,22 @@ public class ZombieManagement : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        //读取关卡json文件并转换为变量对象
+        //Đọc file json của màn chơi và chuyển thành đối tượng biến
         string info = Resources.Load<TextAsset>(
             "Json/ZombieData/Level" + GameManagement.levelData.level
         ).text;
         timeNodes = JsonUtility.FromJson<TimeNodes>(info);
 
-        //初始化可生成的僵尸的名称列表
+        //Khởi tạo danh sách tên zombie có thể sinh ra
         for(int i = 0; i < zombies.Length; i++)
         {
             zombiesName.Add(zombies[i].name, i);
         }
 
-        //初始化僵尸生成相关
+        //Khởi tạo phần liên quan tới sinh zombie
         initRowList();
 
-        //初始化时间轴相关
+        //Khởi tạo phần liên quan tới trục thời gian
         nodeCount = timeNodes.info.Count;
         nowNode_index = 0;
         nowNode = timeNodes.info[nowNode_index];
@@ -66,89 +72,187 @@ public class ZombieManagement : MonoBehaviour
 
     public void activate()
     {
-        //准备第一波
+        //Máy khách không chạy trục thời gian, nó chỉ nhận lệnh sinh zombie từ máy chủ.
+        //Chế độ đối kháng cũng bỏ trục thời gian vì zombie do người chơi thả.
+        if (!NetSession.IsAuthority || !NetSession.UseZombieTimeline) return;
+
+        //Chuẩn bị đợt đầu tiên
         Invoke("enterTimeNode", nowNode.deltaTime);
     }
 
     private void enterTimeNode()
     {
-        if (nowNode.isWave == false)   //不是一波
+        if (nowNode.isWave == false)   //Không phải một đợt lớn
         {
             Invoke(generateFunc, 0);
         }
-        else   //是一波
+        else   //Là một đợt lớn
         {
-            if (zombieNum_now == 0)   //场上僵尸清零后才产生一波
+            if (zombieNum_now == 0)   //Hết sạch zombie trên màn rồi mới sinh một đợt lớn
             {
                 waitWave = false;
-                if(nowNode.isFinalWave == false) caption.showWave();
-                else caption.showFinalWave();
+                if (nowNode.isFinalWave == false)
+                {
+                    caption.showWave();
+                    NetGameplay.NotifyProgress(currentProgress(), "wave");
+                }
+                else
+                {
+                    caption.showFinalWave();
+                    NetGameplay.NotifyProgress(currentProgress(), "final");
+                }
                 Invoke(generateFunc, 0);
             }
             else waitWave = true;
         }
     }
 
-    //逐个生成当前时间节点的所有僵尸
-    //此函数并非未引用过，而是以Invoke方式调用未识别
+    //Sinh lần lượt toàn bộ zombie của mốc thời gian hiện tại
+    //Hàm này không phải không được dùng, mà do gọi bằng Invoke nên trình biên dịch không nhận ra
     private void generateZombies()
     {
         for (int i = 0; i < nowNode.number; i++)
         {
-            //获取随机行
+            //Lấy hàng ngẫu nhiên
             int randY = rowList[Random.Range(0, rowList.Count)];
             rowList.Remove(randY);
             if (rowList.Count == 0) initRowList();
-            //生成僵尸
-            GameObject newZombie = Instantiate(zombies[zombiesName[nowNode.zombie]],
-                new Vector3(initPos_x, GameManagement.levelData.zombieInitPosY[randY], 0),
-                Quaternion.Euler(0, 0, 0),
-                transform);
-            newZombie.GetComponent<Zombie>().setPosRow(randY);
-            addZombieNumAll();
+            //Sinh zombie
+            GameObject spawned = spawnZombie(nowNode.zombie, randY, initPos_x, 0);
+            if (spawned == null && NetSession.IsAuthority)
+                Debug.LogError("Unknown zombie in level data: " + nowNode.zombie, this);
         }
         changeTimeNode();
     }
 
-    //切换时间节点到下一个并执行相应修改
+    //Chuyển sang mốc thời gian kế tiếp và cập nhật tương ứng
     private void changeTimeNode()
     {
-        //如果刚生成的是第一批僵尸
+        //Nếu vừa sinh ra là lứa zombie đầu tiên
         if(nowNode_index == 0)
         {
-            audioSource.Play(); //播放警报音效
-            InvokeRepeating("groan", 0, 5);   //每隔5秒执行僵尸叹息音效函数
+            audioSource.Play(); //Phát âm thanh báo động
+            InvokeRepeating("groan", 0, 5);   //Cứ mỗi 5 giây chạy hàm phát âm thanh zombie thở dài
         }
 
-        //切换时间节点
+        //Chuyển mốc thời gian
         nowNode_index++;
-        if (nowNode_index < nodeCount)   //后面还有时间节点，就切换
+        if (nowNode_index < nodeCount)   //Nếu còn mốc thời gian phía sau thì chuyển
         {
             nowNode = timeNodes.info[nowNode_index];
             Invoke("enterTimeNode", nowNode.deltaTime);
         }
-        else   //没了就是游戏结束
+        else   //Hết rồi thì kết thúc trò chơi
         {
             isOver = true;
         }
 
-        //更新关卡进度条
-        flagMeter.setValue((nodeCount - nowNode_index) / (float)nodeCount);
+        //Cập nhật thanh tiến trình màn chơi
+        flagMeter.setValue(currentProgress());
+        NetGameplay.NotifyProgress(currentProgress(), "");
     }
 
-    //创造僵尸，上帝模式，用于对话
+    //Tạo zombie ở chế độ god mode, dùng cho hội thoại
     public void createZombieByGod(string name, int posRow)
     {
-        GameObject newZombie = Instantiate(zombies[zombiesName[name]],
-            new Vector3(initPos_x, GameManagement.levelData.zombieInitPosY[posRow], 0),
-            Quaternion.Euler(0, 0, 0),
-            transform);
-        newZombie.GetComponent<Zombie>().setPosRow(posRow);
-        newZombie.GetComponent<Zombie>().cancelSleep();
-        addZombieNumAll();
+        GameObject newZombie = spawnZombie(name, posRow, initPos_x, 0, 0f);
+        if (newZombie != null) newZombie.GetComponent<Zombie>().cancelSleep();
     }
 
-    //初始化可生成僵尸行列表
+    #region Cửa sinh zombie dùng chung
+
+    //Mọi nơi muốn sinh zombie đều đi qua đây, nhờ vậy chỉ cần cắm phần mạng vào một chỗ.
+    //sleepTime âm nghĩa là để hàm tự bốc ngẫu nhiên.
+    private GameObject spawnZombie(string name, int row, float posX, int priorNetId, float sleepTime = -1f)
+    {
+        //Máy khách không tự sinh zombie, nó chờ gói tin từ máy chủ
+        if (!NetSession.IsAuthority) return null;
+        if (row < 0 || row >= GameManagement.levelData.zombieInitPosY.Count) return null;
+
+        float posY = GameManagement.levelData.zombieInitPosY[row];
+        float speedScale = Random.Range(1.0f, 1.5f);
+        if (sleepTime < 0f) sleepTime = Random.Range(0.0f, 5.0f);
+
+        GameObject newZombie = buildZombie(name, row, posX, posY, speedScale, sleepTime);
+        if (newZombie == null) return null;
+
+        addZombieNumAll();
+        NetGameplay.RegisterZombie(newZombie.GetComponent<Zombie>(),
+            name, row, posX, posY, speedScale, sleepTime, priorNetId);
+        return newZombie;
+    }
+
+    //Máy khách dựng lại đúng con zombie mà máy chủ vừa sinh
+    public GameObject spawnZombieFromNetwork(string name, int row, float posX, float posY,
+        float speedScale, float sleepTime, Zombie prior)
+    {
+        GameObject newZombie = buildZombie(name, row, posX, posY, speedScale, sleepTime);
+        if (newZombie == null) return null;
+
+        addZombieNumAll();
+
+        //Nối lại đội hình cho đám zombie xếp hàng của màn 2
+        ChineseZombie chinese = newZombie.GetComponent<ChineseZombie>();
+        if (chinese != null)
+        {
+            ChineseZombie priorChinese = prior != null ? prior.GetComponent<ChineseZombie>() : null;
+            linkChinese(chinese, priorChinese);
+            chinese.next = null;
+        }
+
+        return newZombie;
+    }
+
+    //Phe zombie trong chế độ đối kháng thả quân xuống một hàng
+    public GameObject spawnCommandedZombie(string name, int row)
+    {
+        //Thả là đi ngay, không đứng ngủ như zombie sinh theo đợt
+        return spawnZombie(name, row, initPos_x, 0, 0f);
+    }
+
+    //Phần dựng đối tượng thật sự, dùng chung cho cả hai máy
+    private GameObject buildZombie(string name, int row, float posX, float posY,
+        float speedScale, float sleepTime)
+    {
+        //Dùng createZombie để giữ được đường dự phòng cho zombie nhập ngoài
+        GameObject newZombie = createZombie(name, new Vector3(posX, posY, 0));
+        if (newZombie == null) return null;
+
+        Zombie script = newZombie.GetComponent<Zombie>();
+        if (script == null) return null;
+
+        //Đặt trước khi Start chạy, để hai máy có cùng tốc độ và cùng thời gian đứng ngủ
+        script.netSpeedScale = speedScale;
+        script.netSleepTime = sleepTime;
+        script.setPosRow(row);
+        return newZombie;
+    }
+
+    //Nối một zombie vào cuối đội hình xếp hàng
+    private void linkChinese(ChineseZombie current, ChineseZombie prior)
+    {
+        if (prior == null)
+        {
+            current.prior = null;
+            current.isCaptain = true;
+        }
+        else
+        {
+            prior.next = current;
+            current.prior = prior;
+        }
+    }
+
+    //Phần màn chơi còn lại, dùng cho thanh cắm cờ
+    private float currentProgress()
+    {
+        if (nodeCount <= 0) return 0f;
+        return (nodeCount - nowNode_index) / (float)nodeCount;
+    }
+
+    #endregion
+
+    //Khởi tạo danh sách hàng có thể sinh zombie
     private void initRowList()
     {
         for (int i = 0; i < GameManagement.levelData.landRowCount; i++)
@@ -171,95 +275,109 @@ public class ZombieManagement : MonoBehaviour
         zombieNum_now++;
     }
 
-    //场上僵尸数量减一
+    //Giảm một zombie trên màn
     public void minusZombieNumAll()
     {
-        zombieNum_now--;  //场上僵尸数量减一
+        zombieNum_now--;  //Giảm một zombie trên màn
 
-        //若场上已无僵尸
+        //Nếu trên màn không còn zombie
         if (zombieNum_now <= 0)
         {
-            //若一大波僵尸正等待生成，则生成
+            //Nếu đang có một đợt zombie lớn chờ sinh thì sinh ra
             if(waitWave == true)
             {
                 enterTimeNode();
             }
-            //若所有僵尸已生成，则游戏结束
-            else if(isOver == true)
+            //Nếu đã sinh hết zombie thì kết thúc trò chơi
+            else if(isOver == true && NetSession.IsAuthority)
             {
                 GameObject.Find("Game Management").GetComponent<GameManagement>().win();
             }
         }
     }
 
-    #region 特殊关卡专用函数区域
+    public bool SpawnTestZombie(int index, int row)
+    {
+        if (index < 0 || index >= zombies.Length || row < 0 || row >= GameManagement.levelData.landRowCount) return false;
+        GameObject created = Instantiate(zombies[index], new Vector3(initPos_x, GameManagement.levelData.zombieInitPosY[row], 0), Quaternion.identity, transform);
+        Zombie zombie = created.GetComponent<Zombie>();
+        zombie.setPosRow(row);
+        zombie.cancelSleep();
+        addZombieNumAll();
+        return true;
+    }
 
-    //专用于第二关的僵尸生成函数
-    //此函数并非未引用过，而是以Invoke方式调用未识别
+    public bool SpawnImportedTestZombie(string name, int row)
+    {
+        if (!ImportedZombieRuntime.Supports(name) || row < 0 || row >= GameManagement.levelData.landRowCount) return false;
+        GameObject created = createZombie(name, new Vector3(initPos_x, GameManagement.levelData.zombieInitPosY[row], 0));
+        created.GetComponent<Zombie>().setPosRow(row);
+        addZombieNumAll();
+        return true;
+    }
+
+    private GameObject createZombie(string name, Vector3 position)
+    {
+        if (zombiesName.TryGetValue(name, out int index))
+            return Instantiate(zombies[index], position, Quaternion.identity, transform);
+        return ImportedZombieRuntime.Create(name, position, transform);
+    }
+    #region Vùng hàm dành riêng cho màn đặc biệt
+
+    //Hàm sinh zombie dành riêng cho màn 2
+    //Hàm này không phải không được dùng, mà do gọi bằng Invoke nên trình biên dịch không nhận ra
     private void generateZombies_level2()
     {
-        //此关卡中nowNode.number代表有几队僵尸
+        //Trong màn này nowNode.number là số đội zombie
         for (int i = 0; i < nowNode.number; i++)
         {
-            int zombieNum = Random.Range(3, 6);  //随机生成本队僵尸数量
-            ChineseZombie last = null;  //上一个僵尸
+            int zombieNum = Random.Range(3, 6);  //Sinh ngẫu nhiên số zombie của đội này
+            ChineseZombie last = null;  //Zombie trước đó
 
-            //获取随机行
+            //Lấy hàng ngẫu nhiên
             int randY = rowList[Random.Range(0, rowList.Count)];
             rowList.Remove(randY);
             if (rowList.Count == 0) initRowList();
 
-            //该队僵尸随机横坐标偏移量
+            //Độ lệch toạ độ ngang ngẫu nhiên của đội zombie này
             float allOffset = Random.Range(0.0f, 2.0f);
 
-            float offset = 0.85f;  //各个僵尸之间横坐标偏移量
+            float offset = 0.85f;  //Độ lệch toạ độ ngang giữa các zombie
+
+            int lastNetId = 0;
 
             for (int j = 0; j < zombieNum; j++)
             {
-                //生成僵尸
-                GameObject newZombie = Instantiate(zombies[zombiesName[nowNode.zombie]],
-                    new Vector3(
-                        initPos_x + allOffset + j * offset,
-                        GameManagement.levelData.zombieInitPosY[randY],
-                        0
-                    ),
-                    Quaternion.Euler(0, 0, 0),
-                    transform);
-                newZombie.GetComponent<Zombie>().setPosRow(randY);
-                addZombieNumAll();
-                //设置僵尸链表信息
-                if(last == null)
-                {
-                    last = newZombie.GetComponent<ChineseZombie>();
-                    last.prior = null;
-                    last.isCaptain = true;
-                }
-                else
-                {
-                    ChineseZombie newCZ = newZombie.GetComponent<ChineseZombie>();
-                    last.next = newCZ;
-                    newCZ.prior = last;
-                    last = newCZ;
-                }
+                //Sinh zombie
+                GameObject newZombie = spawnZombie(nowNode.zombie, randY,
+                    initPos_x + allOffset + j * offset, lastNetId);
+                if (newZombie == null) continue;
+
+                //Đặt thông tin danh sách liên kết của zombie
+                ChineseZombie newCZ = newZombie.GetComponent<ChineseZombie>();
+                if (newCZ == null) continue;
+
+                linkChinese(newCZ, last);
+                last = newCZ;
+                lastNetId = NetGameplay.NetIdOf(newCZ);
             }
-            last.next = null;
+            if (last != null) last.next = null;
         }
 
         changeTimeNode();
     }
 
-    //用于随机创造幽灵
+    //Dùng để tạo Bóng Ma ngẫu nhiên
     public void createGhost()
     {
-        //获取随机行
+        //Bóng Ma chỉ do máy chủ sinh, và không xuất hiện ở chế độ đối kháng
+        if (!NetSession.IsAuthority || !NetSession.UseZombieTimeline) return;
+
+        //Lấy hàng ngẫu nhiên
         int randY = Random.Range(0, GameManagement.levelData.rowCount);
-        //生成幽灵
-        GameObject newZombie = Instantiate(zombies[zombiesName["Ghost"]],
-            new Vector3(initPos_x, GameManagement.levelData.zombieInitPosY[randY], 0),
-            Quaternion.Euler(0, 0, 0),
-            transform);
-        newZombie.GetComponent<Zombie>().setPosRow(randY);
-        //随机时间后再创造
+        //Sinh Bóng Ma
+        spawnZombie("Ghost", randY, initPos_x, 0);
+        //Tạo lại sau một khoảng thời gian ngẫu nhiên
         if(nowNode_index <= 8)
             Invoke("createGhost", Random.Range(15.0f, 20.0f));
         else Invoke("createGhost", Random.Range(5.0f, 10.0f));
@@ -271,11 +389,11 @@ public class ZombieManagement : MonoBehaviour
 [System.Serializable]
 public class TimeNode
 {
-    public float deltaTime;  //多长时间后开始下一波进攻
-    public bool isWave;  //是否为一波
-    public bool isFinalWave;   //是否为最后一波
-    public int number;   //僵尸数量
-    public string zombie;   //僵尸名称
+    public float deltaTime;  //Bao lâu nữa thì bắt đầu đợt tấn công tiếp theo
+    public bool isWave;  //Có phải một đợt lớn không
+    public bool isFinalWave;   //Có phải đợt cuối cùng không
+    public int number;   //Số lượng zombie
+    public string zombie;   //Tên zombie
 }
 
 [System.Serializable]

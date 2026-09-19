@@ -1,4 +1,4 @@
-using System.Collections;
+Ôªøusing System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,8 +7,8 @@ public class SnowKing : MultiImagePlant
     public GameObject SongController;
     public List<GameObject> bullets;
 
-    private Vector3 bulletOffset = new Vector3(0.656f, 0.392f, 0);   //◊”µØ≥ı ºŒª÷√∆´“∆¡ø
-    private Vector2 castEndPoint;   //…‰œﬂÕ∂…‰ ±÷’µ„
+    private Vector3 bulletOffset = new Vector3(0.656f, 0.392f, 0);   //ƒê·ªô l·ªách v·ªã tr√≠ ban ƒë·∫ßu c·ªßa ƒë·∫°n
+    private Vector2 castEndPoint;   //ƒêi·ªÉm cu·ªëi khi ph√≥ng raycast
 
     protected override void Start()
     {
@@ -33,7 +33,8 @@ public class SnowKing : MultiImagePlant
                 Physics2D.LinecastAll(transform.position, castEndPoint, LayerMask.GetMask("Zombie"));
         foreach (RaycastHit2D hitResult in hitResults)
         {
-            if (hitResult.transform.GetComponent<Zombie>().pos_row == row)
+            Zombie zombie=hitResult.transform.GetComponent<Zombie>();
+            if (zombie!=null && !zombie.IsHypnotized && zombie.pos_row == row)
             {
                 int bulletIndex = Random.Range(0, bullets.Count);
                 Instantiate(
@@ -41,14 +42,14 @@ public class SnowKing : MultiImagePlant
                     transform.position + bulletOffset,
                     Quaternion.Euler(0, 0, 0)
                 ).GetComponent<ThrowBullet>()
-                    .initialize(hitResult.transform.GetComponent<Zombie>(), this, row);
+                    .initialize(zombie, this, row);
                 audioSource.Play();
                 break;
             }
         }
     }
 
-    //—©Õı≤ªª·∫Æ¿‰£¨π ÷ÿ–¥Œ™ø’
+    //Vua Tuy·∫øt kh√¥ng b·ªã l·∫°nh n√™n ghi ƒë√® th√†nh r·ªóng
     public override void cold()
     {
         

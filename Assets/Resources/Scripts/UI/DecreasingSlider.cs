@@ -1,12 +1,12 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class DecreasingSlider : MonoBehaviour
 {
-    UnityEngine.UI.Slider slider;   //Slider×é¼ş
-    float targetValue;   //Ä¿±êÖµ
-    float slidingVelocity = 0.1f;  //½ø¶ÈÌõÖµ¸Ä±äÊ±µÄ»¬¶¯ËÙ¶È
+    UnityEngine.UI.Slider slider;   //Component Slider
+    float targetValue;   //GiÃ¡ trá»‹ má»¥c tiÃªu
+    float slidingVelocity = 0.1f;  //Tá»‘c Ä‘á»™ trÆ°á»£t khi giÃ¡ trá»‹ thanh tiáº¿n trÃ¬nh thay Ä‘á»•i
 
     // Start is called before the first frame update
     void Start()

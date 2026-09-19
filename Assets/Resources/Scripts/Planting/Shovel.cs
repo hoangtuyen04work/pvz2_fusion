@@ -1,28 +1,28 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Shovel : MonoBehaviour
 {
-    public GameObject shovelUI;   //²ù×ÓUI£¬¿ØÖÆ¿É¼ûÓë·ñ
+    public GameObject shovelUI;   //UI cÃ¡i xáº»ng, Ä‘iá»u khiá»ƒn áº©n hiá»‡n
 
-    Vector3 mouseWorldPos;   //Êó±êÎ»ÖÃ
+    Vector3 mouseWorldPos;   //Vá»‹ trÃ­ chuá»™t
 
     // Start is called before the first frame update
     void Start()
     {
-        gameObject.SetActive(false);   //×ÔÉí²»¿É¼û
+        gameObject.SetActive(false);   //ChÃ­nh nÃ³ khÃ´ng hiá»ƒn thá»‹
     }
 
     // Update is called once per frame
     void Update()
     {
-        //²ù×ÓÊ¼ÖÕ¸úËæÊó±ê
+        //Xáº»ng luÃ´n Ä‘i theo chuá»™t
         mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         mouseWorldPos.z = 0;
         transform.position = mouseWorldPos;
 
-        //µã»÷Êó±ê×ó¼ü£¬×ÔÉí²»¿É¼û£¬UI¿É¼û
+        //Báº¥m chuá»™t trÃ¡i, chÃ­nh nÃ³ áº©n Ä‘i, UI hiá»‡n ra
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
             shovelUI.SetActive(true);
@@ -32,16 +32,16 @@ public class Shovel : MonoBehaviour
 
     public void clickShovel()
     {
-        //²ù×ÓUI²»¿É¼û
+        //UI cÃ¡i xáº»ng bá»‹ áº©n
         shovelUI.SetActive(false);
 
-        //×ÔÉí¿É¼û£¬¸úËæÊó±ê
+        //ChÃ­nh nÃ³ hiá»‡n ra, Ä‘i theo chuá»™t
         Vector3 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         mouseWorldPos.z = 0;
         transform.position = mouseWorldPos;
         gameObject.SetActive(true);
 
-        //²¥·ÅÒôĞ§
+        //PhÃ¡t Ã¢m thanh
         GetComponent<AudioSource>().Play();
     }
 }

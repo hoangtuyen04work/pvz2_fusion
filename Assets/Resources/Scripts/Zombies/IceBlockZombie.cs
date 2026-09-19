@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.U2D.Animation;
@@ -13,8 +13,8 @@ public class IceBlockZombie : Zombie
     public GameObject hat;
     public GameObject jaw;
 
-    //±»¹¥»÷
-    //×´Ì¬±¸×¢£º1300ÂúÑª£¬950±ù¿éËğÉË1,600±ù¿éËğÉË2,200±ù¿éµôÂä£¬100¸ì²²µôÂä
+    //Bá»‹ táº¥n cÃ´ng
+    //Ghi chÃº tráº¡ng thÃ¡i: 1300 Ä‘áº§y mÃ¡u, 950 khá»‘i bÄƒng há»ng 1, 600 khá»‘i bÄƒng há»ng 2, 200 khá»‘i bÄƒng rÆ¡i, 100 rá»¥ng tay
     public override void beAttacked(int hurt)
     {
         base.beAttacked(hurt);
@@ -36,7 +36,7 @@ public class IceBlockZombie : Zombie
         }
     }
 
-    //ÓĞ±ù¿éÊ±£¬»áÊÜµ½ºÜ´óµÄ»ğÉËº¦
+    //Khi cÃ²n khá»‘i bÄƒng sáº½ há»©ng sÃ¡t thÆ°Æ¡ng lá»­a ráº¥t lá»›n
     public override void beBurned()
     {
         if (iceState == IceBlockZombieState.IceCompete ||

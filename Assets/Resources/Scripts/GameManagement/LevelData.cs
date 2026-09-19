@@ -1,20 +1,23 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class LevelData
 {
-    public int level;  //¹Ø¿¨ĞòºÅ
-    public string levelName;   //¹Ø¿¨Ãû
+    public int level;  //Sá»‘ thá»© tá»± mÃ n
+    public string levelName;   //TÃªn mÃ n
 
-    public string mapSuffix;  //µØÍ¼Í¼Æ¬ºó×º
-    public int rowCount;   //×Ü¹²¼¸ĞĞ
-    public int landRowCount;   //¼¸ĞĞÂ½µØ
-    public bool isDay;   //ÊÇ·ñ°×Ìì
-    public string plantingManagementSuffix;   //¶ÔÓ¦µÄÖÖÖ²¹ÜÀí×é¼şºó×º
-    public string backgroundSuffix;   //¶ÔÓ¦±³¾°ÒôÀÖºó×º
+    public string mapSuffix;  //Háº­u tá»‘ áº£nh báº£n Ä‘á»“
+    public int rowCount;   //Tá»•ng cá»™ng bao nhiÃªu hÃ ng
+    public int landRowCount;   //Bao nhiÃªu hÃ ng Ä‘áº¥t liá»n
+    public bool isDay;   //CÃ³ pháº£i ban ngÃ y khÃ´ng
+    public string plantingManagementSuffix;   //Háº­u tá»‘ component quáº£n lÃ½ trá»“ng cÃ¢y tÆ°Æ¡ng á»©ng
+    public string backgroundSuffix;   //Háº­u tá»‘ nháº¡c ná»n tÆ°Æ¡ng á»©ng
 
-    public List<float> zombieInitPosY;   //¸÷ĞĞ½©Ê¬³õÊ¼YÖáÎ»ÖÃ
+    public List<float> zombieInitPosY;   //Vá»‹ trÃ­ trá»¥c Y ban Ä‘áº§u cá»§a zombie tá»«ng hÃ ng
 
-    public List<string> plantCards;   //±¾¹ØÖ²Îï¿¨²ÛĞòÁĞ
+    public List<string> plantCards;   //DÃ£y tháº» cÃ¢y cá»§a mÃ n nÃ y
+    public int initialSun = 50;       //LÆ°á»£ng náº¯ng khi báº¯t Ä‘áº§u mÃ n
+    public bool skipIntro = false;    //MÃ n chÆ¡i khÃ´ng cÃ³ há»™i thoáº¡i má»Ÿ Ä‘áº§u
+    public bool isTestMode = false;
 }

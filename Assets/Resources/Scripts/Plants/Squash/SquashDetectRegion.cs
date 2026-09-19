@@ -1,33 +1,35 @@
-using System.Collections;
+Ôªøusing System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class SquashDetectRegion : MonoBehaviour
 {
-    public Squash squash;   //Œ—πœ
+    public Squash squash;   //B√≠ Ng√≤i
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.tag == "Zombie")
         {
+            Zombie zombie=collision.GetComponent<Zombie>();
+            if(zombie==null || zombie.IsHypnotized) return;
             if (squash.collider_Idle.enabled == true)
             {
-                //À¯∂®Ω© ¨
+                //Kho√° m·ª•c ti√™u zombie
                 squash.lockedZombie = collision.gameObject;
 
-                //≈–∂œΩ© ¨‘⁄◊Û±ﬂªπ «”“±ﬂ
+                //X√°c ƒë·ªãnh zombie ·ªü b√™n tr√°i hay b√™n ph·∫£i
                 if (squash.lockedZombie.transform.position.x > transform.position.x)
                     squash.animator.SetBool("LookRight", true);
                 else squash.animator.SetBool("LookLeft", true);
 
-                squash.collider_Idle.enabled = false;   //ÃΩ≤‚≈ˆ◊≤ÃÂ ß–ß
+                squash.collider_Idle.enabled = false;   //V√¥ hi·ªáu collider d√≤ t√¨m
                 squash.idle = false;
             }
             else if (squash.collider_attack.enabled == true)
             {
-                if (collision.GetComponent<Zombie>().pos_row == squash.row)
+                if (zombie.pos_row == squash.row)
                 {
-                    collision.GetComponent<Zombie>().beSquashed();
+                    zombie.beSquashed();
                 }
             }
         }

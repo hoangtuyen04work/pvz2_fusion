@@ -1,23 +1,29 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class SunManagement : MonoBehaviour
 {
-    //天空太阳预制体
+    //Prefab mặt trời trên trời
     public GameObject skysunPrefab;
     public GameObject fullMoonPrefab;
     public GameObject crescentMoonPrefab;
 
-    string createFunc;   //创造阳光函数名，分为白天和夜晚
+    string createFunc;   //Tên hàm tạo nắng, chia làm ban ngày và ban đêm
 
-    //太阳掉落计时
+    //Đếm giờ mặt trời rơi
     float minInterval = 10f, maxInterval = 20f;
-    //太阳初始位置
+    //Vị trí ban đầu của mặt trời
     float posY =  3.4f;
-    //太阳掉落位置x轴限制
+    //Giới hạn trục x của vị trí mặt trời rơi
     const float leftEdge = -4.4f;
     const float rightEdge = 2.8f;
+
+    public void setDropInterval(float minimum, float maximum)
+    {
+        minInterval = Mathf.Max(0.15f, minimum);
+        maxInterval = Mathf.Max(minInterval, maximum);
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -25,6 +31,9 @@ public class SunManagement : MonoBehaviour
         if (GameManagement.levelData.isDay)
             createFunc = "createSun";
         else createFunc = "createMoon";
+
+        //Máy khách không tự sinh mặt trời, nó nhận lệnh sinh từ máy chủ
+        if (!NetSession.IsAuthority) return;
 
         Invoke(createFunc, Random.Range(minInterval, maxInterval));
     }
@@ -65,11 +74,16 @@ public class SunManagement : MonoBehaviour
 
     private void clickSun()
     {
+        //Phe zombie trong chế độ đối kháng không nhặt được nắng
+        if (NetSession.IsOnline && !NetSession.ControlsPlants) return;
+
         Vector2 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         Collider2D[] allSun = Physics2D.OverlapPointAll(mouseWorldPos, LayerMask.GetMask("Sun"));
         if (allSun.Length > 0)
         {
-            allSun[allSun.Length - 1].gameObject.GetComponent<SunBase>().bePickedUp();
+            //Chơi mạng thì máy chủ mới quyết định mặt trời có được nhặt hay không
+            NetGameplay.RequestSunPickup(
+                allSun[allSun.Length - 1].gameObject.GetComponent<SunBase>());
         }
     }
 }

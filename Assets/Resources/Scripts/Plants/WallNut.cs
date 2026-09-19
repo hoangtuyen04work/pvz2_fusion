@@ -1,7 +1,8 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+// CÃ¢y Háº¡t Dáº» TÆ°á»ng.
 public class WallNut : Plant
 {
     float crackedPoint1, crackedPoint2;
@@ -15,7 +16,7 @@ public class WallNut : Plant
     }
     public override int beAttacked(int hurt, string form)
     {
-        //Èô´¦ÓÚÇ¿»¯×´Ì¬£¬·ÀÓùÁ¦ÔöÇ¿
+        //Náº¿u Ä‘ang á»Ÿ tráº¡ng thÃ¡i tÄƒng cÆ°á»ng thÃ¬ phÃ²ng thá»§ tÄƒng lÃªn
         if (intensified) hurt = (int)(hurt * 0.75);
 
         bloodVolume -= hurt;

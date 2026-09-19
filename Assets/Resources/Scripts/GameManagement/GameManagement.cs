@@ -6,31 +6,43 @@ using UnityEngine.UI;
 
 public class GameManagement : MonoBehaviour
 {
-    public int level;   //µ±«∞πÿø®–Ú∫≈
+    public int level;   //S·ªë th·ª© t·ª± m√†n hi·ªán t·∫°i
     private LevelController levelController;
-    public static LevelData levelData;   //µ±«∞πÿø® ˝æ›
+    private bool startWithoutDialog;
+    public static LevelData levelData;   //D·ªØ li·ªáu m√†n hi·ªán t·∫°i
 
-    public List<GameObject> awakeList;  //¥˝ªΩ–—¡–±Ì£¨”√”⁄ø™≥°æÁ«ÈΩ· ¯∫ÛªΩ–—∏√ªΩ–—µƒ∂‘œÛ
+    public List<GameObject> awakeList;  //Danh s√°ch ch·ªù ƒë√°nh th·ª©c, d√πng ƒë·ªÉ ƒë√°nh th·ª©c c√°c ƒë·ªëi t∆∞·ª£ng sau khi k·∫øt th√∫c c·ªët truy·ªán m·ªü m√†n
 
-    public GameObject endMenuPanel;   //”Œœ∑Ω· ¯√Ê∞Â
-    public GameObject background;   //±≥æ∞∂‘œÛ
-    public GameObject zombieManagement;   //Ω© ¨π‹¿Ì∂‘œÛ
-    public GameObject uiManagement;   //UIπ‹¿Ì∂‘œÛ
+    public GameObject endMenuPanel;   //B·∫£ng k·∫øt th√∫c tr√≤ ch∆°i
+    public GameObject background;   //ƒê·ªëi t∆∞·ª£ng n·ªÅn
+    public GameObject zombieManagement;   //ƒê·ªëi t∆∞·ª£ng qu·∫£n l√Ω zombie
+    public GameObject uiManagement;   //ƒê·ªëi t∆∞·ª£ng qu·∫£n l√Ω UI
 
     private void Awake()
     {
+        // Ch∆°i m·∫°ng th√¨ m√†n do ch·ªß ph√≤ng quy·∫øt ƒë·ªãnh, sau ƒë√≥ m·ªõi t·ªõi b·∫£ng ch·ªçn m√†n.
+        if (NetSession.IsOnline && NetSession.Level >= 0)
+            level = NetSession.Level;
+        else if (GameSession.SelectedLevel >= 0)
+            level = GameSession.SelectedLevel;
+
         levelController = 
             (LevelController)gameObject.AddComponent(Type.GetType("Level" + level + "Controller"));
         levelController.init();
 
-        //º”‘ÿ±≥æ∞Õº∆¨
+        // A selection made in the main menu overrides the level's legacy
+        // default deck. Direct scene launches still keep the old defaults.
+        if (GameSession.SelectedPlants.Count > 0)
+            levelData.plantCards = new List<string>(GameSession.SelectedPlants);
+
+        //T·∫£i ·∫£nh n·ªÅn
         background.GetComponent<SpriteRenderer>().sprite =
             Resources.Load<Sprite>("Sprites/Background/Background" + levelData.mapSuffix);
-        //…Ë÷√±≥æ∞“Ù¿÷
+        //ƒê·∫∑t nh·∫°c n·ªÅn
         background.GetComponent<BGMusicControl>()
             .changeMusic("Music" + levelData.backgroundSuffix);
 
-        //º”‘ÿ∂‘”¶µƒ÷÷÷≤π‹¿Ì◊Èº˛
+        //T·∫£i component qu·∫£n l√Ω tr·ªìng c√¢y t∆∞∆°ng ·ª©ng
         GameObject pm = Instantiate(
             Resources.Load<GameObject>(
                 "Prefabs/PlantingManagement/PlantingManagement" + levelData.plantingManagementSuffix),
@@ -39,34 +51,58 @@ public class GameManagement : MonoBehaviour
         );
         pm.name = "Planting Management";
 
-        //º”‘ÿUI
+        //T·∫£i UI
         uiManagement.GetComponent<UIManagement>().initUI();
 
-        //º”‘ÿ∂‘ª∞√Ê∞Â
-        Instantiate(Resources.Load<UnityEngine.Object>("Prefabs/UI/DialogPanel/DialogPanel-Level" + level),
-                    new Vector3(0, 0, 0),
-                    Quaternion.Euler(0, 0, 0),
-                    GameObject.Find("TopCanvas").transform);
+        //M√†n test ho·∫∑c m√†n kh√¥ng c√≥ prefab h·ªôi tho·∫°i s·∫Ω v√†o gameplay tr·ª±c ti·∫øp.
+        UnityEngine.Object dialog = Resources.Load<UnityEngine.Object>("Prefabs/UI/DialogPanel/DialogPanel-Level" + level);
+        //Ch∆°i m·∫°ng th√¨ b·ªè h·ªôi tho·∫°i m·ªü m√†n, tr√°nh hai m√°y l·ªách nh·ªãp
+        if (!levelData.skipIntro && !NetSession.SkipIntroDialog && dialog != null)
+        {
+            Instantiate(dialog, Vector3.zero, Quaternion.identity, GameObject.Find("TopCanvas").transform);
+        }
+        else
+        {
+            startWithoutDialog = true;
+        }
+    }
+
+    private void Start()
+    {
+        if (startWithoutDialog) awakeAll();
     }
 
     public void awakeAll()
     {
+        // H·ªôi tho·∫°i m·ªü ƒë·∫ßu ƒë√£ k·∫øt th√∫c, ·∫©n n√∫t b·ªè qua tr∆∞·ªõc khi gameplay b·∫Øt ƒë·∫ßu.
+        StartupSkipController.HideForGameplay();
+
         foreach (GameObject gameObject in awakeList)
         {
             gameObject.SetActive(true);
         }
         uiManagement.GetComponent<UIManagement>().appear();
-        zombieManagement.GetComponent<ZombieManagement>().activate();
         levelController.activate();
+        StartCoroutine(activateZombiesNextFrame());
+    }
+
+    private IEnumerator activateZombiesNextFrame()
+    {
+        //ƒê·ª£i Start c·ªßa ZombieManagement ƒë·ªçc xong JSON sau khi object v·ª´a ƒë∆∞·ª£c b·∫≠t.
+        yield return null;
+        zombieManagement.GetComponent<ZombieManagement>().activate();
     }
 
     public void gameOver()
     {
+        //M√°y ch·ªß b√°o k·∫øt qu·∫£ cho m√°y kh√°ch tr∆∞·ªõc khi hi·ªán b·∫£ng k·∫øt th√∫c
+        NetGameplay.NotifyGameEnd(true);
         endMenuPanel.GetComponent<EndMenu>().gameOver();
     }
 
     public void win()
     {
+        NetGameplay.NotifyGameEnd(false);
         endMenuPanel.GetComponent<EndMenu>().win();
     }
 }
