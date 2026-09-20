@@ -53,6 +53,12 @@ public class AIAdvisorUI : MonoBehaviour
     [Tooltip("Nút nền để click ra ngoài đóng panel (tùy chọn)")]
     public Button backdropButton;
 
+    [Tooltip("Ảnh avatar trong khung lời khuyên (tự đồng bộ theo avatar nút)")]
+    public Image panelAvatarImage;
+
+    [Tooltip("Tia sét/vòng cung năng lượng kết nối nút với khung lời khuyên (tùy chọn)")]
+    public GameObject electricArc;
+
     [Header("Cài đặt hiển thị")]
     [Tooltip("Thời gian fade in/out của text lời khuyên (giây)")]
     public float fadeDuration = 0.4f;
@@ -112,9 +118,21 @@ public class AIAdvisorUI : MonoBehaviour
         // Ẩn UI ban đầu
         if (advisorPanel != null) advisorPanel.SetActive(false);
         if (backdropButton != null) backdropButton.gameObject.SetActive(false);
+        if (electricArc != null) electricArc.SetActive(false);
         SetLoadingVisible(false);
         SetAdviceVisible(false);
         SetErrorVisible(null);
+
+        // Đồng bộ avatar từ nút bấm sang khung panel lời khuyên
+        SyncAvatar();
+    }
+
+    public void SyncAvatar()
+    {
+        if (panelAvatarImage != null && animatedAdvisor != null && animatedAdvisor.avatarImage != null)
+        {
+            panelAvatarImage.sprite = animatedAdvisor.avatarImage.sprite;
+        }
     }
 
     private void OnDestroy()
@@ -174,8 +192,10 @@ public class AIAdvisorUI : MonoBehaviour
         }
 
         // 3. Mở panel và chuyển sang trạng thái loading
+        SyncAvatar();
         if (backdropButton != null) backdropButton.gameObject.SetActive(true);
         if (advisorPanel != null) advisorPanel.SetActive(true);
+        if (electricArc != null) electricArc.SetActive(true);
         SetAdviceVisible(false);
         SetErrorVisible(null);
         SetLoadingVisible(true);
@@ -258,6 +278,7 @@ public class AIAdvisorUI : MonoBehaviour
 
         if (backdropButton != null) backdropButton.gameObject.SetActive(false);
         if (advisorPanel != null) advisorPanel.SetActive(false);
+        if (electricArc != null) electricArc.SetActive(false);
         SetAdviceVisible(false);
         SetLoadingVisible(false);
         SetErrorVisible(null);
