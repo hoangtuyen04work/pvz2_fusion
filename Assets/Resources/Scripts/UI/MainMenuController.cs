@@ -8,6 +8,7 @@ using UnityEngine.UI;
 public class MainMenuController : MonoBehaviour
 {
     private const int GargantuarArenaLevelIndex = 6;
+    private const int ThreeWorldsCampaignLevelIndex = 7;
 
     public Font menuFont;
     public Sprite stoneButtonNormal;
@@ -91,7 +92,7 @@ public class MainMenuController : MonoBehaviour
         CreateHotspot(menuFrame, "Phiêu lưu", 0.500f, 0.656f, 0.891f, 0.843f, new Vector4(0.520f, 0.710f, 0.865f, 0.825f), StartAdventure);
         CreateHotspot(menuFrame, "Trò chơi nhỏ", 0.503f, 0.497f, 0.880f, 0.690f, new Vector4(0.520f, 0.535f, 0.850f, 0.655f), () => ShowNotice("Chế độ Trò chơi nhỏ sẽ sớm ra mắt!"));
         CreateHotspot(menuFrame, "Giải đố", 0.512f, 0.385f, 0.862f, 0.548f, new Vector4(0.545f, 0.420f, 0.835f, 0.515f), () => ShowNotice("Chế độ Giải đố sẽ sớm ra mắt!"));
-        CreateHotspot(menuFrame, "Sinh tồn", 0.514f, 0.287f, 0.839f, 0.435f, new Vector4(0.540f, 0.310f, 0.805f, 0.405f), () => ShowNotice("Chế độ Sinh tồn sẽ sớm ra mắt!"));
+        CreateHotspot(menuFrame, "Sinh tồn", 0.514f, 0.287f, 0.839f, 0.435f, new Vector4(0.540f, 0.310f, 0.805f, 0.405f), EndlessMenuOverlay.Show);
         CreateHotspot(menuFrame, "Cửa hàng", 0.341f, 0.059f, 0.445f, 0.144f, new Vector4(0.350f, 0.075f, 0.435f, 0.130f), () => ShowNotice("Cửa hàng hiện đang đóng cửa."));
         CreateHotspot(menuFrame, "Tùy chọn", 0.683f, 0.109f, 0.784f, 0.227f, new Vector4(0.690f, 0.130f, 0.770f, 0.200f), ShowOptions);
         CreateHotspot(menuFrame, "Trợ giúp", 0.775f, 0.069f, 0.871f, 0.218f, new Vector4(0.790f, 0.085f, 0.855f, 0.165f), ShowHelp);
@@ -246,7 +247,8 @@ public class MainMenuController : MonoBehaviour
             "Vùng Đất Bất Tử",
             "Sông Băng Địa Cực",
             "Sân Thử Nghiệm",
-            "Đấu Trường Gargantuar"
+            "Đấu Trường Gargantuar",
+            "Chiến Dịch Ba Cõi"
         };
         string[] thumbnails =
         {
@@ -256,7 +258,8 @@ public class MainMenuController : MonoBehaviour
             "Sprites/BackGround/background_Night_Bone",
             "Sprites/BackGround/Background_Ice",
             "Sprites/BackGround/Background_Day",
-            "Sprites/BackGround/Background_Day"
+            "Sprites/BackGround/Background_Day",
+            "Sprites/BackGround/background_Night_Bone"
         };
 
         for (int i = 0; i < levelNames.Length; i++)
@@ -323,7 +326,7 @@ public class MainMenuController : MonoBehaviour
                 ? new Color(0.64f, 1f, 0.30f, 1f)
                 : new Color(0.74f, 0.76f, 0.70f, 1f);
 
-        string[] names = { "Mèo Miu Xuất Trận", "Hành Trình Mới", "Thầy Luyện Xác", "Vùng Đất Bất Tử", "Sông Băng Địa Cực", "Sân Thử Nghiệm", "Đấu Trường Gargantuar" };
+        string[] names = { "Mèo Miu Xuất Trận", "Hành Trình Mới", "Thầy Luyện Xác", "Vùng Đất Bất Tử", "Sông Băng Địa Cực", "Sân Thử Nghiệm", "Đấu Trường Gargantuar", "Chiến Dịch Ba Cõi" };
         selectedLevelText.text = "Đã chọn: Màn " + (levelIndex + 1) + " — " + names[levelIndex];
         playLevelButton.interactable = true;
         PlayClick();
@@ -336,6 +339,12 @@ public class MainMenuController : MonoBehaviour
         if (selectedLevel == GargantuarArenaLevelIndex)
         {
             StartCoroutine(LoadSceneWithFade(GargantuarArenaBootstrap.SceneName));
+            return;
+        }
+
+        if (selectedLevel == ThreeWorldsCampaignLevelIndex)
+        {
+            StartCoroutine(LoadSceneWithFade(CampaignBootstrap.GameScene));
             return;
         }
 

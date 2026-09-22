@@ -30,6 +30,14 @@ public class GameManagement : MonoBehaviour
             (LevelController)gameObject.AddComponent(Type.GetType("Level" + level + "Controller"));
         levelController.init();
 
+        // Endless chỉ mượn sân và prefab của màn ngày; luật chơi do hệ thống riêng quản lý.
+        if (EndlessRun.Active)
+        {
+            levelData.levelName = "Sinh Tồn Vô Hạn";
+            levelData.initialSun = 150;
+            levelData.skipIntro = true;
+        }
+
         // A selection made in the main menu overrides the level's legacy
         // default deck. Direct scene launches still keep the old defaults.
         if (GameSession.SelectedPlants.Count > 0)
@@ -95,6 +103,8 @@ public class GameManagement : MonoBehaviour
 
     public void gameOver()
     {
+        if (EndlessRun.HandleGameOver()) return;
+
         //Máy chủ báo kết quả cho máy khách trước khi hiện bảng kết thúc
         NetGameplay.NotifyGameEnd(true);
         endMenuPanel.GetComponent<EndMenu>().gameOver();

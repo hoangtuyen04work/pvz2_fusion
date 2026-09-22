@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f83b75d4775949c28a16167043bec77b, type: 3}
+  m_Name: Definition
+  m_EditorClassIdentifier: Assembly-CSharp::AsetEntityDefinition
+  displayName: GoblinChiefEnemy
+  faction: 1
+  maximumHealth: 320
+  movementSpeed: 0.82
+  attackDamage: 30
+  attackRange: 1.15
+  attackInterval: 1.35
