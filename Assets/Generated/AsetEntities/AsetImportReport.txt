@@ -1,0 +1,10 @@
+﻿BÁO CÁO ASET SPRITE PIPELINE
+Sinh lúc: 2026-09-22 15:34:11
+PNG: 29
+Spritesheet: 25
+Frame đã cắt: 270
+Ảnh Single: 4
+Goblin: grid 480x480, PPU 480
+Attack_Player: grid 128x128, PPU 128; Arrow là Sprite Single
+Phân loại: Idle | Walk/Run | Attack_1..3 | Shot | Hurt/Dead/Jump | Arrow(projectile)
+Map: Sprite Single, PPU 100, max size 4096

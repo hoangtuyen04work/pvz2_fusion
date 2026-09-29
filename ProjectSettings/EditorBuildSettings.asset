@@ -14,4 +14,19 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/GargantuarArena.unity
     guid: 639063cabf304087b91be2c0c29a4522
+  - enabled: 1
+    path: Assets/Scenes/EndlessScene.unity
+    guid: 62ac8320e8184ea7887d6041c606f719
+  - enabled: 1
+    path: Assets/Scenes/CampaignScene.unity
+    guid: 8810eac4c85f4b32b301b426609eabb1
+  - enabled: 1
+    path: Assets/Scenes/CampaignSettings.unity
+    guid: d7e83c69cab4431da69685e9ba840703
+  - enabled: 1
+    path: Assets/Scenes/CampaignProgress.unity
+    guid: 457fe52361584a1d9c805ff80d29ba8c
+  - enabled: 1
+    path: Assets/Scenes/CampaignAchievements.unity
+    guid: b5f1e099bafb419289fbf75928342ace
   m_configObjects: {}

@@ -72,6 +72,9 @@ public class ZombieManagement : MonoBehaviour
 
     public void activate()
     {
+        // Endless có bộ sinh wave riêng; không chạy timeline JSON của màn nền.
+        if (EndlessRun.Active) return;
+
         //Máy khách không chạy trục thời gian, nó chỉ nhận lệnh sinh zombie từ máy chủ.
         //Chế độ đối kháng cũng bỏ trục thời gian vì zombie do người chơi thả.
         if (!NetSession.IsAuthority || !NetSession.UseZombieTimeline) return;
