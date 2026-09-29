@@ -74,8 +74,54 @@ public class UIManagement : MonoBehaviour
             .SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, cardGroupWidth + 78);
         shovelBank.GetComponent<RectTransform>()
             .SetInsetAndSizeFromParentEdge(RectTransform.Edge.Left, cardGroupWidth + 108, 60);
+        CreatePlantGloveButton(cardGroupWidth);
         // Render the total after the dynamically-created cards so it cannot be hidden.
         sunObject.transform.SetAsLastSibling();
+    }
+
+    private void CreatePlantGloveButton(float cardGroupWidth)
+    {
+        Transform parent = shovelBank.transform.parent;
+        Transform existing = parent.Find("Glove Bank");
+        GameObject gloveBank;
+        if (existing != null)
+        {
+            gloveBank = existing.gameObject;
+        }
+        else
+        {
+            gloveBank = new GameObject("Glove Bank", typeof(RectTransform), typeof(Image), typeof(Button));
+            gloveBank.transform.SetParent(parent, false);
+            Image background = gloveBank.GetComponent<Image>();
+            background.sprite = Resources.Load<Sprite>("Sprites/UI/ShovelBank");
+            background.type = Image.Type.Sliced;
+
+            GameObject iconObject = new GameObject("Glove Icon", typeof(RectTransform), typeof(Image));
+            iconObject.transform.SetParent(gloveBank.transform, false);
+            Image icon = iconObject.GetComponent<Image>();
+            icon.sprite = PlantGlove.LoadIcon();
+            icon.preserveAspect = true;
+            icon.raycastTarget = false;
+            RectTransform iconRect = icon.GetComponent<RectTransform>();
+            iconRect.anchorMin = new Vector2(0.12f, 0.10f);
+            iconRect.anchorMax = new Vector2(0.88f, 0.90f);
+            iconRect.offsetMin = Vector2.zero;
+            iconRect.offsetMax = Vector2.zero;
+        }
+
+        RectTransform rect = gloveBank.GetComponent<RectTransform>();
+        rect.anchorMin = rect.anchorMax = new Vector2(0f, 1f);
+        rect.pivot = new Vector2(0f, 1f);
+        rect.anchoredPosition = new Vector2(cardGroupWidth + 174f, 0f);
+        rect.sizeDelta = new Vector2(60f, 60f);
+
+        PlantGlove glove = GetComponent<PlantGlove>();
+        if (glove == null) glove = gameObject.AddComponent<PlantGlove>();
+        Image gloveImage = gloveBank.GetComponent<Image>();
+        glove.Configure(gloveImage);
+        Button button = gloveBank.GetComponent<Button>();
+        button.onClick.RemoveAllListeners();
+        button.onClick.AddListener(glove.SelectGlove);
     }
 
     private void PlaceSunCounterAboveSeedBank(GameObject sunObject)

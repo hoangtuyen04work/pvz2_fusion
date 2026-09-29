@@ -29,6 +29,9 @@ public class Zombie : MonoBehaviour
     private Zombie hypnotizedTarget;
 
     public bool IsHypnotized => hypnotized;
+    public bool IsBurning => burning;
+    public bool IsSlowed => slowed;
+    public bool IsFrozen => frozen;
 
     //Liên quan tới tấn công
     public int attackPower;  //Sức tấn công
@@ -52,6 +55,7 @@ public class Zombie : MonoBehaviour
         //Lấy component
         myAnimator = gameObject.GetComponent<Animator>();
         audioSource = gameObject.GetComponent<AudioSource>();
+        if (GetComponent<StatusEffectIndicator>() == null) gameObject.AddComponent<StatusEffectIndicator>();
     }
 
     // Start is called before the first frame update
@@ -141,6 +145,8 @@ public class Zombie : MonoBehaviour
             plant.beAttacked(attackPower, "beEated");
             FireWallNutFusion fusion = plant.GetComponent<FireWallNutFusion>();
             if (fusion != null) fusion.OnBitten(this);
+            IceWallNut iceWallNut = plant.GetComponent<IceWallNut>();
+            if (iceWallNut != null) iceWallNut.OnBitten(this);
         }
     }
 
@@ -208,6 +214,7 @@ public class Zombie : MonoBehaviour
                 if (myAnimator != null) myAnimator.speed = myAnimator.speed / previousMultiplier * slowMultiplier;
             }
             frozen = false;
+            RefreshStatusTint();
         }
         if (slowed && Time.time >= slowEndTime) ClearSlow();
     }
@@ -236,6 +243,7 @@ public class Zombie : MonoBehaviour
         }
         slowEndTime = Mathf.Max(slowEndTime, Time.time + duration);
         state = ZombieState.Cold;
+        RefreshStatusTint();
     }
 
     public void ApplyFreeze(float immobilizeDuration, float chilledDuration)
@@ -249,12 +257,14 @@ public class Zombie : MonoBehaviour
         freezeEndTime = Time.time + Mathf.Max(0f, immobilizeDuration);
         slowEndTime = freezeEndTime + Mathf.Max(0f, chilledDuration);
         state = ZombieState.Cold;
+        RefreshStatusTint();
     }
 
     public void Thaw()
     {
         if (slowed) ClearSlow();
         frozen = false;
+        RefreshStatusTint();
     }
 
     private void ClearSlow()
@@ -265,6 +275,7 @@ public class Zombie : MonoBehaviour
         slowed = false;
         slowMultiplier = 1f;
         if (state == ZombieState.Cold) state = hypnotized ? ZombieState.Hypnotized : ZombieState.Normal;
+        RefreshStatusTint();
     }
 
     public void Hypnotize()
@@ -277,11 +288,7 @@ public class Zombie : MonoBehaviour
         Vector3 scale = transform.localScale;
         scale.x = -Mathf.Abs(scale.x);
         transform.localScale = scale;
-        foreach (SpriteRenderer renderer in GetComponentsInChildren<SpriteRenderer>(true))
-        {
-            Color color = renderer.color;
-            renderer.color = new Color(0.72f, 1f, 0.72f, color.a);
-        }
+        RefreshStatusTint();
         OnHypnotized();
     }
 
@@ -367,12 +374,21 @@ public class Zombie : MonoBehaviour
 
     private void setBurnColor(bool value)
     {
+        RefreshStatusTint();
+    }
+
+    // Freeze and slow use the classic blue PvZ-style tint. Keep this central so
+    // thawing, burning and hypnosis cannot leave stale colours on child sprites.
+    private void RefreshStatusTint()
+    {
+        Color tint = frozen ? new Color(0.38f, 0.68f, 1f) :
+            slowed ? new Color(0.55f, 0.78f, 1f) :
+            burning ? new Color(1f, 0.48f, 0.16f) :
+            hypnotized ? new Color(0.72f, 1f, 0.72f) : Color.white;
         foreach (SpriteRenderer renderer in GetComponentsInChildren<SpriteRenderer>(true))
         {
             Color color = renderer.color;
-            renderer.color = value
-                ? new Color(1f, 0.48f, 0.16f, color.a)
-                : new Color(1f, 1f, 1f, color.a);
+            renderer.color = new Color(tint.r, tint.g, tint.b, color.a);
         }
     }
 

@@ -22,6 +22,7 @@ public class MainMenuController : MonoBehaviour
     private Text noticeText;
     private bool transitioning;
     private GameObject optionsPanel;
+    private GameObject plantLibraryPanel;
     private int selectedLevel = -1;
     private Button playLevelButton;
     private Text selectedLevelText;
@@ -93,7 +94,24 @@ public class MainMenuController : MonoBehaviour
         CreateHotspot(menuFrame, "Giải đố", 0.512f, 0.385f, 0.862f, 0.548f, new Vector4(0.545f, 0.420f, 0.835f, 0.515f), () => ShowNotice("Chế độ Giải đố sẽ sớm ra mắt!"));
         CreateHotspot(menuFrame, "Sinh tồn", 0.514f, 0.287f, 0.839f, 0.435f, new Vector4(0.540f, 0.310f, 0.805f, 0.405f), () => ShowNotice("Chế độ Sinh tồn sẽ sớm ra mắt!"));
         CreateHotspot(menuFrame, "Cửa hàng", 0.341f, 0.059f, 0.445f, 0.144f, new Vector4(0.350f, 0.075f, 0.435f, 0.130f), () => ShowNotice("Cửa hàng hiện đang đóng cửa."));
-        CreateHotspot(menuFrame, "Tùy chọn", 0.683f, 0.109f, 0.784f, 0.227f, new Vector4(0.690f, 0.130f, 0.770f, 0.200f), ShowOptions);
+        // Tấm phủ đá che hoàn toàn chữ "TÙY CHỌN" cũ trên ảnh nền main_menu_vi
+        var stonePatch = CreateImage("Tấm phủ đá Cây", menuFrame, stoneButtonNormal != null ? stoneButtonNormal : Resources.Load<Sprite>("Sprites/UI/Menu/button_normal"));
+        stonePatch.type = Image.Type.Sliced;
+        stonePatch.color = new Color(0.28f, 0.32f, 0.29f, 0.96f);
+        SetAnchors(stonePatch.rectTransform, 0.686f, 0.116f, 0.778f, 0.198f);
+        stonePatch.raycastTarget = false;
+
+        CreateHotspot(menuFrame, "Danh sách cây", 0.683f, 0.109f, 0.784f, 0.227f, new Vector4(0.690f, 0.130f, 0.770f, 0.200f), ShowPlantLibrary);
+        var libraryLabel = CreateText("Nhãn danh sách cây", menuFrame, "CÂY", 20, TextAnchor.MiddleCenter, new Color(1f, 0.95f, 0.65f));
+        SetAnchors(libraryLabel.rectTransform, 0.688f, 0.118f, 0.776f, 0.196f);
+        libraryLabel.fontStyle = FontStyle.Bold;
+        libraryLabel.raycastTarget = false;
+        var libraryOutline = libraryLabel.gameObject.AddComponent<Outline>();
+        libraryOutline.effectColor = new Color(0.12f, 0.08f, 0.04f, 0.95f);
+        libraryOutline.effectDistance = new Vector2(1.5f, -1.5f);
+        var libraryShadow = libraryLabel.gameObject.AddComponent<Shadow>();
+        libraryShadow.effectColor = new Color(0f, 0f, 0f, 0.7f);
+        libraryShadow.effectDistance = new Vector2(2f, -2f);
         CreateHotspot(menuFrame, "Trợ giúp", 0.775f, 0.069f, 0.871f, 0.218f, new Vector4(0.790f, 0.085f, 0.855f, 0.165f), ShowHelp);
         CreateHotspot(menuFrame, "Thoát", 0.864f, 0.084f, 0.965f, 0.229f, new Vector4(0.880f, 0.110f, 0.950f, 0.190f), QuitGame);
 
@@ -102,7 +120,7 @@ public class MainMenuController : MonoBehaviour
         noticeText.gameObject.SetActive(false);
 
         levelPanel = BuildLevelSelection(menuFrame);
-        optionsPanel = BuildModal(menuFrame, "TÙY CHỌN", "Âm thanh và thiết lập nâng cao sẽ được bổ sung trong bản cập nhật tiếp theo.");
+        plantLibraryPanel = BuildPlantLibrary(menuFrame);
         helpPanel = BuildModal(menuFrame, "TRỢ GIÚP",
             "Chọn PHIÊU LƯU để chơi một mình: chọn thẻ cây rồi nhấn vào ô đất để trồng cây chống zombie.\n\n"
             + "CHƠI MẠNG: vào PHIÊU LƯU rồi bấm nút CHƠI MẠNG ở góc trái trên bảng chọn màn. Một người bấm TẠO PHÒNG rồi đọc địa chỉ hiện trên màn hình, người kia bấm THAM GIA và gõ địa chỉ đó vào.\n\n"
@@ -116,6 +134,308 @@ public class MainMenuController : MonoBehaviour
         fadeImage.raycastTarget = true;
         fadeImage.canvasRenderer.SetAlpha(0f);
         fadeImage.gameObject.SetActive(false);
+    }
+
+    private static readonly Dictionary<string, string> PlantDescriptions = new Dictionary<string, string>(System.StringComparer.OrdinalIgnoreCase)
+    {
+        { "SunFlower", "Hướng Dương là cây cốt lõi của mọi chiến thuật. Hướng Dương cung cấp nguồn Nắng dồi dào để bạn trồng thêm nhiều cây phòng thủ.\n\n\"Tôi cực kỳ thích ánh nắng mặt trời và những điệu nhảy sôi động dưới ánh ban mai!\"" },
+        { "PeaShooter", "Bắn Đậu là phòng tuyến đầu tiên của bạn. Nó bắn ra các viên đậu tròn sát thương cơ bản vào bất kỳ zombie nào bước vào làn đường.\n\n\"Tôi làm việc chăm chỉ, bắn thẳng và luôn nhắm chính xác vào đầu zombie!\"" },
+        { "WallNut", "Quả Óc Chó có vỏ giáp siêu dày dặn, dùng làm hàng rào kiên cố chặn đứng bước tiến của binh đoàn zombie.\n\n\"Mọi người hay hỏi tôi có đau khi bị zombie cắn không? Tôi đáp: Không, vỏ tôi dày lắm!\"" },
+        { "Squash", "Bí Ép sẽ kiên nhẫn chờ đợi con zombie đầu tiên tiến lại gần, sau đó nhảy cẫng lên và đè bẹp dí đối phương!\n\n\"Tôi sẵn sàng đè bẹp bất kỳ kẻ nào dám xâm phạm khu vườn này!\"" },
+        { "TorchWood", "Gốc Đuốc biến các viên đậu bay qua nó thành đậu lửa, tăng gấp đôi sát thương gây ra cho zombie.\n\n\"Đậu qua người tôi là thành đậu lửa hừng hực ngay!\"" },
+        { "MiaoMiao", "Mèo Miu là mèo chiến binh dũng cảm, tấn công zombie liên tục với tốc độ cào xé chóng mặt.\n\n\"Meow! Đừng coi thường móng nốt sắc bén của tôi!\"" },
+        { "SnowKing", "Vua Băng giá là huyền thoại của vùng tuyết. Triệu hồi trận bão tuyết đóng băng toàn bộ zombie trên màn chơi.\n\n\"Cơn giận của cái lạnh giá sẽ đóng băng mọi kẻ thù!\"" },
+        { "SunNut", "Hạt Óc Chó Nắng là sự kết hợp hoàn hảo giữa hàng rào phòng thủ của Quả Óc Chó và khả năng tạo Nắng của Hướng Dương.\n\n\"Tạo nắng và chịu đòn - hai trong một!\"" },
+        { "RepeaterPea", "Bắn Đậu Cú Đúp bắn hai viên đậu liên tiếp cùng một lúc, gấp đôi hỏa lực so với Bắn Đậu thường.\n\n\"Hai viên đậu luôn tốt hơn một viên!\"" },
+        { "SnowPea", "Bắn Đậu Băng bắn ra các viên đậu băng giá làm chậm tốc độ di chuyển và tốc độ cắn của zombie.\n\n\"Tôi giữ cho bầu không khí luôn tươi mát và lạnh giá.\"" },
+        { "Threepeater", "Bắn Đậu 3 Hàng bắn đậu đồng thời trên 3 làn đường xung quanh, phủ rộng hỏa lực toàn sân vườn.\n\n\"Ba cái đầu luôn thông minh và lợi hại hơn một cái head!\"" },
+        { "CherryBomb", "Bơm Anh Đào nổ tung ngay lập tức sau khi trồng, thiêu rụi toàn bộ zombie trong phạm vi 3x3.\n\n\"Chúng tôi sẵn sàng nổ tung vì sự bình yên của khu vườn!\"" },
+        { "PotatoMine", "Mìn Khoai Tây cần thời gian để chôn mình dưới đất. Sau khi sẵn sàng, nó sẽ phát nổ dẹp gọn zombie dẫm lên.\n\n\"SPUDOW! Kiên nhẫn là chìa khóa của chiến thắng.\"" },
+        { "Chomper", "Cây Nuốt Chửng có thể nuốt chửng nguyên một con zombie trong một miếng, nhưng cần thời gian để nhai.\n\n\"Ngon miệng lắm, nhưng tôi cần thời gian để tiêu hóa hết đấy!\"" },
+        { "PuffShroom", "Nấm Bắn Gần là loại cây miễn phí (0 Nắng), bắn các bào tử sát thương tầm ngắn.\n\n\"Miễn phí nhưng đầy uy lực ở khoảng cách gần!\"" },
+        { "SunShroom", "Nấm Mặt Trời ban đầu cho ít Nắng, nhưng sau một thời gian sẽ lớn lên và tạo Nắng dồi dào như Hướng Dương.\n\n\"Tôi nhỏ bé lúc đầu, nhưng hãy chờ tôi lớn nhé!\"" },
+        { "ScaredyShroom", "Nấm Nhát Gan bắn bào tử từ khoảng cách xa, nhưng sẽ sợ hãi chui tọt xuống đất khi zombie lại gần.\n\n\"Tớ ưa khoảng cách an toàn, đừng để chúng tiến lại gần tớ!\"" },
+        { "HypnoShroom", "Nấm Thôi Miên khi bị zombie cắn sẽ thôi miên con zombie đó quay lại tấn công các zombie khác.\n\n\"Nhìn sâu vào mắt tôi này... bạn là đồng minh của Cây rồi đấy!\"" },
+        { "IceShroom", "Nấm Đóng Băng làm đông cứng tất cả zombie trên toàn bộ màn chơi trong khoảng thời gian ngắn.\n\n\"Đứng yên! Tất cả đông cứng lại cho tôi!\"" },
+        { "Jalapeno", "Ớt Cay tạo ra ngọn lửa rực cháy trên toàn bộ một hàng ngang, thiêu rụi mọi zombie ngáng đường.\n\n\"Nóng rực lửa! Không con zombie nào sống sót trên hàng này!\"" },
+        { "Spikeweed", "Gai Đất đâm thủng bánh xe và gây sát thương liên tục cho bất kỳ zombie nào bước qua.\n\n\"Hãy cẩn thận từng bước chân trên bãi cỏ này!\"" }
+    };
+
+    // These entries are informational only. Hybrid plants are created by combining
+    // their component plants during a match, so they must not appear in the seed
+    // selection catalogue.
+    private static readonly PlantLoadoutEntry[] HybridLibraryEntries =
+    {
+        new PlantLoadoutEntry("SunNut", "SunNut", "Óc Chó Mặt Trời", "Sprites/Plants/SunNut/States/SunNut0", 125, 7.5f),
+        new PlantLoadoutEntry("FireWallNut", "FireWallNut", "Óc Chó Lửa", "Sprites/Plants/FireWallNut/FireWallNutV2", 225, 7.5f),
+        new PlantLoadoutEntry("IceWallNut", "IceWallNut", "Óc Chó Băng", "Sprites/Plants/IceWallNut/IceWallNutStates", 125, 30f),
+        new PlantLoadoutEntry("PeaTorch", "PeaTorch", "Đậu Đuốc", "Sprites/Plants/Hybrids/PeaTorch/Preview", 275, 1.55f),
+        new PlantLoadoutEntry("TorchSun", "TorchSun", "Đuốc Mặt Trời", "Sprites/Plants/Hybrids/TorchSun/Preview", 225, 18f),
+        new PlantLoadoutEntry("SunPea", "SunPea", "Đậu Hướng Dương", "Sprites/Plants/Hybrids/SunPea/Preview", 150, 1.7f),
+        new PlantLoadoutEntry("SunflowerQueen", "SunflowerQueen", "Nữ Hoàng Hướng Dương", "Sprites/Plants/Hybrids/SunflowerQueen/Preview", 450, 1.35f),
+        new PlantLoadoutEntry("CherryShooter", "CherryShooter", "Cherry-shooter", "Sprites/Plants/CherryFusions/CherryShooter", 250, 1.5f),
+        new PlantLoadoutEntry("Cherrepeater", "Cherrepeater", "Cherrepeater", "Sprites/Plants/CherryFusions/Cherrepeater", 350, 1.5f),
+        new PlantLoadoutEntry("SplitCherry", "SplitCherry", "Split Cherry", "Sprites/Plants/CherryFusions/SplitCherry", 375, 1.5f),
+        new PlantLoadoutEntry("GatlingCherry", "GatlingCherry", "Gatling Cherry", "Sprites/Plants/CherryFusions/GatlingCherry", 500, 1.5f),
+        new PlantLoadoutEntry("CherryBomber", "CherryBomber", "Cherry-bomber", "Sprites/Plants/CherryFusions/CherryBomber", 400, 1.5f),
+        new PlantLoadoutEntry("GatlingCherryBomber", "GatlingCherryBomber", "Gatling Cherrybomber", "Sprites/Plants/CherryFusions/GatlingCherryBomber", 800, 1.5f)
+    };
+
+    private static readonly Dictionary<string, (string ing1Name, string ing2Name)> HybridRecipes = new Dictionary<string, (string, string)>(System.StringComparer.OrdinalIgnoreCase)
+    {
+        { "SunNut", ("Hướng Dương", "Quả Óc Chó") },
+        { "FireWallNut", ("Quả Óc Chó", "Gốc Đuốc") },
+        { "IceWallNut", ("Quả Óc Chó", "Nấm Băng") },
+        { "PeaTorch", ("Bắn Đậu", "Gốc Đuốc") },
+        { "TorchSun", ("Gốc Đuốc", "Hướng Dương") },
+        { "SunPea", ("Hướng Dương", "Bắn Đậu") },
+        { "SunflowerQueen", ("Đậu Đuốc", "Hướng Dương") },
+        { "CherryShooter", ("Bắn Đậu", "Cherry Bomb") },
+        { "Cherrepeater", ("Bắn Đậu Cú Đúp", "Cherry Bomb") },
+        { "SplitCherry", ("Bắn Đậu 3 Hàng", "Cherry Bomb") },
+        { "GatlingCherry", ("Cherrepeater / Split Cherry", "Bắn Đậu") },
+        { "CherryBomber", ("Cherry-shooter", "Cherry Bomb") },
+        { "GatlingCherryBomber", ("Gatling Cherry", "Cherry-bomber") }
+    };
+
+    private static readonly Dictionary<string, string> HybridDescriptions = new Dictionary<string, string>(System.StringComparer.OrdinalIgnoreCase)
+    {
+        { "SunNut", "Óc Chó Mặt Trời được tạo khi kết hợp Hướng Dương với Quả Óc Chó. Nó vừa làm hàng rào kiên cố chắn đường vừa liên tục sản xuất Nắng cho đồng đội." },
+        { "FireWallNut", "Óc Chó Lửa được tạo khi kết hợp Quả Óc Chó với Gốc Đuốc. Nó sở hữu vỏ giáp cực dày và ngọn lửa rực cháy thiêu rụi zombie khi chúng cắn phá!" },
+        { "IceWallNut", "Óc Chó Băng được tạo khi kết hợp Quả Óc Chó với Nấm Băng. Mỗi cú cắn khiến zombie bị làm chậm, còn lớp giáp băng sẽ nứt dần theo lượng máu còn lại." },
+        { "PeaTorch", "Đậu Đuốc được tạo khi kết hợp Bắn Đậu với Gốc Đuốc. Nó trực tiếp bắn ra các viên đậu lửa với hỏa lực gấp đôi mà không cần Gốc Đuốc ngáng đường." },
+        { "TorchSun", "Đuốc Mặt Trời được tạo khi kết hợp Gốc Đuốc với Hướng Dương. Nó vừa tỏa ra Nắng ấm áp vừa thiêu rụi bất kỳ zombie nào dẫm phải!" },
+        { "SunPea", "Đậu Hướng Dương được tạo khi kết hợp Hướng Dương với Bắn Đậu. Vừa chiến đấu bảo vệ làn đường vừa định kỳ tạo ra Mặt Trời dồi dào!" },
+        { "SunflowerQueen", "Nữ Hoàng Hướng Dương là dạng kết hợp tối thượng của cả 3 nguyên tố: Hướng Dương + Bắn Đậu + Gốc Đuốc. Bắn đậu lửa bão táp và tạo vô số Mặt Trời!" },
+        { "CherryShooter", "Cherry-shooter bắn một viên Cherry về phía trước, gây 40 sát thương mỗi 1,5 giây." },
+        { "Cherrepeater", "Cherrepeater bắn liên tiếp hai viên Cherry trong mỗi đợt tấn công." },
+        { "SplitCherry", "Split Cherry bắn một viên về trước và hai viên về sau; đạn sau đổi hướng khi chạm mép trái." },
+        { "GatlingCherry", "Gatling Cherry bắn bốn viên Cherry liên tiếp trong mỗi đợt tấn công." },
+        { "CherryBomber", "Cherry-bomber bắn đạn Cherry phát nổ, gây sát thương diện rộng khi trúng zombie." },
+        { "GatlingCherryBomber", "Dạng tối thượng bắn bốn viên Cherry nổ liên tiếp, mỗi viên gây sát thương diện rộng." }
+    };
+
+    private GameObject BuildPlantLibrary(Transform parent)
+    {
+        var panel = new GameObject("Danh sách cây Panel", typeof(RectTransform), typeof(Image), typeof(CanvasGroup));
+        panel.transform.SetParent(parent, false);
+        SetAnchors(panel.GetComponent<RectTransform>(), 0.04f, 0.04f, 0.96f, 0.96f);
+
+        var bgImage = panel.GetComponent<Image>();
+        bgImage.sprite = Resources.Load<Sprite>("Sprites/UI/Menu/dialog");
+        if (bgImage.sprite != null)
+        {
+            bgImage.type = Image.Type.Sliced;
+            bgImage.color = new Color(0.90f, 0.85f, 0.75f, 1f);
+        }
+        else
+        {
+            bgImage.color = new Color(0.14f, 0.10f, 0.06f, 0.98f);
+        }
+
+        var innerBorder = CreateImage("Viền trong", panel.transform, null);
+        SetAnchors(innerBorder.rectTransform, 0.015f, 0.02f, 0.985f, 0.98f);
+        innerBorder.color = new Color(0.08f, 0.06f, 0.04f, 0.90f);
+
+        var headerBar = CreateImage("Thanh tiêu đề", panel.transform, stoneButtonNormal != null ? stoneButtonNormal : Resources.Load<Sprite>("Sprites/UI/Menu/button_normal"));
+        SetAnchors(headerBar.rectTransform, 0.18f, 0.875f, 0.82f, 0.975f);
+        headerBar.type = Image.Type.Sliced;
+        headerBar.color = new Color(0.24f, 0.32f, 0.18f, 1f);
+
+        var title = CreateText("Tiêu đề", headerBar.transform, "SÁCH TỪ ĐIỂN CÂY TRỒNG", 28, TextAnchor.MiddleCenter, new Color(1f, 0.94f, 0.40f));
+        Stretch(title.rectTransform);
+        title.fontStyle = FontStyle.Bold;
+        var titleOutline = title.gameObject.AddComponent<Outline>();
+        titleOutline.effectColor = new Color(0.1f, 0.08f, 0.02f, 0.95f);
+        titleOutline.effectDistance = new Vector2(1.5f, -1.5f);
+
+        var subtitle = CreateText("Mô tả phụ", panel.transform, "Tra cứu đặc tính & công thức kết hợp cây trồng", 16, TextAnchor.MiddleCenter, new Color(0.85f, 0.92f, 0.72f));
+        SetAnchors(subtitle.rectTransform, 0.20f, 0.83f, 0.80f, 0.875f);
+
+        var normalTab = CreateStoneButton("Tab Cây Thường", panel.transform, "🌿 CÂY THƯỜNG", 17, null);
+        SetAnchors(normalTab.GetComponent<RectTransform>(), 0.10f, 0.785f, 0.42f, 0.845f);
+        var hybridTab = CreateStoneButton("Tab Cây Kết Hợp", panel.transform, "⚡ CÂY KẾT HỢP", 17, null);
+        SetAnchors(hybridTab.GetComponent<RectTransform>(), 0.44f, 0.785f, 0.76f, 0.845f);
+
+        var close = CreateStoneButton("Đóng thư viện cây", panel.transform, "ĐÓNG", 22, () => CloseModal(panel));
+        SetAnchors(close.GetComponent<RectTransform>(), 0.84f, 0.885f, 0.97f, 0.965f);
+
+        // CỘT BÊN TRÁI: GRID DANH SÁCH THẺ CÂY
+        var leftPanel = CreateImage("Cột danh sách", panel.transform, null);
+        SetAnchors(leftPanel.rectTransform, 0.03f, 0.04f, 0.47f, 0.77f);
+        leftPanel.color = new Color(0.12f, 0.16f, 0.09f, 0.85f);
+        var leftBorder = leftPanel.gameObject.AddComponent<Outline>();
+        leftBorder.effectColor = new Color(0.25f, 0.35f, 0.18f, 0.8f);
+
+        var viewport = new GameObject("Viewport", typeof(RectTransform), typeof(Image), typeof(Mask));
+        viewport.transform.SetParent(leftPanel.transform, false);
+        SetAnchors(viewport.GetComponent<RectTransform>(), 0.02f, 0.02f, 0.98f, 0.98f);
+        viewport.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.2f);
+        viewport.GetComponent<Mask>().showMaskGraphic = true;
+
+        var content = new GameObject("Danh sách Grid", typeof(RectTransform), typeof(GridLayoutGroup), typeof(ContentSizeFitter));
+        content.transform.SetParent(viewport.transform, false);
+        var contentRect = content.GetComponent<RectTransform>();
+        contentRect.anchorMin = new Vector2(0f, 1f);
+        contentRect.anchorMax = new Vector2(1f, 1f);
+        contentRect.pivot = new Vector2(0.5f, 1f);
+
+        var grid = content.GetComponent<GridLayoutGroup>();
+        grid.padding = new RectOffset(8, 8, 10, 10);
+        grid.spacing = new Vector2(8f, 8f);
+        grid.cellSize = new Vector2(120f, 138f);
+        grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+        grid.constraintCount = 3;
+        grid.childAlignment = TextAnchor.UpperCenter;
+
+        content.GetComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+        var scroll = leftPanel.gameObject.AddComponent<ScrollRect>();
+        scroll.viewport = viewport.GetComponent<RectTransform>();
+        scroll.content = contentRect;
+        scroll.horizontal = false;
+        scroll.vertical = true;
+        scroll.scrollSensitivity = 30f;
+
+        // CỘT BÊN PHẢI: BẢNG XEM CHI TIẾT CÂY
+        var rightPanel = CreateImage("Cột chi tiết", panel.transform, null);
+        SetAnchors(rightPanel.rectTransform, 0.49f, 0.04f, 0.97f, 0.77f);
+        rightPanel.color = new Color(0.18f, 0.14f, 0.10f, 0.92f);
+        var rightBorder = rightPanel.gameObject.AddComponent<Outline>();
+        rightBorder.effectColor = new Color(0.42f, 0.32f, 0.18f, 0.8f);
+
+        var iconFrame = CreateImage("Khung ảnh cây", rightPanel.transform, stoneButtonNormal != null ? stoneButtonNormal : Resources.Load<Sprite>("Sprites/UI/Menu/button_normal"));
+        SetAnchors(iconFrame.rectTransform, 0.06f, 0.62f, 0.38f, 0.94f);
+        iconFrame.type = Image.Type.Sliced;
+        iconFrame.color = new Color(0.22f, 0.30f, 0.16f, 1f);
+
+        var previewIcon = CreateImage("Ảnh xem trước", iconFrame.transform, null);
+        SetAnchors(previewIcon.rectTransform, 0.08f, 0.08f, 0.92f, 0.92f);
+        previewIcon.preserveAspect = true;
+        previewIcon.raycastTarget = false;
+
+        var plantTitleText = CreateText("Tên cây chi tiết", rightPanel.transform, "", 24, TextAnchor.MiddleLeft, new Color(1f, 0.92f, 0.35f));
+        SetAnchors(plantTitleText.rectTransform, 0.41f, 0.80f, 0.96f, 0.95f);
+        plantTitleText.fontStyle = FontStyle.Bold;
+        var pTitleOutline = plantTitleText.gameObject.AddComponent<Outline>();
+        pTitleOutline.effectColor = new Color(0.1f, 0.08f, 0.02f, 0.95f);
+
+        var statCostText = CreateText("Giá nắng chi tiết", rightPanel.transform, "", 18, TextAnchor.MiddleLeft, new Color(1f, 0.95f, 0.55f));
+        SetAnchors(statCostText.rectTransform, 0.41f, 0.70f, 0.96f, 0.80f);
+
+        var statCooldownText = CreateText("Hồi chiêu chi tiết", rightPanel.transform, "", 17, TextAnchor.MiddleLeft, new Color(0.85f, 0.95f, 0.75f));
+        SetAnchors(statCooldownText.rectTransform, 0.41f, 0.60f, 0.96f, 0.70f);
+
+        // Khung Công Thức Kết Hợp (dành riêng cho Cây Kết Hợp)
+        var recipeBox = CreateImage("Khung công thức", rightPanel.transform, null);
+        SetAnchors(recipeBox.rectTransform, 0.05f, 0.45f, 0.95f, 0.58f);
+        recipeBox.color = new Color(0.26f, 0.18f, 0.10f, 0.92f);
+        var recipeOutline = recipeBox.gameObject.AddComponent<Outline>();
+        recipeOutline.effectColor = new Color(0.85f, 0.65f, 0.25f, 0.8f);
+
+        var recipeText = CreateText("Nội dung công thức", recipeBox.transform, "", 15, TextAnchor.MiddleCenter, new Color(1f, 0.94f, 0.45f));
+        Stretch(recipeText.rectTransform);
+        recipeText.fontStyle = FontStyle.Bold;
+
+        var descBox = CreateImage("Khung mô tả", rightPanel.transform, null);
+        SetAnchors(descBox.rectTransform, 0.05f, 0.04f, 0.95f, 0.43f);
+        descBox.color = new Color(0.10f, 0.08f, 0.05f, 0.80f);
+        var descOutline = descBox.gameObject.AddComponent<Outline>();
+        descOutline.effectColor = new Color(0.35f, 0.26f, 0.15f, 0.6f);
+
+        var descText = CreateText("Nội dung mô tả", descBox.transform, "", 17, TextAnchor.UpperLeft, new Color(0.96f, 0.94f, 0.88f));
+        SetAnchors(descText.rectTransform, 0.04f, 0.04f, 0.96f, 0.96f);
+        descText.verticalOverflow = VerticalWrapMode.Truncate;
+
+        var cardBorders = new System.Collections.Generic.List<Image>();
+
+        System.Action<PlantLoadoutEntry, Image> selectPlantAction = (entry, borderImg) =>
+        {
+            PlayClick();
+            foreach (var b in cardBorders)
+                if (b != null) b.color = new Color(0.28f, 0.38f, 0.18f, 0.9f);
+
+            if (borderImg != null)
+                borderImg.color = new Color(0.95f, 0.90f, 0.30f, 1f);
+
+            previewIcon.sprite = SeedPacketFactory.LoadIcon(entry);
+            plantTitleText.text = entry.DisplayName.ToUpper();
+            statCostText.text = "☀️  Giá Nắng:  " + entry.Cost;
+            statCooldownText.text = "⏱️  Hồi chiêu:  " + entry.Cooldown + " giây";
+
+            if (HybridRecipes.TryGetValue(entry.Key, out var recipe))
+            {
+                recipeBox.gameObject.SetActive(true);
+                recipeText.text = "⚡ CÔNG THỨC KẾT HỢP:\n" + recipe.ing1Name + "   +   " + recipe.ing2Name + "   ➔   " + entry.DisplayName;
+                SetAnchors(descBox.rectTransform, 0.05f, 0.04f, 0.95f, 0.43f);
+            }
+            else
+            {
+                recipeBox.gameObject.SetActive(false);
+                SetAnchors(descBox.rectTransform, 0.05f, 0.04f, 0.95f, 0.57f);
+            }
+
+            if (HybridDescriptions.TryGetValue(entry.Key, out var hybridDesc))
+                descText.text = hybridDesc;
+            else if (PlantDescriptions.TryGetValue(entry.Key, out var desc))
+                descText.text = desc;
+            else
+                descText.text = entry.DisplayName + " là một loài cây phòng thủ tuyệt vời trong khu vườn của bạn!";
+        };
+
+        System.Action<bool> showTab = showHybrids =>
+        {
+            for (int i = content.transform.childCount - 1; i >= 0; i--)
+                Destroy(content.transform.GetChild(i).gameObject);
+            cardBorders.Clear();
+
+            IEnumerable<PlantLoadoutEntry> entries = showHybrids
+                ? HybridLibraryEntries
+                : System.Linq.Enumerable.Where(PlantLoadoutCatalog.All, entry => !string.Equals(entry.Key, "SunNut", System.StringComparison.OrdinalIgnoreCase));
+            bool firstSelected = false;
+            foreach (var entry in entries)
+            {
+                var card = new GameObject(entry.Key, typeof(RectTransform), typeof(Image), typeof(Button));
+                card.transform.SetParent(content.transform, false);
+                var cardBg = card.GetComponent<Image>();
+                cardBg.sprite = stoneButtonNormal != null ? stoneButtonNormal : Resources.Load<Sprite>("Sprites/UI/Menu/button_normal");
+                cardBg.type = Image.Type.Sliced;
+                cardBg.color = new Color(0.28f, 0.38f, 0.18f, 0.9f);
+                cardBorders.Add(cardBg);
+
+                var icon = CreateImage("Ảnh cây", card.transform, SeedPacketFactory.LoadIcon(entry));
+                icon.preserveAspect = true;
+                icon.raycastTarget = false;
+                SetAnchors(icon.rectTransform, 0.08f, 0.34f, 0.92f, 0.94f);
+
+                var nameLabel = CreateText("Tên", card.transform, entry.DisplayName, 15, TextAnchor.MiddleCenter, Color.white);
+                SetAnchors(nameLabel.rectTransform, 0.04f, 0.15f, 0.96f, 0.34f);
+                nameLabel.raycastTarget = false;
+
+                var costLabel = CreateText("Giá", card.transform, entry.Cost + " ☀️", 15, TextAnchor.MiddleCenter, new Color(1f, 0.92f, 0.35f));
+                SetAnchors(costLabel.rectTransform, 0.04f, 0.02f, 0.96f, 0.16f);
+                costLabel.raycastTarget = false;
+
+                var btn = card.GetComponent<Button>();
+                var targetEntry = entry;
+                btn.onClick.AddListener(() => selectPlantAction(targetEntry, cardBg));
+
+                if (!firstSelected)
+                {
+                    firstSelected = true;
+                    selectPlantAction(targetEntry, cardBg);
+                }
+            }
+
+            normalTab.GetComponent<Image>().color = showHybrids ? new Color(0.28f, 0.32f, 0.29f, 0.8f) : new Color(0.35f, 0.55f, 0.20f, 1f);
+            hybridTab.GetComponent<Image>().color = showHybrids ? new Color(0.85f, 0.65f, 0.20f, 1f) : new Color(0.28f, 0.32f, 0.29f, 0.8f);
+        };
+
+        normalTab.GetComponent<Button>().onClick.AddListener(() => { PlayClick(); showTab(false); });
+        hybridTab.GetComponent<Button>().onClick.AddListener(() => { PlayClick(); showTab(true); });
+        showTab(false);
+
+        panel.SetActive(false);
+        return panel;
     }
 
     private void CreateHotspot(Transform parent, string label, float xMin, float yMin, float xMax, float yMax, Vector4 textRect, UnityEngine.Events.UnityAction action)
@@ -307,7 +627,10 @@ public class MainMenuController : MonoBehaviour
         image.type = Image.Type.Sliced;
         var button = go.GetComponent<Button>();
         button.transition = Selectable.Transition.None;
-        button.onClick.AddListener(action);
+        // Tabs attach their callback after creation. Do not register a null
+        // UnityAction: UnityEvent will try to invoke it when the button is pressed.
+        if (action != null)
+            button.onClick.AddListener(action);
         go.GetComponent<MenuButtonMotion>().targetGraphic = image;
         var text = CreateText("Chữ", go.transform, label, fontSize, TextAnchor.MiddleCenter, Color.white);
         Stretch(text.rectTransform);
@@ -343,7 +666,7 @@ public class MainMenuController : MonoBehaviour
         PlantSelectionOverlay.Show(selectedLevel, () => StartCoroutine(LoadSceneWithFade("GameScene")));
     }
 
-    private void ShowOptions() => OpenModal(optionsPanel);
+    private void ShowPlantLibrary() => OpenModal(plantLibraryPanel);
     private void ShowHelp() => OpenModal(helpPanel);
 
     private void OpenModal(GameObject panel)

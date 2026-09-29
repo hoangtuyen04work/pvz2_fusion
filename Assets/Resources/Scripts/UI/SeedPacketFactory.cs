@@ -59,7 +59,43 @@ public static class SeedPacketFactory
         return root;
     }
 
-    public static Sprite LoadIcon(PlantLoadoutEntry entry) { Sprite sprite=string.IsNullOrEmpty(entry.IconPath)?null:Resources.Load<Sprite>(entry.IconPath); if(sprite!=null) return sprite; return ImportedPlantRuntime.CardPreview(entry.Key)??ImportedPlantRuntime.Preview(entry.Key); }
+    public static Sprite LoadIcon(PlantLoadoutEntry entry)
+    {
+        if (entry == null) return null;
+
+        // SunNut0 is a multiple-sprite texture. Resources.Load<Sprite> selects
+        // its first, tiny slice, which makes the icon appear blank in UI. Use its
+        // largest slice only for this plant; all other plant icon handling stays
+        // unchanged.
+        if (entry.Key == "SunNut" && !string.IsNullOrEmpty(entry.IconPath))
+        {
+            Sprite[] sunNutSprites = Resources.LoadAll<Sprite>(entry.IconPath);
+            Sprite largestSprite = null;
+            float largestArea = 0f;
+            foreach (Sprite candidate in sunNutSprites)
+            {
+                float area = candidate.rect.width * candidate.rect.height;
+                if (area > largestArea)
+                {
+                    largestArea = area;
+                    largestSprite = candidate;
+                }
+            }
+            if (largestSprite != null) return largestSprite;
+        }
+
+        if (entry.Key == "IceWallNut" && !string.IsNullOrEmpty(entry.IconPath))
+        {
+            Sprite firstState = null;
+            foreach (Sprite candidate in Resources.LoadAll<Sprite>(entry.IconPath))
+                if (firstState == null || candidate.rect.x < firstState.rect.x) firstState = candidate;
+            if (firstState != null) return firstState;
+        }
+
+        Sprite sprite=string.IsNullOrEmpty(entry.IconPath)?null:Resources.Load<Sprite>(entry.IconPath);
+        if(sprite!=null) return sprite;
+        return ImportedPlantRuntime.CardPreview(entry.Key)??ImportedPlantRuntime.Preview(entry.Key);
+    }
     static Image ImageObject(string name,Transform parent,Color color) { GameObject go=new GameObject(name,typeof(RectTransform),typeof(CanvasRenderer),typeof(Image)); go.transform.SetParent(parent,false); Image image=go.GetComponent<Image>(); image.color=color; return image; }
     static Text TextObject(string name,Transform parent,string value,int size,TextAnchor alignment,Color color) { GameObject go=new GameObject(name,typeof(RectTransform),typeof(CanvasRenderer),typeof(Text)); go.transform.SetParent(parent,false); Text text=go.GetComponent<Text>(); text.font=Resources.Load<Font>("Fonts/Baloo2")??Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf"); text.text=value; text.fontSize=size; text.resizeTextForBestFit=true; text.resizeTextMinSize=Mathf.Min(7,size); text.resizeTextMaxSize=size; text.alignment=alignment; text.color=color; return text; }
     static void Stretch(RectTransform rect,float margin=0) { Anchor(rect,margin,margin,1-margin,1-margin); }

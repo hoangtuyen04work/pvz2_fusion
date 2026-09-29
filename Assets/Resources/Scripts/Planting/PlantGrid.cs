@@ -40,7 +40,11 @@ public class PlantGrid : MonoBehaviour
 
     private void OnMouseEnter()
     {
-        if(havePlanted == false && toBePlanted.activeSelf == true)
+        if (PlantGlove.Active != null && PlantGlove.Active.IsEnabledForMove && havePlanted && nowPlant != null)
+        {
+            nowPlant.GetComponent<Plant>().highlight();
+        }
+        else if(havePlanted == false && toBePlanted.activeSelf == true)
         {
             spriteRenderer.sprite = toBePlanted.GetComponent<SpriteRenderer>().sprite;
         }
@@ -57,7 +61,11 @@ public class PlantGrid : MonoBehaviour
 
     private void OnMouseExit()
     {
-        if (havePlanted == false && toBePlanted.activeSelf == true)
+        if (PlantGlove.Active != null && PlantGlove.Active.IsEnabledForMove && havePlanted && nowPlant != null)
+        {
+            nowPlant.GetComponent<Plant>().cancelHighlight();
+        }
+        else if (havePlanted == false && toBePlanted.activeSelf == true)
         {
             spriteRenderer.sprite = null;
         }
@@ -74,6 +82,7 @@ public class PlantGrid : MonoBehaviour
 
     private void OnMouseDown()
     {
+        if (PlantGlove.Active != null && PlantGlove.Active.HandleGridClick(this)) return;
         if (tryPlaceSelectedPlant()) return;
 
         if (havePlanted == true && selectedShovel.activeSelf == true)
@@ -89,12 +98,15 @@ public class PlantGrid : MonoBehaviour
             nowPlant.GetComponent<Plant>() == null ||
             nowPlant.GetComponent<FireWallNutFusion>() != null ||
             nowPlant.GetComponent<SunNut>() != null) return false;
-        if (HybridPlantRuntime.IsFinalEvolution(nowPlant.name)) return false;
+        if (HybridPlantRuntime.IsFinalEvolution(nowPlant.name) || CherryFusionRuntime.IsFinal(nowPlant.name)) return false;
+        if (CherryFusionRuntime.TryGetFusionResult(nowPlant.name, selectedPlant, out _)) return true;
         if (HybridPlantRuntime.TryGetFusionResult(nowPlant.name, selectedPlant, out _)) return true;
         bool wallNutOnGrid = nowPlant.name.StartsWith("WallNut", StringComparison.OrdinalIgnoreCase);
+        bool iceShroomOnGrid = nowPlant.name.StartsWith("IceShroom", StringComparison.OrdinalIgnoreCase);
         bool torchWoodOnGrid = nowPlant.name.StartsWith("Torchwood", StringComparison.OrdinalIgnoreCase);
         bool sunFlowerOnGrid = nowPlant.name.StartsWith("SunFlower", StringComparison.OrdinalIgnoreCase);
-        return (wallNutOnGrid && (selectedPlant.Equals("TorchWood", StringComparison.OrdinalIgnoreCase) || selectedPlant.Equals("SunFlower", StringComparison.OrdinalIgnoreCase)))
+        return (wallNutOnGrid && (selectedPlant.Equals("TorchWood", StringComparison.OrdinalIgnoreCase) || selectedPlant.Equals("SunFlower", StringComparison.OrdinalIgnoreCase) || selectedPlant.Equals("IceShroom", StringComparison.OrdinalIgnoreCase)))
+            || (iceShroomOnGrid && selectedPlant.Equals("WallNut", StringComparison.OrdinalIgnoreCase))
             || (torchWoodOnGrid && selectedPlant.Equals("WallNut", StringComparison.OrdinalIgnoreCase))
             || (sunFlowerOnGrid && selectedPlant.Equals("WallNut", StringComparison.OrdinalIgnoreCase));
     }
@@ -102,6 +114,14 @@ public class PlantGrid : MonoBehaviour
     private bool fuse(string selectedPlant)
     {
         if (!canFuse(selectedPlant)) return false;
+
+        bool createsIceWallNut = (nowPlant.name.StartsWith("WallNut", StringComparison.OrdinalIgnoreCase) && selectedPlant.Equals("IceShroom", StringComparison.OrdinalIgnoreCase))
+            || (nowPlant.name.StartsWith("IceShroom", StringComparison.OrdinalIgnoreCase) && selectedPlant.Equals("WallNut", StringComparison.OrdinalIgnoreCase));
+        if (createsIceWallNut)
+            return fuseIceWallNut();
+
+        if (CherryFusionRuntime.TryGetFusionResult(nowPlant.name, selectedPlant, out string cherryResult))
+            return fuseCherryHybrid(cherryResult);
 
         if (HybridPlantRuntime.TryGetFusionResult(nowPlant.name, selectedPlant, out string hybridResult))
             return fuseHybrid(hybridResult);
@@ -143,6 +163,30 @@ public class PlantGrid : MonoBehaviour
         return true;
     }
 
+    private bool fuseIceWallNut()
+    {
+        GameObject oldPlant = nowPlant;
+        IceWallNut.CreateFusionBurst(transform.position + new Vector3(0f, 0f, 5f));
+        GameObject fusedPlant = IceWallNut.Create(transform.position + new Vector3(0f, 0f, 5f), transform);
+        if (fusedPlant == null) return false;
+        Plant fusedComponent = fusedPlant.GetComponent<Plant>();
+        if (fusedComponent == null)
+        {
+            Destroy(fusedPlant);
+            return false;
+        }
+
+        fusedPlant.name = "IceWallNut";
+        fusedComponent.initialize(this, spriteRenderer.sortingLayerName, spriteRenderer.sortingOrder);
+        fusionHighlighted = false;
+        nowPlant = fusedPlant;
+        oldPlant.GetComponent<Plant>().removeForFusion();
+
+        audioSource.clip = Resources.Load<AudioClip>("Sounds/Plants/frozen");
+        if (audioSource.clip != null) audioSource.Play();
+        return true;
+    }
+
     private bool fuseHybrid(string resultPlant)
     {
         GameObject fusedPlant = HybridPlantRuntime.Create(
@@ -165,6 +209,27 @@ public class PlantGrid : MonoBehaviour
         nowPlant = fusedPlant;
         oldPlant.GetComponent<Plant>().removeForFusion();
 
+        audioSource.clip = Resources.Load<AudioClip>("Sounds/UI/SeedAndShovelBank/plant");
+        if (audioSource.clip != null) audioSource.Play();
+        return true;
+    }
+
+    private bool fuseCherryHybrid(string resultPlant)
+    {
+        GameObject fusedPlant = CherryFusionRuntime.Create(resultPlant, transform.position + new Vector3(0, 0, 5), transform);
+        Plant fusedPlantComponent = fusedPlant != null ? fusedPlant.GetComponent<Plant>() : null;
+        if (fusedPlantComponent == null)
+        {
+            Debug.LogError("Unable to create Cherry fusion plant: " + resultPlant, this);
+            if (fusedPlant != null) Destroy(fusedPlant);
+            return false;
+        }
+        GameObject oldPlant = nowPlant;
+        fusedPlant.name = resultPlant;
+        fusedPlantComponent.initialize(this, spriteRenderer.sortingLayerName, spriteRenderer.sortingOrder);
+        fusionHighlighted = false;
+        nowPlant = fusedPlant;
+        oldPlant.GetComponent<Plant>().removeForFusion();
         audioSource.clip = Resources.Load<AudioClip>("Sounds/UI/SeedAndShovelBank/plant");
         if (audioSource.clip != null) audioSource.Play();
         return true;
@@ -225,6 +290,49 @@ public class PlantGrid : MonoBehaviour
             return true;
         }
         return false;
+    }
+
+    // The glove calls these methods instead of manipulating the private grid
+    // state directly. This keeps Plant.myGrid, the parent transform, row, and
+    // occupancy flags in sync while preserving the plant's health/animation.
+    public bool TryPickUpForGlove(out GameObject plantObject)
+    {
+        plantObject = null;
+        if (NetSession.IsOnline || !havePlanted || nowPlant == null) return false;
+        if (nowPlant.GetComponent<Plant>() == null) return false;
+        plantObject = nowPlant;
+        return true;
+    }
+
+    public bool TryReceiveMovedPlant(GameObject plantObject)
+    {
+        if (NetSession.IsOnline || havePlanted || plantObject == null) return false;
+        Plant plantComponent = plantObject.GetComponent<Plant>();
+        if (plantComponent == null) return false;
+
+        spriteRenderer.sprite = null;
+        plantObject.transform.SetParent(transform, true);
+        plantObject.transform.position = transform.position + new Vector3(0f, 0f, 5f);
+        plantComponent.initialize(this, spriteRenderer.sortingLayerName, spriteRenderer.sortingOrder);
+        SpriteRenderer plantRenderer = plantObject.GetComponent<SpriteRenderer>();
+        if (plantRenderer != null) plantRenderer.enabled = true;
+        nowPlant = plantObject;
+        havePlanted = true;
+        return true;
+    }
+
+    public bool TryFuseGlovePlant(string plantName)
+    {
+        if (NetSession.IsOnline || string.IsNullOrEmpty(plantName)) return false;
+        return havePlanted && fuse(plantName);
+    }
+
+    public void ReleasePlantForGlove(GameObject plantObject)
+    {
+        if (nowPlant != plantObject) return;
+        nowPlant = null;
+        havePlanted = false;
+        fusionHighlighted = false;
     }
 
     //Trừ nắng và cho thẻ vào hồi chiêu ở chế độ chơi đơn

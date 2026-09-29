@@ -18,9 +18,6 @@ public static class PresentationBootstrap
 
     private static void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        if (scene.name == "MainMenu" && Object.FindAnyObjectByType<HomeSplashPresentation>() == null)
-            new GameObject("Splash & Loading Presentation", typeof(HomeSplashPresentation));
-
         if (scene.name == "GameScene" && Object.FindAnyObjectByType<GameplayBackgroundMotion>() == null)
             new GameObject("Gameplay Background Motion", typeof(GameplayBackgroundMotion));
     }
