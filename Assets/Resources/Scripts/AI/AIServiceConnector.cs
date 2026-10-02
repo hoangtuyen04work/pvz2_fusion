@@ -93,8 +93,8 @@ public class AIServiceConnector : MonoBehaviour
     // ---- Chế độ Mock: giả lập phản hồi AI ----
     private IEnumerator SimulateMockResponse(string jsonPayload)
     {
-        // Giả lập độ trễ mạng 0.5-1.5 giây
-        yield return new WaitForSeconds(UnityEngine.Random.Range(0.5f, 1.5f));
+        // Giả lập độ trễ mạng 0.5-1.5 giây (dùng thời gian thực khi game đang pause)
+        yield return new WaitForSecondsRealtime(UnityEngine.Random.Range(0.5f, 1.5f));
 
         // Phân tích sơ bộ game state để tạo lời khuyên mock thông minh hơn
         string advice = GenerateMockAdvice(jsonPayload);
