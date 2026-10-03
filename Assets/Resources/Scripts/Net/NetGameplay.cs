@@ -863,15 +863,28 @@ public static class ZombieRoster
 
     public static readonly Entry[] All =
     {
-        new Entry("ZombieNormal",   "Zombie thường", 25,  3f),
-        new Entry("ConeZombie",     "Mũ chóp",       50,  6f),
-        new Entry("ChineseZombie",  "Thầy phù thuỷ", 75,  10f),
-        new Entry("BucketZombie",   "Đội xô",        100, 12f),
-        new Entry("Ghost",          "Bóng ma",       100, 14f),
-        new Entry("SnowZombie",     "Zombie tuyết",  125, 16f),
-        new Entry("BoneZombie",     "Zombie xương",  150, 20f),
-        new Entry("IceBlockZombie", "Khối băng",     175, 24f),
-        new Entry("YetiZombie",     "Người tuyết",   200, 30f)
+        new Entry("ZombieNormal",       "Zombie thường", 25,  3f),
+        new Entry("ConeZombie",         "Mũ chóp",       50,  6f),
+        new Entry("ChineseZombie",      "Thầy phù thuỷ", 75,  10f),
+        new Entry("BucketZombie",       "Đội xô",        100, 12f),
+        new Entry("Ghost",              "Bóng ma",       100, 14f),
+        new Entry("SnowZombie",         "Zombie tuyết",  125, 16f),
+        new Entry("BoneZombie",         "Zombie xương",  150, 20f),
+        new Entry("IceBlockZombie",     "Khối băng",     175, 24f),
+        new Entry("YetiZombie",         "Người tuyết",   200, 30f),
+        new Entry("FlagZombie",         "Cầm cờ",        50,  5f),
+        new Entry("NewspaperZombie",    "Đọc báo",       100, 10f),
+        new Entry("PoleVaultingZombie", "Nhảy sào",      125, 12f),
+        new Entry("FootballZombie",     "Cầu thủ",       175, 18f),
+        new Entry("ScreenDoorZombie",   "Cầm cửa",       125, 12f),
+        new Entry("BalloonZombie",      "Bóng bay",      125, 15f),
+        new Entry("JackinTheBoxZombie", "Hộp hề",        150, 16f),
+        new Entry("DancingZombie",      "Vũ công",       200, 25f),
+        new Entry("BackupDancer",       "Múa phụ họa",   50,  6f),
+        new Entry("DolphinRiderZombie", "Cưỡi cá heo",   150, 15f),
+        new Entry("SnorkelZombie",      "Bơi lặn",       100, 10f),
+        new Entry("Zomboni",            "Xe dọn băng",   225, 28f),
+        new Entry("Imp",                "Quỷ lùn Imp",   50,  4f)
     };
 
     public static int CostOf(string zombieName)

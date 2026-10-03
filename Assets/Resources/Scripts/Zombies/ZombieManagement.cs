@@ -299,30 +299,49 @@ public class ZombieManagement : MonoBehaviour
         }
     }
 
+    public bool SpawnZombieByName(string name, int row)
+    {
+        if (row < 0 || row >= GameManagement.levelData.landRowCount) return false;
+        GameObject created = createZombie(name, new Vector3(initPos_x, GameManagement.levelData.zombieInitPosY[row], 0));
+        if (created == null) return false;
+        Zombie zombie = created.GetComponent<Zombie>();
+        if (zombie != null)
+        {
+            zombie.setPosRow(row);
+            zombie.cancelSleep();
+        }
+        addZombieNumAll();
+        return true;
+    }
+
     public bool SpawnTestZombie(int index, int row)
     {
         if (index < 0 || index >= zombies.Length || row < 0 || row >= GameManagement.levelData.landRowCount) return false;
         GameObject created = Instantiate(zombies[index], new Vector3(initPos_x, GameManagement.levelData.zombieInitPosY[row], 0), Quaternion.identity, transform);
         Zombie zombie = created.GetComponent<Zombie>();
-        zombie.setPosRow(row);
-        zombie.cancelSleep();
+        if (zombie != null)
+        {
+            zombie.setPosRow(row);
+            zombie.cancelSleep();
+        }
         addZombieNumAll();
         return true;
     }
 
     public bool SpawnImportedTestZombie(string name, int row)
     {
-        if (!ImportedZombieRuntime.Supports(name) || row < 0 || row >= GameManagement.levelData.landRowCount) return false;
-        GameObject created = createZombie(name, new Vector3(initPos_x, GameManagement.levelData.zombieInitPosY[row], 0));
-        created.GetComponent<Zombie>().setPosRow(row);
-        addZombieNumAll();
-        return true;
+        return SpawnZombieByName(name, row);
     }
 
     private GameObject createZombie(string name, Vector3 position)
     {
-        if (zombiesName.TryGetValue(name, out int index))
+        if (zombiesName.TryGetValue(name, out int index) && index >= 0 && index < zombies.Length && zombies[index] != null)
             return Instantiate(zombies[index], position, Quaternion.identity, transform);
+        
+        GameObject resPrefab = Resources.Load<GameObject>("Prefabs/Zombies/" + name);
+        if (resPrefab != null)
+            return Instantiate(resPrefab, position, Quaternion.identity, transform);
+
         return ImportedZombieRuntime.Create(name, position, transform);
     }
     #region Vùng hàm dành riêng cho màn đặc biệt

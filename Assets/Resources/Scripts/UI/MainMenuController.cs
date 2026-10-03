@@ -24,6 +24,7 @@ public class MainMenuController : MonoBehaviour
     private bool transitioning;
     private GameObject optionsPanel;
     private GameObject plantLibraryPanel;
+    private GameObject zombieLibraryPanel;
     private int selectedLevel = -1;
     private Button playLevelButton;
     private Text selectedLevelText;
@@ -95,24 +96,36 @@ public class MainMenuController : MonoBehaviour
         CreateHotspot(menuFrame, "Giải đố", 0.512f, 0.385f, 0.862f, 0.548f, new Vector4(0.545f, 0.420f, 0.835f, 0.515f), () => ShowNotice("Chế độ Giải đố sẽ sớm ra mắt!"));
         CreateHotspot(menuFrame, "Sinh tồn", 0.514f, 0.287f, 0.839f, 0.435f, new Vector4(0.540f, 0.310f, 0.805f, 0.405f), EndlessMenuOverlay.Show);
         CreateHotspot(menuFrame, "Cửa hàng", 0.341f, 0.059f, 0.445f, 0.144f, new Vector4(0.350f, 0.075f, 0.435f, 0.130f), () => ShowNotice("Cửa hàng hiện đang đóng cửa."));
-        // Tấm phủ đá che hoàn toàn chữ "TÙY CHỌN" cũ trên ảnh nền main_menu_vi
+        // Tấm phủ đá che chữ "TÙY CHỌN" cũ trên ảnh nền (không dùng nữa)
+        var optionCover = CreateImage("Tấm phủ đá TÙY CHỌN", menuFrame, stoneButtonNormal != null ? stoneButtonNormal : Resources.Load<Sprite>("Sprites/UI/Menu/button_normal"));
+        optionCover.type = Image.Type.Sliced;
+        optionCover.color = new Color(0.32f, 0.30f, 0.26f, 0.97f);
+        SetAnchors(optionCover.rectTransform, 0.578f, 0.108f, 0.690f, 0.200f);
+        optionCover.raycastTarget = false;
+
+        // Nút ZOMBIE — đặt ở vùng cuốn sách Suburban Almanac (bên trái cuốn sách)
+        var zombieStonePatch = CreateImage("Tấm phủ đá Zombie", menuFrame, stoneButtonNormal != null ? stoneButtonNormal : Resources.Load<Sprite>("Sprites/UI/Menu/button_normal"));
+        zombieStonePatch.type = Image.Type.Sliced;
+        zombieStonePatch.color = new Color(0.36f, 0.18f, 0.16f, 0.97f);
+        SetAnchors(zombieStonePatch.rectTransform, 0.405f, 0.032f, 0.495f, 0.118f);
+        zombieStonePatch.raycastTarget = false;
+
+        CreateHotspot(menuFrame, "Danh sách zombie", 0.400f, 0.025f, 0.500f, 0.145f, new Vector4(0.410f, 0.040f, 0.492f, 0.112f), ShowZombieLibrary);
+        var zombieLibraryLabel = CreateText("Nhãn danh sách zombie", menuFrame, "ZOMBIE", 16, TextAnchor.MiddleCenter, new Color(1f, 0.78f, 0.52f));
+        SetAnchors(zombieLibraryLabel.rectTransform, 0.407f, 0.035f, 0.493f, 0.115f);
+        StyleLibraryLabel(zombieLibraryLabel);
+
+        // Nút CÂY — đặt bên phải cuốn sách Almanac
         var stonePatch = CreateImage("Tấm phủ đá Cây", menuFrame, stoneButtonNormal != null ? stoneButtonNormal : Resources.Load<Sprite>("Sprites/UI/Menu/button_normal"));
         stonePatch.type = Image.Type.Sliced;
-        stonePatch.color = new Color(0.28f, 0.32f, 0.29f, 0.96f);
-        SetAnchors(stonePatch.rectTransform, 0.686f, 0.116f, 0.778f, 0.198f);
+        stonePatch.color = new Color(0.22f, 0.32f, 0.16f, 0.97f);
+        SetAnchors(stonePatch.rectTransform, 0.500f, 0.032f, 0.585f, 0.118f);
         stonePatch.raycastTarget = false;
 
-        CreateHotspot(menuFrame, "Danh sách cây", 0.683f, 0.109f, 0.784f, 0.227f, new Vector4(0.690f, 0.130f, 0.770f, 0.200f), ShowPlantLibrary);
-        var libraryLabel = CreateText("Nhãn danh sách cây", menuFrame, "CÂY", 20, TextAnchor.MiddleCenter, new Color(1f, 0.95f, 0.65f));
-        SetAnchors(libraryLabel.rectTransform, 0.688f, 0.118f, 0.776f, 0.196f);
-        libraryLabel.fontStyle = FontStyle.Bold;
-        libraryLabel.raycastTarget = false;
-        var libraryOutline = libraryLabel.gameObject.AddComponent<Outline>();
-        libraryOutline.effectColor = new Color(0.12f, 0.08f, 0.04f, 0.95f);
-        libraryOutline.effectDistance = new Vector2(1.5f, -1.5f);
-        var libraryShadow = libraryLabel.gameObject.AddComponent<Shadow>();
-        libraryShadow.effectColor = new Color(0f, 0f, 0f, 0.7f);
-        libraryShadow.effectDistance = new Vector2(2f, -2f);
+        CreateHotspot(menuFrame, "Danh sách cây", 0.495f, 0.025f, 0.590f, 0.145f, new Vector4(0.505f, 0.040f, 0.582f, 0.112f), ShowPlantLibrary);
+        var libraryLabel = CreateText("Nhãn danh sách cây", menuFrame, "CÂY", 18, TextAnchor.MiddleCenter, new Color(1f, 0.95f, 0.65f));
+        SetAnchors(libraryLabel.rectTransform, 0.502f, 0.035f, 0.583f, 0.115f);
+        StyleLibraryLabel(libraryLabel);
         CreateHotspot(menuFrame, "Trợ giúp", 0.775f, 0.069f, 0.871f, 0.218f, new Vector4(0.790f, 0.085f, 0.855f, 0.165f), ShowHelp);
         CreateHotspot(menuFrame, "Thoát", 0.864f, 0.084f, 0.965f, 0.229f, new Vector4(0.880f, 0.110f, 0.950f, 0.190f), QuitGame);
 
@@ -122,6 +135,7 @@ public class MainMenuController : MonoBehaviour
 
         levelPanel = BuildLevelSelection(menuFrame);
         plantLibraryPanel = BuildPlantLibrary(menuFrame);
+        zombieLibraryPanel = BuildZombieLibrary(menuFrame);
         helpPanel = BuildModal(menuFrame, "TRỢ GIÚP",
             "Chọn PHIÊU LƯU để chơi một mình: chọn thẻ cây rồi nhấn vào ô đất để trồng cây chống zombie.\n\n"
             + "CHƠI MẠNG: vào PHIÊU LƯU rồi bấm nút CHƠI MẠNG ở góc trái trên bảng chọn màn. Một người bấm TẠO PHÒNG rồi đọc địa chỉ hiện trên màn hình, người kia bấm THAM GIA và gõ địa chỉ đó vào.\n\n"
@@ -439,6 +453,304 @@ public class MainMenuController : MonoBehaviour
         return panel;
     }
 
+    private static readonly Dictionary<string, string> ZombieDescriptions = new Dictionary<string, string>(System.StringComparer.OrdinalIgnoreCase)
+    {
+        { "ZombieNormal", "Zombie thường là lực lượng cơ bản của đội quân xác sống. Không có giáp bảo vệ, nhưng rẻ và hồi chiêu nhanh.\n\n\"Não... não ngon lắm... cho tôi thêm não đi!\"" },
+        { "ConeZombie", "Zombie Mũ Chóp đội một chiếc cọc tiêu để chịu thêm sát thương trước khi bị hạ.\n\n\"Cái mũ này tôi nhặt ở lề đường, nhưng nó hữu ích hơn tôi tưởng!\"" },
+        { "ChineseZombie", "Thầy Phù Thủy là một zombie đặc biệt với khả năng gây áp lực lên hàng phòng thủ từ phía sau đội hình.\n\n\"Phép thuật cổ đại không chỉ dùng để diệt quỷ...\"" },
+        { "BucketZombie", "Zombie Đội Xô có lớp giáp kim loại rất bền, chịu được lượng sát thương lớn trước khi mất chiếc xô.\n\n\"Ai bảo xô chỉ để đựng nước? Nhìn tôi đây!\"" },
+        { "Ghost", "Bóng Ma là kẻ địch bí ẩn, xuất hiện với hình dáng trong suốt và rất khó lường.\n\n\"Bạn không thể bắn thứ bạn không thấy... hehe!\"" },
+        { "SnowZombie", "Zombie Tuyết mang sức mạnh giá lạnh, có thể làm đóng băng cây và cản trở hàng phòng thủ.\n\n\"Trời lạnh thì tôi mạnh hơn, tuyết rơi là tôi vui!\"" },
+        { "BoneZombie", "Zombie Xương là chiến binh cứng cáp của đội quân xác sống, có sức chống chịu cao.\n\n\"Xương tôi cứng lắm, đậu bắn vào cũng bật ra!\"" },
+        { "IceBlockZombie", "Zombie Khối Băng được bảo vệ bởi một khối băng dày, khiến nó trở thành mục tiêu rất khó tiêu diệt.\n\n\"Lớp giáp băng này bất khả xâm phạm... gần như vậy.\"" },
+        { "YetiZombie", "Người Tuyết là zombie hiếm và nguy hiểm, sở hữu sức mạnh cùng lượng máu vượt trội.\n\n\"GRAAAH! Tôi là bão tuyết biết đi!\"" },
+        { "FlagZombie", "Zombie Cầm Cờ dẫn đầu các đợt tấn công lớn của binh đoàn xác sống.\n\n\"Tôi cầm cờ xông lên, anh em tiến lên nào!\"" },
+        { "NewspaperZombie", "Zombie Đọc Báo rất điềm tĩnh cho đến khi tờ báo của hắn bị xé rách!\n\n\"Đang đọc báo hay mà... ĐỪNG LÀM PHIỀN TÔI!\"" },
+        { "PoleVaultingZombie", "Zombie Nhảy Sào dùng gậy nhảy vọt qua cây đầu tiên chắn đường.\n\n\"Nhảy cao là sở trường của tôi!\"" },
+        { "FootballZombie", "Zombie Cầu Thủ di chuyển cực nhanh và có giáp mũ bảo hiểm rất trâu bò.\n\n\"TOUCHDOWN! Không ai cản nổi tôi!\"" },
+        { "ScreenDoorZombie", "Zombie Cầm Cửa dùng cánh cửa lưới sắt chắn toàn bộ đạn đậu bắn thẳng.\n\n\"Cửa sắt kiên cố, đạn đậu búng vào chỉ kêu leng keng!\"" },
+        { "BalloonZombie", "Zombie Bóng Bay bay trên không trung, vượt qua hầu hết cây trồng mặt đất.\n\n\"Tôi bay trên cao, cây dưới đất không làm gì được tôi!\"" },
+        { "JackinTheBoxZombie", "Zombie Hộp Hề ôm hộp nhạc phát nổ gây sát thương lớn diện rộng.\n\n\"Surprise! Một món quà bất ngờ dành cho khu vườn!\"" },
+        { "DancingZombie", "Zombie Vũ Công triệu hồi các vũ công phụ họa vây quanh khu vườn.\n\n\"Let's Dance! Đêm nay là của chúng ta!\"" },
+        { "BackupDancer", "Vũ Công Phụ Họa xuất hiện cùng Dancing Zombie để biểu diễn màn nhảy bão táp.\n\n\"Nhảy cùng thần tượng là vinh dự của chúng tôi!\"" },
+        { "DolphinRiderZombie", "Zombie Cưỡi Cá Heo lao nhanh trên mặt nước và nhảy qua cây đầu tiên.\n\n\"Cá heo ơi, lao về phía trước nào!\"" },
+        { "SnorkelZombie", "Zombie Bơi Lặn chìm dưới nước để né tránh mọi đạn bắn thẳng.\n\n\"Lặn sâu dưới nước, xuất hiện bất ngờ!\"" },
+        { "Zomboni", "Xe Dọn Băng đè bẹp mọi cây trồng và cày nát bãi cỏ thành dải băng giá.\n\n\"Brum brum! Xe dọn băng đến đây!\"" },
+        { "Imp", "Quỷ Lùn Imp bé nhỏ nhưng di chuyển nhanh và cực kỳ tinh ranh.\n\n\"Tớ nhỏ bé nhưng tớ nhanh nhẹn lắm đấy!\"" }
+    };
+
+    // Thông số zombie: HP, tốc độ, loại giáp — dùng hiển thị trong sách từ điển.
+    private static readonly Dictionary<string, (int hp, string speed, string armor)> ZombieStats = new Dictionary<string, (int, string, string)>(System.StringComparer.OrdinalIgnoreCase)
+    {
+        { "ZombieNormal",       (200,  "Chậm",        "Không giáp") },
+        { "ConeZombie",         (560,  "Chậm",        "Mũ Chóp") },
+        { "ChineseZombie",      (400,  "Trung bình",   "Phép thuật") },
+        { "BucketZombie",       (1300, "Chậm",        "Xô sắt") },
+        { "Ghost",              (300,  "Nhanh",       "Vô hình") },
+        { "SnowZombie",         (600,  "Chậm",        "Băng giá") },
+        { "BoneZombie",         (800,  "Chậm",        "Xương cứng") },
+        { "IceBlockZombie",     (1500, "Rất chậm",    "Khối băng") },
+        { "YetiZombie",         (2000, "Rất chậm",    "Lông dày") },
+        { "FlagZombie",         (270,  "Trung bình",   "Cầm cờ") },
+        { "NewspaperZombie",    (420,  "Nhanh (cuồng)","Tờ báo") },
+        { "PoleVaultingZombie", (500,  "Rất nhanh",   "Gậy nhảy") },
+        { "FootballZombie",     (1400, "Cực nhanh",   "Mũ bóng bầu dục") },
+        { "ScreenDoorZombie",   (1100, "Chậm",        "Cửa lưới sắt") },
+        { "BalloonZombie",      (450,  "Bay lơ lửng",  "Bóng bay") },
+        { "JackinTheBoxZombie", (500,  "Nhanh",       "Hộp nổ") },
+        { "DancingZombie",      (500,  "Trung bình",   "Vũ công") },
+        { "BackupDancer",       (300,  "Trung bình",   "Phụ họa") },
+        { "DolphinRiderZombie", (500,  "Rất nhanh",   "Cá heo") },
+        { "SnorkelZombie",      (500,  "Trung bình",   "Dưới nước") },
+        { "Zomboni",            (1350, "Trung bình",   "Xe bọc thép") },
+        { "Imp",                (270,  "Cực nhanh",   "Tí hon") }
+    };
+
+    private GameObject BuildZombieLibrary(Transform parent)
+    {
+        var panel = new GameObject("Danh sách zombie Panel", typeof(RectTransform), typeof(Image), typeof(CanvasGroup));
+        panel.transform.SetParent(parent, false);
+        SetAnchors(panel.GetComponent<RectTransform>(), 0.04f, 0.04f, 0.96f, 0.96f);
+
+        var background = panel.GetComponent<Image>();
+        background.sprite = Resources.Load<Sprite>("Sprites/UI/Menu/dialog");
+        background.type = background.sprite != null ? Image.Type.Sliced : Image.Type.Simple;
+        background.color = background.sprite != null ? new Color(0.68f, 0.62f, 0.58f, 1f) : new Color(0.10f, 0.06f, 0.06f, 0.98f);
+
+        // Viền trong — tông tím-xám zombie
+        var inner = CreateImage("Viền trong", panel.transform, null);
+        SetAnchors(inner.rectTransform, 0.015f, 0.02f, 0.985f, 0.98f);
+        inner.color = new Color(0.08f, 0.04f, 0.06f, 0.94f);
+
+        // Thanh tiêu đề — tím đậm zombie
+        var header = CreateImage("Thanh tiêu đề", panel.transform, stoneButtonNormal != null ? stoneButtonNormal : Resources.Load<Sprite>("Sprites/UI/Menu/button_normal"));
+        SetAnchors(header.rectTransform, 0.15f, 0.885f, 0.85f, 0.975f);
+        header.type = Image.Type.Sliced;
+        header.color = new Color(0.32f, 0.12f, 0.18f, 1f);
+
+        var title = CreateText("Tiêu đề", header.transform, "☠  SÁCH TỪ ĐIỂN ZOMBIE  ☠", 28, TextAnchor.MiddleCenter, new Color(1f, 0.78f, 0.32f));
+        Stretch(title.rectTransform);
+        title.fontStyle = FontStyle.Bold;
+        StyleLibraryLabel(title);
+
+        var subtitle = CreateText("Mô tả phụ", panel.transform, "Khám phá thông tin chi tiết về đội quân xác sống", 16, TextAnchor.MiddleCenter, new Color(0.85f, 0.72f, 0.68f));
+        SetAnchors(subtitle.rectTransform, 0.15f, 0.84f, 0.85f, 0.885f);
+
+        var close = CreateStoneButton("Đóng thư viện zombie", panel.transform, "✕ ĐÓNG", 20, () => CloseModal(panel));
+        SetAnchors(close.GetComponent<RectTransform>(), 0.84f, 0.895f, 0.97f, 0.965f);
+
+        // ═══════════════════════════════════════════════
+        // CỘT TRÁI: DANH SÁCH ZOMBIE DẠNG GRID
+        // ═══════════════════════════════════════════════
+
+        var leftPanel = CreateImage("Cột danh sách", panel.transform, null);
+        SetAnchors(leftPanel.rectTransform, 0.025f, 0.035f, 0.46f, 0.825f);
+        leftPanel.color = new Color(0.12f, 0.06f, 0.07f, 0.92f);
+        var leftBorder = leftPanel.gameObject.AddComponent<Outline>();
+        leftBorder.effectColor = new Color(0.45f, 0.20f, 0.18f, 0.7f);
+
+        var viewport = new GameObject("Viewport", typeof(RectTransform), typeof(Image), typeof(Mask));
+        viewport.transform.SetParent(leftPanel.transform, false);
+        SetAnchors(viewport.GetComponent<RectTransform>(), 0.02f, 0.02f, 0.98f, 0.98f);
+        viewport.GetComponent<Image>().color = new Color(0f, 0f, 0f, 0.15f);
+
+        var content = new GameObject("Danh sách Grid", typeof(RectTransform), typeof(GridLayoutGroup), typeof(ContentSizeFitter));
+        content.transform.SetParent(viewport.transform, false);
+        var contentRect = content.GetComponent<RectTransform>();
+        contentRect.anchorMin = new Vector2(0f, 1f);
+        contentRect.anchorMax = new Vector2(1f, 1f);
+        contentRect.pivot = new Vector2(0.5f, 1f);
+        var grid = content.GetComponent<GridLayoutGroup>();
+        grid.padding = new RectOffset(8, 8, 8, 8);
+        grid.spacing = new Vector2(7f, 7f);
+        grid.cellSize = new Vector2(120f, 160f);
+        grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
+        grid.constraintCount = 3;
+        grid.childAlignment = TextAnchor.UpperCenter;
+        content.GetComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+        var scroll = leftPanel.gameObject.AddComponent<ScrollRect>();
+        scroll.viewport = viewport.GetComponent<RectTransform>();
+        scroll.content = contentRect;
+        scroll.horizontal = false;
+        scroll.vertical = true;
+        scroll.scrollSensitivity = 30f;
+
+        // ═══════════════════════════════════════════════
+        // CỘT PHẢI: BẢNG CHI TIẾT ZOMBIE
+        // ═══════════════════════════════════════════════
+
+        var detail = CreateImage("Cột chi tiết", panel.transform, null);
+        SetAnchors(detail.rectTransform, 0.48f, 0.035f, 0.975f, 0.825f);
+        detail.color = new Color(0.12f, 0.07f, 0.065f, 0.95f);
+        var detailBorder = detail.gameObject.AddComponent<Outline>();
+        detailBorder.effectColor = new Color(0.50f, 0.22f, 0.18f, 0.7f);
+
+        // Khung ảnh zombie lớn
+        var iconFrame = CreateImage("Khung ảnh zombie", detail.transform, stoneButtonNormal != null ? stoneButtonNormal : Resources.Load<Sprite>("Sprites/UI/Menu/button_normal"));
+        SetAnchors(iconFrame.rectTransform, 0.05f, 0.60f, 0.38f, 0.96f);
+        iconFrame.type = Image.Type.Sliced;
+        iconFrame.color = new Color(0.35f, 0.14f, 0.14f, 1f);
+        var iconInnerBorder = iconFrame.gameObject.AddComponent<Outline>();
+        iconInnerBorder.effectColor = new Color(0.65f, 0.30f, 0.22f, 0.8f);
+
+        var preview = CreateImage("Ảnh xem trước", iconFrame.transform, null);
+        SetAnchors(preview.rectTransform, 0.06f, 0.06f, 0.94f, 0.94f);
+        preview.preserveAspect = true;
+        preview.raycastTarget = false;
+
+        // Tên zombie
+        var nameText = CreateText("Tên zombie", detail.transform, "", 26, TextAnchor.MiddleLeft, new Color(1f, 0.80f, 0.30f));
+        SetAnchors(nameText.rectTransform, 0.41f, 0.85f, 0.96f, 0.96f);
+        nameText.fontStyle = FontStyle.Bold;
+        var nameOutline = nameText.gameObject.AddComponent<Outline>();
+        nameOutline.effectColor = new Color(0.12f, 0.06f, 0.04f, 0.95f);
+        nameOutline.effectDistance = new Vector2(1.5f, -1.5f);
+
+        // Thanh phân cách nhỏ dưới tên
+        var nameSeparator = CreateImage("Phân cách tên", detail.transform, null);
+        SetAnchors(nameSeparator.rectTransform, 0.41f, 0.84f, 0.94f, 0.845f);
+        nameSeparator.color = new Color(0.65f, 0.30f, 0.22f, 0.7f);
+
+        // Khung thông số — nền tối hơn
+        var statsBox = CreateImage("Khung thông số", detail.transform, null);
+        SetAnchors(statsBox.rectTransform, 0.41f, 0.60f, 0.96f, 0.83f);
+        statsBox.color = new Color(0.08f, 0.04f, 0.04f, 0.80f);
+        var statsOutline = statsBox.gameObject.AddComponent<Outline>();
+        statsOutline.effectColor = new Color(0.40f, 0.18f, 0.14f, 0.6f);
+
+        // Chi phí não
+        var costText = CreateText("Giá não", statsBox.transform, "", 17, TextAnchor.MiddleLeft, new Color(0.98f, 0.60f, 0.68f));
+        SetAnchors(costText.rectTransform, 0.06f, 0.72f, 0.96f, 0.96f);
+
+        // HP
+        var hpText = CreateText("Máu", statsBox.transform, "", 17, TextAnchor.MiddleLeft, new Color(0.95f, 0.40f, 0.35f));
+        SetAnchors(hpText.rectTransform, 0.06f, 0.48f, 0.96f, 0.72f);
+
+        // Tốc độ
+        var speedText = CreateText("Tốc độ", statsBox.transform, "", 17, TextAnchor.MiddleLeft, new Color(0.75f, 0.88f, 0.95f));
+        SetAnchors(speedText.rectTransform, 0.06f, 0.24f, 0.96f, 0.48f);
+
+        // Giáp
+        var armorText = CreateText("Giáp", statsBox.transform, "", 17, TextAnchor.MiddleLeft, new Color(0.90f, 0.82f, 0.65f));
+        SetAnchors(armorText.rectTransform, 0.06f, 0.00f, 0.96f, 0.24f);
+
+        // Hồi chiêu
+        var cooldownText = CreateText("Hồi chiêu", detail.transform, "", 16, TextAnchor.MiddleLeft, new Color(0.82f, 0.80f, 0.72f));
+        SetAnchors(cooldownText.rectTransform, 0.06f, 0.53f, 0.96f, 0.59f);
+
+        // Thanh phân cách trước mô tả
+        var descSeparator = CreateImage("Phân cách mô tả", detail.transform, null);
+        SetAnchors(descSeparator.rectTransform, 0.06f, 0.515f, 0.94f, 0.52f);
+        descSeparator.color = new Color(0.50f, 0.24f, 0.18f, 0.6f);
+
+        // Khung mô tả
+        var descBox = CreateImage("Khung mô tả", detail.transform, null);
+        SetAnchors(descBox.rectTransform, 0.04f, 0.04f, 0.96f, 0.51f);
+        descBox.color = new Color(0.08f, 0.05f, 0.04f, 0.82f);
+        var descBoxOutline = descBox.gameObject.AddComponent<Outline>();
+        descBoxOutline.effectColor = new Color(0.32f, 0.16f, 0.12f, 0.5f);
+
+        var description = CreateText("Mô tả", descBox.transform, "", 17, TextAnchor.UpperLeft, new Color(0.94f, 0.90f, 0.84f));
+        SetAnchors(description.rectTransform, 0.04f, 0.04f, 0.96f, 0.96f);
+        description.verticalOverflow = VerticalWrapMode.Truncate;
+
+        // ═══════════════════════════════════════════════
+        // XỬ LÝ CHỌN ZOMBIE + TẠO THẺ
+        // ═══════════════════════════════════════════════
+
+        var borders = new List<Image>();
+        System.Action<ZombieRoster.Entry, Image> selectZombie = (entry, border) =>
+        {
+            PlayClick();
+            foreach (var item in borders) item.color = new Color(0.32f, 0.14f, 0.12f, 0.94f);
+            border.color = new Color(0.90f, 0.48f, 0.20f, 1f);
+
+            preview.sprite = LoadZombieIcon(entry.name);
+            nameText.text = entry.label.ToUpper();
+            costText.text = "🧠  Giá Não:  " + entry.cost;
+            cooldownText.text = "⏱  Hồi chiêu:  " + entry.cooldown + " giây";
+
+            if (ZombieStats.TryGetValue(entry.name, out var stats))
+            {
+                hpText.text = "❤️  Máu:  " + stats.hp;
+                speedText.text = "💨  Tốc độ:  " + stats.speed;
+                armorText.text = "🛡️  Giáp:  " + stats.armor;
+            }
+            else
+            {
+                hpText.text = "❤️  Máu:  ???";
+                speedText.text = "💨  Tốc độ:  ???";
+                armorText.text = "🛡️  Giáp:  ???";
+            }
+
+            description.text = ZombieDescriptions.TryGetValue(entry.name, out var value) ? value : "Một thành viên nguy hiểm của đội quân zombie.";
+        };
+
+        bool selected = false;
+        foreach (var entry in ZombieRoster.All)
+        {
+            var card = new GameObject(entry.name, typeof(RectTransform), typeof(Image), typeof(Button));
+            card.transform.SetParent(content.transform, false);
+            var cardImage = card.GetComponent<Image>();
+            cardImage.sprite = stoneButtonNormal != null ? stoneButtonNormal : Resources.Load<Sprite>("Sprites/UI/Menu/button_normal");
+            cardImage.type = Image.Type.Sliced;
+            cardImage.color = new Color(0.32f, 0.14f, 0.12f, 0.94f);
+            borders.Add(cardImage);
+
+            // Ảnh zombie trên thẻ
+            var icon = CreateImage("Ảnh zombie", card.transform, LoadZombieIcon(entry.name));
+            SetAnchors(icon.rectTransform, 0.08f, 0.38f, 0.92f, 0.94f);
+            icon.preserveAspect = true;
+            icon.raycastTarget = false;
+
+            // Tên zombie
+            var label = CreateText("Tên", card.transform, entry.label, 14, TextAnchor.MiddleCenter, Color.white);
+            SetAnchors(label.rectTransform, 0.04f, 0.20f, 0.96f, 0.38f);
+            label.raycastTarget = false;
+
+            // Dòng giá não
+            var price = CreateText("Giá", card.transform, entry.cost + " 🧠", 13, TextAnchor.MiddleCenter, new Color(1f, 0.68f, 0.68f));
+            SetAnchors(price.rectTransform, 0.04f, 0.10f, 0.96f, 0.22f);
+            price.raycastTarget = false;
+
+            // Dòng HP nhỏ trên thẻ
+            string hpLabel = "???";
+            if (ZombieStats.TryGetValue(entry.name, out var st))
+                hpLabel = "❤️ " + st.hp;
+            var hpSmall = CreateText("HP nhỏ", card.transform, hpLabel, 12, TextAnchor.MiddleCenter, new Color(0.95f, 0.42f, 0.38f));
+            SetAnchors(hpSmall.rectTransform, 0.04f, 0.01f, 0.96f, 0.11f);
+            hpSmall.raycastTarget = false;
+
+            var capturedEntry = entry;
+            card.GetComponent<Button>().onClick.AddListener(() => selectZombie(capturedEntry, cardImage));
+            if (!selected)
+            {
+                selected = true;
+                selectZombie(capturedEntry, cardImage);
+            }
+        }
+
+        panel.SetActive(false);
+        return panel;
+    }
+
+    private static Sprite LoadZombieIcon(string zombieName)
+    {
+        return ZombieIconHelper.GetIcon(zombieName);
+    }
+
+    private static void StyleLibraryLabel(Text label)
+    {
+        label.fontStyle = FontStyle.Bold;
+        label.raycastTarget = false;
+        var outline = label.gameObject.AddComponent<Outline>();
+        outline.effectColor = new Color(0.12f, 0.08f, 0.04f, 0.95f);
+        outline.effectDistance = new Vector2(1.5f, -1.5f);
+        var shadow = label.gameObject.AddComponent<Shadow>();
+        shadow.effectColor = new Color(0f, 0f, 0f, 0.7f);
+        shadow.effectDistance = new Vector2(2f, -2f);
+    }
+
     private void CreateHotspot(Transform parent, string label, float xMin, float yMin, float xMax, float yMax, Vector4 textRect, UnityEngine.Events.UnityAction action)
     {
         var go = new GameObject("Nút " + label, typeof(RectTransform), typeof(Image), typeof(Button), typeof(MenuButtonMotion));
@@ -676,6 +988,7 @@ public class MainMenuController : MonoBehaviour
     }
 
     private void ShowPlantLibrary() => OpenModal(plantLibraryPanel);
+    private void ShowZombieLibrary() => OpenModal(zombieLibraryPanel);
     private void ShowHelp() => OpenModal(helpPanel);
 
     private void OpenModal(GameObject panel)

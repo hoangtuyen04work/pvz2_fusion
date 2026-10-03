@@ -8,6 +8,7 @@ public enum CherryFusionKind { CherryShooter, Cherrepeater, SplitCherry, Gatling
 public static class CherryFusionRuntime
 {
     private const string Root = "Sprites/Plants/CherryFusions/";
+    private static readonly Dictionary<string, Sprite[]> animationCache = new Dictionary<string, Sprite[]>();
 
     public static bool TryGetFusionResult(string currentPlant, string addedPlant, out string result)
     {
@@ -30,7 +31,14 @@ public static class CherryFusionRuntime
         return result != null;
     }
 
-    public static bool IsFinal(string name) => Clean(name).Equals("GatlingCherryBomber", StringComparison.OrdinalIgnoreCase);
+    public static bool IsFinal(string name)
+    {
+        string clean = Clean(name);
+        if (string.IsNullOrEmpty(clean)) return false;
+        return clean.Equals("GatlingCherryBomber", StringComparison.OrdinalIgnoreCase) ||
+               clean.Equals("CherryBomber", StringComparison.OrdinalIgnoreCase) ||
+               clean.Equals("GatlingCherry", StringComparison.OrdinalIgnoreCase);
+    }
 
     public static GameObject Create(string key, Vector3 position, Transform parent)
     {
@@ -68,6 +76,28 @@ public static class CherryFusionRuntime
         return texture == null ? null : Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(.5f, .08f), 100f);
     }
 
+    public static Sprite[] LoadAnimation(string key)
+    {
+        if (animationCache.TryGetValue(key, out Sprite[] cached)) return cached;
+        Texture2D sheet = Resources.Load<Texture2D>(Root + "Animation/" + key + "Sheet");
+        if (sheet == null) return animationCache[key] = Array.Empty<Sprite>();
+
+        int frameWidth = sheet.width / 4;
+        int frameHeight = sheet.height / 2;
+        Sprite[] frames = new Sprite[8];
+        for (int row = 0; row < 2; row++)
+        for (int column = 0; column < 4; column++)
+        {
+            // Authored sheet: idle on the top row, attack on the bottom row.
+            int sourceY = row == 0 ? frameHeight : 0;
+            frames[row * 4 + column] = Sprite.Create(sheet,
+                new Rect(column * frameWidth, sourceY, frameWidth, frameHeight),
+                new Vector2(.5f, .08f), 100f, 0, SpriteMeshType.FullRect);
+            frames[row * 4 + column].name = key + (row == 0 ? "_Idle_" : "_Attack_") + column;
+        }
+        return animationCache[key] = frames;
+    }
+
     private static string Clean(string value) => string.IsNullOrEmpty(value) ? string.Empty : value.Replace("(Clone)", string.Empty).Trim();
 }
 
@@ -76,16 +106,44 @@ public sealed class CherryFusionPlant : Plant
     private CherryFusionKind kind;
     private float nextShot;
     private float rate = 1f;
+    private SpriteRenderer spriteRenderer;
+    private Sprite[] animationFrames = Array.Empty<Sprite>();
+    private float animationStartedAt;
+    private float attackUntil;
 
-    public void Configure(CherryFusionKind value) { kind = value; bloodVolume = kind == CherryFusionKind.GatlingCherryBomber ? 600 : 300; }
+    public void Configure(CherryFusionKind value)
+    {
+        kind = value;
+        bloodVolume = kind == CherryFusionKind.GatlingCherryBomber ? 600 : 300;
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        animationFrames = CherryFusionRuntime.LoadAnimation(kind.ToString());
+        animationStartedAt = Time.time;
+        if (animationFrames.Length == 8) spriteRenderer.sprite = animationFrames[0];
+    }
 
     protected override void Start() { base.Start(); nextShot = Time.time + .75f; }
 
     private void Update()
     {
+        UpdateAnimation();
         if (Time.time < nextShot || !HasTarget()) return;
         StartCoroutine(FireVolley());
         nextShot = Time.time + 1.5f / rate;
+    }
+
+    private void UpdateAnimation()
+    {
+        if (animationFrames.Length != 8 || spriteRenderer == null) return;
+        bool attacking = Time.time < attackUntil;
+        float fps = attacking ? 16f : 5f;
+        int frame = Mathf.FloorToInt((Time.time - animationStartedAt) * fps) % 4;
+        spriteRenderer.sprite = animationFrames[(attacking ? 4 : 0) + frame];
+    }
+
+    private void PlayAttackAnimation()
+    {
+        animationStartedAt = Time.time;
+        attackUntil = Time.time + .25f / rate;
     }
 
     private bool HasTarget()
@@ -101,6 +159,7 @@ public sealed class CherryFusionPlant : Plant
         int shots = kind == CherryFusionKind.Cherrepeater ? 2 : (kind == CherryFusionKind.GatlingCherry || kind == CherryFusionKind.GatlingCherryBomber ? 4 : 1);
         if (kind == CherryFusionKind.SplitCherry)
         {
+            PlayAttackAnimation();
             Spawn(1, 0f);
             Spawn(-1, .08f);
             Spawn(-1, -.08f);
@@ -108,6 +167,7 @@ public sealed class CherryFusionPlant : Plant
         }
         for (int i = 0; i < shots; i++)
         {
+            PlayAttackAnimation();
             Spawn(1, (i - (shots - 1) * .5f) * .035f);
             if (i + 1 < shots) yield return new WaitForSeconds(.11f / rate);
         }
@@ -115,10 +175,14 @@ public sealed class CherryFusionPlant : Plant
 
     private void Spawn(int direction, float yOffset)
     {
+        bool explosive = kind == CherryFusionKind.CherryBomber || kind == CherryFusionKind.GatlingCherryBomber;
         GameObject projectile = new GameObject("CherryProjectile");
         projectile.transform.position = transform.position + new Vector3(direction * .36f, .24f + yOffset, 0f);
         SpriteRenderer renderer = projectile.AddComponent<SpriteRenderer>();
         renderer.sprite = CherryFusionRuntime.LoadSprite("CherryProjectile");
+        // Bomber projectiles keep the exact same sprite/scale, but use a
+        // deeper ripe-cherry red so they are distinct from regular shots.
+        renderer.color = explosive ? new Color(.72f, .32f, .32f, 1f) : Color.white;
         renderer.sortingLayerName = "PlantBullet";
         renderer.sortingOrder = 4;
         if (renderer.sprite != null)
@@ -127,7 +191,6 @@ public sealed class CherryFusionPlant : Plant
             projectile.transform.localScale = new Vector3(direction * s, s, 1f);
         }
         CherryFusionProjectile bullet = projectile.AddComponent<CherryFusionProjectile>();
-        bool explosive = kind == CherryFusionKind.CherryBomber || kind == CherryFusionKind.GatlingCherryBomber;
         bullet.Initialize(row, direction, explosive ? 300 : 40, explosive, direction < 0);
     }
 

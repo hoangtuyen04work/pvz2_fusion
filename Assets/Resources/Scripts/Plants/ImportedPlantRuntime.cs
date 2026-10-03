@@ -20,7 +20,7 @@ public static class ImportedPlantRuntime
     private const string Root = "Sprites/Imported/MarbleXu/";
     private static readonly Dictionary<string, ImportedPlantDefinition> Definitions = BuildDefinitions();
 
-    public static bool Supports(string key) => Definitions.ContainsKey(key);
+    public static bool Supports(string key) => Definitions.ContainsKey(key) || OriginalPvZPlantRuntime.Supports(key);
 
     public static bool TryGetDefinition(string key, out ImportedPlantDefinition definition)
     {
@@ -29,6 +29,7 @@ public static class ImportedPlantRuntime
 
     public static Sprite Preview(string key)
     {
+        if (OriginalPvZPlantRuntime.Supports(key)) return OriginalPvZPlantRuntime.Preview(key);
         if (!Definitions.TryGetValue(key, out var d)) return null;
         var sprites = Resources.LoadAll<Sprite>(d.framePath);
         return sprites.OrderBy(s => NaturalIndex(s.name)).FirstOrDefault();
@@ -36,6 +37,7 @@ public static class ImportedPlantRuntime
 
     public static Sprite CardPreview(string key)
     {
+        if (OriginalPvZPlantRuntime.Supports(key)) return OriginalPvZPlantRuntime.Preview(key);
         return Definitions.TryGetValue(key, out var definition)
             ? Resources.Load<Sprite>(definition.cardPath)
             : null;
@@ -51,6 +53,7 @@ public static class ImportedPlantRuntime
 
     public static GameObject CreatePlant(string key, Vector3 position, Transform parent)
     {
+        if (OriginalPvZPlantRuntime.Supports(key)) return OriginalPvZPlantRuntime.Create(key, position, parent);
         if (!Definitions.TryGetValue(key, out var d)) return null;
         var go = new GameObject(key);
         go.tag = "Plant";
@@ -141,17 +144,23 @@ public sealed class RuntimeFrameAnimator : MonoBehaviour
     public void Configure(SpriteRenderer target, string path, float rate) { renderer=target; fps=rate; SetFrames(path); }
     public void SetFrames(string path) { LoadFrames(path, true, null); }
     public void PlayOnce(string path, Action completed = null) { LoadFrames(path, false, completed); }
+    public void PlayOnce(string path, float playbackSpeed, Action completed = null)
+    {
+        LoadFrames(path, false, completed);
+        speed = Mathf.Max(.01f, playbackSpeed);
+    }
+    private float speed = 1f;
     private void LoadFrames(string path, bool shouldLoop, Action completed)
     {
         frames=Resources.LoadAll<Sprite>(path).OrderBy(s=>ImportedPlantRuntime.NaturalIndex(s.name)).ToArray();
-        elapsed=0f; loop=shouldLoop; onComplete=completed;
+        elapsed=0f; loop=shouldLoop; onComplete=completed; speed=1f;
         if(frames.Length>0 && renderer!=null) renderer.sprite=frames[0];
     }
     private void Update()
     {
         if(frames.Length==0 || renderer==null) return;
         elapsed += Time.deltaTime;
-        int index=Mathf.FloorToInt(elapsed*fps);
+        int index=Mathf.FloorToInt(elapsed*fps*speed);
         if(loop) { renderer.sprite=frames[index%frames.Length]; return; }
         if(index<frames.Length) { renderer.sprite=frames[index]; return; }
         renderer.sprite=frames[frames.Length-1];

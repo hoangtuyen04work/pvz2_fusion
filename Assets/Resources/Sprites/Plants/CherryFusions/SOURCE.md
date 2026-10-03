@@ -11,3 +11,7 @@ The plant renders and Cherry projectile in this folder are unredrawn source artw
 - CherryProjectile.png — https://wiki.biligame.com/pvzrh/文件:樱桃子弹-立绘.png
 
 Downloaded 2026-09-26 from `patchwiki.biligame.com`, using the original file URLs exposed by each wiki file page/API.
+
+## Animation sheets
+
+The six `Animation/*Sheet.png` files were generated from the corresponding source renders with OpenAI's built-in image generation tool on 2026-10-02. Each sheet is a 4x2 layout: four looping idle frames on the top row and four firing/recoil frames on the bottom row. They preserve the original plant designs while adding poses not published as downloadable frames by the source wiki.

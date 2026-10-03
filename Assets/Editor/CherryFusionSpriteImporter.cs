@@ -12,5 +12,9 @@ public sealed class CherryFusionSpriteImporter : AssetPostprocessor
         importer.alphaIsTransparency = true;
         importer.spritePixelsPerUnit = 100f;
         importer.filterMode = UnityEngine.FilterMode.Bilinear;
+        // Animation sheets are cut into frames at runtime so the generated
+        // artwork can keep a simple, predictable 4x2 layout.
+        if (assetPath.Contains("/CherryFusions/Animation/"))
+            importer.isReadable = true;
     }
 }

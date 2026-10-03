@@ -50,7 +50,11 @@ public static class PlantLoadoutCatalog
         new PlantLoadoutEntry("HypnoShroom", "HypnoShroom", "Hypno-shroom", "", 75, 30f),
         new PlantLoadoutEntry("IceShroom", "IceShroom", "Ice-shroom", "", 75, 50f),
         new PlantLoadoutEntry("Jalapeno", "Jalapeno", "Jalapeno", "", 125, 50f),
-        new PlantLoadoutEntry("Spikeweed", "Spikeweed", "Spikeweed", "", 100, 7.5f)
+        new PlantLoadoutEntry("Spikeweed", "Spikeweed", "Spikeweed", "", 100, 7.5f),
+        new PlantLoadoutEntry("CabbagePult", "CabbagePult", "Cabbage-pult", "", 100, 7.5f),
+        new PlantLoadoutEntry("KernelPult", "KernelPult", "Kernel-pult", "", 100, 7.5f),
+        new PlantLoadoutEntry("MelonPult", "MelonPult", "Melon-pult", "", 300, 7.5f),
+        new PlantLoadoutEntry("UmbrellaLeaf", "UmbrellaLeaf", "Umbrella Leaf", "", 100, 7.5f)
     };
 
     public static bool TryGet(string key, out PlantLoadoutEntry entry)

@@ -1,5 +1,5 @@
 ﻿BÁO CÁO ASET SPRITE PIPELINE
-Sinh lúc: 2026-09-22 15:34:11
+Sinh lúc: 2026-10-03 14:55:22
 PNG: 29
 Spritesheet: 25
 Frame đã cắt: 270

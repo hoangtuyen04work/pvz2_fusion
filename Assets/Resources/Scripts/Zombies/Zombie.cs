@@ -246,6 +246,27 @@ public class Zombie : MonoBehaviour
         RefreshStatusTint();
     }
 
+    public void ApplyButterStun(float duration)
+    {
+        const float immobilizedMultiplier = 0.1f;
+        if (!slowed)
+        {
+            slowed = true;
+            slowMultiplier = immobilizedMultiplier;
+            speed *= slowMultiplier;
+            if (myAnimator != null) myAnimator.speed *= slowMultiplier;
+        }
+        else if (slowMultiplier > immobilizedMultiplier)
+        {
+            speed = speed / slowMultiplier * immobilizedMultiplier;
+            if (myAnimator != null) myAnimator.speed = myAnimator.speed / slowMultiplier * immobilizedMultiplier;
+            slowMultiplier = immobilizedMultiplier;
+        }
+        slowEndTime = Mathf.Max(slowEndTime, Time.time + Mathf.Max(0f, duration));
+        // Butter immobilizes without applying the blue cold/freeze tint. The
+        // attached butter splat is the original game's status indicator.
+    }
+
     public void ApplyFreeze(float immobilizeDuration, float chilledDuration)
     {
         if (slowed) ClearSlow();
