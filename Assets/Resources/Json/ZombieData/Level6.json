@@ -1,0 +1,17 @@
+{
+  "info": [
+    { "deltaTime": 8, "isWave": false, "isFinalWave": false, "number": 1, "zombie": "ZombieNormal" },
+    { "deltaTime": 9, "isWave": false, "isFinalWave": false, "number": 1, "zombie": "ZombieNormal" },
+    { "deltaTime": 8, "isWave": false, "isFinalWave": false, "number": 1, "zombie": "ConeZombie" },
+    { "deltaTime": 8, "isWave": false, "isFinalWave": false, "number": 2, "zombie": "ZombieNormal" },
+    { "deltaTime": 8, "isWave": false, "isFinalWave": false, "number": 1, "zombie": "SnowZombie" },
+
+    { "deltaTime": 8, "isWave": true, "isFinalWave": false, "number": 2, "zombie": "ZombieNormal" },
+    { "deltaTime": 0, "isWave": false, "isFinalWave": false, "number": 1, "zombie": "Ghost" },
+    { "deltaTime": 9, "isWave": false, "isFinalWave": false, "number": 2, "zombie": "ZombieNormal" },
+    { "deltaTime": 8, "isWave": false, "isFinalWave": false, "number": 1, "zombie": "ConeZombie" },
+    { "deltaTime": 8, "isWave": false, "isFinalWave": false, "number": 2, "zombie": "ZombieNormal" },
+
+    { "deltaTime": 8, "isWave": true, "isFinalWave": true, "number": 3, "zombie": "ZombieNormal" }
+  ]
+}

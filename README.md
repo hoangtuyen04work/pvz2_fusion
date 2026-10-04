@@ -1,10 +1,17 @@
 # PvZ-Unity
 
-## Màn Đấu trường Gargantuar
+## Màn 8: Đảo Thiên Đường
 
-Chọn **Phiêu lưu** ở menu chính để vào màn chơi duy nhất mới. Điều khiển Peashooter bằng **WASD**, **phím mũi tên** hoặc joystick trên màn hình; nhấn **Space**, **Ctrl**, nút A trên tay cầm hoặc nút **BẮN** để bắn theo hướng đang quay.
+Màn 8 dùng chu kỳ thủy triều trên bãi biển. Sáu cột bên trái luôn an toàn; ba cột ven biển là vùng
+mạo hiểm. Khi nước ròng, trồng trên hai ô Cát Vàng để nhận 25 nắng và giữ cây sống tới lúc sóng đến
+để nhận thêm 50 nắng. Khi HUD báo **SÓNG**, chuẩn bị rút cây quan trọng khỏi bãi triều. Trong lúc
+**TRIỀU**, không thể trồng tại vùng ngập; cây ở đó mất ít máu, còn zombie bị chậm và đẩy lùi.
+Mỗi chu kỳ thứ ba là Sóng Lớn, ngập thêm một cột. Màn được cân bằng để dễ thắng và trải nghiệm đủ
+các pha thủy triều.
 
-Gargantuar có 200 máu, mỗi viên đậu gây 20 sát thương. Hạ một Gargantuar được 100 điểm; nếu nó vượt biên trái, nó sẽ trở lại từ biên phải ở vị trí dọc ngẫu nhiên và giữ nguyên lượng máu. Peashooter có ba mạng và điểm cao nhất được lưu giữa các lượt chơi.
+## Màn 7: Rừng Nhật Thực
+
+Chọn **Phiêu lưu**, sau đó chọn **Rừng Nhật Thực** để chơi trên bản đồ `map7`. Màn demo kéo dài khoảng 1–2 phút, có hai pha ánh sáng và nhật thực luân phiên. Khi nhật thực xuất hiện, nắng trời tạm ngừng và zombie ở hai hàng phủ bóng được tăng nhẹ tốc độ.
 Bản dựng lại game Plants vs. Zombies (PvZ) bằng Unity với độ tái hiện cao. Dự án mới hoàn thiện luồng chơi của các màn, chưa dựng lại toàn bộ luồng game của bản gốc. Có bổ sung một số cây, zombie và màn chơi mới do tác giả tự thiết kế; một phần tài nguyên được lấy từ trên mạng.
 
 
@@ -88,4 +95,4 @@ này trên router hoặc dùng phần mềm tạo mạng ảo.
 
 ## Ghi chú dự án
 
-- Đối tượng Game Management trong scene có component script cùng tên; tham số level của nó dùng để chọn màn chơi sẽ tải, hiện dùng được các giá trị 0 - 4 .
+- Đối tượng Game Management trong scene có component script cùng tên; tham số level của nó dùng để chọn màn chơi sẽ tải, hiện dùng được các giá trị 0–7.

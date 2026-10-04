@@ -1,0 +1,1222 @@
+fileFormatVersion: 2
+guid: f57445187dada7e4e8a87a31525f97e3
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -603563344088744865
+    second: tide_warning_loop_0
+  - first:
+      213: 8067566077519998490
+    second: tide_warning_loop_1
+  - first:
+      213: 7269852597302779587
+    second: tide_warning_loop_2
+  - first:
+      213: 3199814333222024557
+    second: tide_warning_loop_3
+  - first:
+      213: -2571000104599022666
+    second: tide_warning_loop_4
+  - first:
+      213: -4409724751925138768
+    second: tide_warning_loop_5
+  - first:
+      213: -8814563425493692878
+    second: tide_warning_loop_6
+  - first:
+      213: 1476402295292280189
+    second: tide_warning_loop_7
+  - first:
+      213: -925488643219107113
+    second: tide_warning_loop_8
+  - first:
+      213: 9063632455856386820
+    second: tide_warning_loop_9
+  - first:
+      213: -5088647012461312687
+    second: tide_warning_loop_10
+  - first:
+      213: 5213702995537264073
+    second: tide_warning_loop_11
+  - first:
+      213: 6299379896315281175
+    second: tide_warning_loop_12
+  - first:
+      213: 1743106910754401343
+    second: tide_warning_loop_13
+  - first:
+      213: -8540712138316068089
+    second: tide_warning_loop_14
+  - first:
+      213: -9165270918893853018
+    second: tide_warning_loop_15
+  - first:
+      213: 7044432460569077033
+    second: tide_warning_loop_16
+  - first:
+      213: 6216493871679100325
+    second: tide_warning_loop_17
+  - first:
+      213: -4309685975085839322
+    second: tide_warning_loop_18
+  - first:
+      213: 3963303644469119912
+    second: tide_warning_loop_19
+  - first:
+      213: -7038796004869286512
+    second: tide_warning_loop_20
+  - first:
+      213: -7123375129972927797
+    second: tide_warning_loop_21
+  - first:
+      213: 7228942766285594990
+    second: tide_warning_loop_22
+  - first:
+      213: 5309187109547932666
+    second: tide_warning_loop_23
+  - first:
+      213: -7135889266149398033
+    second: tide_warning_loop_24
+  - first:
+      213: -8129622144700062902
+    second: tide_warning_loop_25
+  - first:
+      213: 6844944330415076831
+    second: tide_warning_loop_26
+  - first:
+      213: 1307882981986827931
+    second: tide_warning_loop_27
+  - first:
+      213: 3874669156096891228
+    second: tide_warning_loop_28
+  - first:
+      213: -2843515067047078899
+    second: tide_warning_loop_29
+  - first:
+      213: -6991109122896235349
+    second: tide_warning_loop_30
+  - first:
+      213: -1298362573283443188
+    second: tide_warning_loop_31
+  - first:
+      213: -4086630223303482989
+    second: tide_warning_loop_32
+  - first:
+      213: 3689191105232737659
+    second: tide_warning_loop_33
+  - first:
+      213: -585113452262740110
+    second: tide_warning_loop_34
+  - first:
+      213: -9186590184305187810
+    second: tide_warning_loop_35
+  - first:
+      213: -8509513223474346244
+    second: tide_warning_loop_36
+  - first:
+      213: -7395519360518337817
+    second: tide_warning_loop_37
+  - first:
+      213: -5898101192573313080
+    second: tide_warning_loop_38
+  - first:
+      213: -3745704056326583474
+    second: tide_warning_loop_39
+  - first:
+      213: -2252453230218194599
+    second: tide_warning_loop_40
+  - first:
+      213: 610914505771103758
+    second: tide_warning_loop_41
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: tide_warning_loop_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 441
+        width: 437
+        height: 446
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f5cb42c1656bf97f0800000000000000
+      internalID: -603563344088744865
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tide_warning_loop_1
+      rect:
+        serializedVersion: 2
+        x: 869
+        y: 453
+        width: 444
+        height: 426
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a1e229c8a90c5ff60800000000000000
+      internalID: 8067566077519998490
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tide_warning_loop_2
+      rect:
+        serializedVersion: 2
+        x: 1502
+        y: 876
+        width: 15
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3cedeaf7b64b3e460800000000000000
+      internalID: 7269852597302779587
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tide_warning_loop_3
+      rect:
+        serializedVersion: 2
+        x: 439
+        y: 440
+        width: 425
+        height: 429
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d65f6e6ce26086c20800000000000000
+      internalID: 3199814333222024557
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tide_warning_loop_4
+      rect:
+        serializedVersion: 2
+        x: 443
+        y: 836
+        width: 16
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6b312efc609f15cd0800000000000000
+      internalID: -2571000104599022666
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tide_warning_loop_5
+      rect:
+        serializedVersion: 2
+        x: 885
+        y: 844
+        width: 17
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0ba214ca3b28dc2c0800000000000000
+      internalID: -4409724751925138768
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tide_warning_loop_6
+      rect:
+        serializedVersion: 2
+        x: 1312
+        y: 436
+        width: 449
+        height: 439
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 23e4c4d14416ca580800000000000000
+      internalID: -8814563425493692878
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tide_warning_loop_7
+      rect:
+        serializedVersion: 2
+        x: 447
+        y: 829
+        width: 8
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d7db774b01c3d7410800000000000000
+      internalID: 1476402295292280189
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tide_warning_loop_8
+      rect:
+        serializedVersion: 2
+        x: 1320
+        y: 779
+        width: 7
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7d254418bf00823f0800000000000000
+      internalID: -925488643219107113
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tide_warning_loop_9
+      rect:
+        serializedVersion: 2
+        x: 1326
+        y: 779
+        width: 6
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 403750a82bd78cd70800000000000000
+      internalID: 9063632455856386820
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tide_warning_loop_10
+      rect:
+        serializedVersion: 2
+        x: 1328
+        y: 763
+        width: 8
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 15504e2c08e7169b0800000000000000
+      internalID: -5088647012461312687
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tide_warning_loop_11
+      rect:
+        serializedVersion: 2
+        x: 1328
+        y: 759
+        width: 12
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9cd7365404bca5840800000000000000
+      internalID: 5213702995537264073
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tide_warning_loop_12
+      rect:
+        serializedVersion: 2
+        x: 1300
+        y: 682
+        width: 15
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 71ffb11e3a4eb6750800000000000000
+      internalID: 6299379896315281175
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tide_warning_loop_13
+      rect:
+        serializedVersion: 2
+        x: 1318
+        y: 688
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f3c6b0dff72c03810800000000000000
+      internalID: 1743106910754401343
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tide_warning_loop_14
+      rect:
+        serializedVersion: 2
+        x: 425
+        y: 633
+        width: 14
+        height: 25
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 70bcdc29f8b497980800000000000000
+      internalID: -8540712138316068089
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tide_warning_loop_15
+      rect:
+        serializedVersion: 2
+        x: 435
+        y: 646
+        width: 8
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6a62d11b8aa6ec080800000000000000
+      internalID: -9165270918893853018
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tide_warning_loop_16
+      rect:
+        serializedVersion: 2
+        x: 1320
+        y: 646
+        width: 10
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9256378fff9d2c160800000000000000
+      internalID: 7044432460569077033
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tide_warning_loop_17
+      rect:
+        serializedVersion: 2
+        x: 1318
+        y: 596
+        width: 22
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5a553d96d3c654650800000000000000
+      internalID: 6216493871679100325
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tide_warning_loop_18
+      rect:
+        serializedVersion: 2
+        x: 1322
+        y: 607
+        width: 12
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 62c8689707be034c0800000000000000
+      internalID: -4309685975085839322
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tide_warning_loop_19
+      rect:
+        serializedVersion: 2
+        x: 877
+        y: 560
+        width: 7
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8abc7998aab700730800000000000000
+      internalID: 3963303644469119912
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tide_warning_loop_20
+      rect:
+        serializedVersion: 2
+        x: 808
+        y: 461
+        width: 14
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 095d353a35c215e90800000000000000
+      internalID: -7038796004869286512
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tide_warning_loop_21
+      rect:
+        serializedVersion: 2
+        x: 1014
+        y: 459
+        width: 17
+        height: 11
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bc29c108f00b42d90800000000000000
+      internalID: -7123375129972927797
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tide_warning_loop_22
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 440
+        height: 444
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e612516352d525460800000000000000
+      internalID: 7228942766285594990
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tide_warning_loop_23
+      rect:
+        serializedVersion: 2
+        x: 56
+        y: 442
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: afbffaefb850ea940800000000000000
+      internalID: 5309187109547932666
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tide_warning_loop_24
+      rect:
+        serializedVersion: 2
+        x: 60
+        y: 440
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fe964ae158a38fc90800000000000000
+      internalID: -7135889266149398033
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tide_warning_loop_25
+      rect:
+        serializedVersion: 2
+        x: 439
+        y: 0
+        width: 439
+        height: 445
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a43e0036bb7cd2f80800000000000000
+      internalID: -8129622144700062902
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tide_warning_loop_26
+      rect:
+        serializedVersion: 2
+        x: 877
+        y: 0
+        width: 442
+        height: 454
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fd5f6b93a902efe50800000000000000
+      internalID: 6844944330415076831
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tide_warning_loop_27
+      rect:
+        serializedVersion: 2
+        x: 1320
+        y: 0
+        width: 443
+        height: 442
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b9e7a1584a8862210800000000000000
+      internalID: 1307882981986827931
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tide_warning_loop_28
+      rect:
+        serializedVersion: 2
+        x: 439
+        y: 426
+        width: 12
+        height: 12
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c59515f811795c530800000000000000
+      internalID: 3874669156096891228
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tide_warning_loop_29
+      rect:
+        serializedVersion: 2
+        x: 1318
+        y: 424
+        width: 13
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d041033bc1ec988d0800000000000000
+      internalID: -2843515067047078899
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tide_warning_loop_30
+      rect:
+        serializedVersion: 2
+        x: 875
+        y: 316
+        width: 11
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ba4f6cf0b479afe90800000000000000
+      internalID: -6991109122896235349
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tide_warning_loop_31
+      rect:
+        serializedVersion: 2
+        x: 1318
+        y: 330
+        width: 18
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c0e37cd5e1a4bfde0800000000000000
+      internalID: -1298362573283443188
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tide_warning_loop_32
+      rect:
+        serializedVersion: 2
+        x: 439
+        y: 305
+        width: 14
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 391ee9bb67f5947c0800000000000000
+      internalID: -4086630223303482989
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tide_warning_loop_33
+      rect:
+        serializedVersion: 2
+        x: 1318
+        y: 317
+        width: 6
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b759de793c3a23330800000000000000
+      internalID: 3689191105232737659
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tide_warning_loop_34
+      rect:
+        serializedVersion: 2
+        x: 1765
+        y: 244
+        width: 9
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 27fa39c4a6241e7f0800000000000000
+      internalID: -585113452262740110
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tide_warning_loop_35
+      rect:
+        serializedVersion: 2
+        x: 441
+        y: 233
+        width: 8
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e14266766eca28080800000000000000
+      internalID: -9186590184305187810
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tide_warning_loop_36
+      rect:
+        serializedVersion: 2
+        x: 879
+        y: 213
+        width: 7
+        height: 13
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cf6825ffec228e980800000000000000
+      internalID: -8509513223474346244
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tide_warning_loop_37
+      rect:
+        serializedVersion: 2
+        x: 1322
+        y: 170
+        width: 7
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7eac7c22356dd5990800000000000000
+      internalID: -7395519360518337817
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tide_warning_loop_38
+      rect:
+        serializedVersion: 2
+        x: 1326
+        y: 166
+        width: 12
+        height: 14
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8cf1c5ff63cb52ea0800000000000000
+      internalID: -5898101192573313080
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tide_warning_loop_39
+      rect:
+        serializedVersion: 2
+        x: 433
+        y: 66
+        width: 7
+        height: 8
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e4b0ae0a106940cc0800000000000000
+      internalID: -3745704056326583474
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tide_warning_loop_40
+      rect:
+        serializedVersion: 2
+        x: 435
+        y: 64
+        width: 12
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 951d9ab98bdadb0e0800000000000000
+      internalID: -2252453230218194599
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: tide_warning_loop_41
+      rect:
+        serializedVersion: 2
+        x: 699
+        y: 13
+        width: 22
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e06be9891876a7800800000000000000
+      internalID: 610914505771103758
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      tide_warning_loop_0: -603563344088744865
+      tide_warning_loop_1: 8067566077519998490
+      tide_warning_loop_10: -5088647012461312687
+      tide_warning_loop_11: 5213702995537264073
+      tide_warning_loop_12: 6299379896315281175
+      tide_warning_loop_13: 1743106910754401343
+      tide_warning_loop_14: -8540712138316068089
+      tide_warning_loop_15: -9165270918893853018
+      tide_warning_loop_16: 7044432460569077033
+      tide_warning_loop_17: 6216493871679100325
+      tide_warning_loop_18: -4309685975085839322
+      tide_warning_loop_19: 3963303644469119912
+      tide_warning_loop_2: 7269852597302779587
+      tide_warning_loop_20: -7038796004869286512
+      tide_warning_loop_21: -7123375129972927797
+      tide_warning_loop_22: 7228942766285594990
+      tide_warning_loop_23: 5309187109547932666
+      tide_warning_loop_24: -7135889266149398033
+      tide_warning_loop_25: -8129622144700062902
+      tide_warning_loop_26: 6844944330415076831
+      tide_warning_loop_27: 1307882981986827931
+      tide_warning_loop_28: 3874669156096891228
+      tide_warning_loop_29: -2843515067047078899
+      tide_warning_loop_3: 3199814333222024557
+      tide_warning_loop_30: -6991109122896235349
+      tide_warning_loop_31: -1298362573283443188
+      tide_warning_loop_32: -4086630223303482989
+      tide_warning_loop_33: 3689191105232737659
+      tide_warning_loop_34: -585113452262740110
+      tide_warning_loop_35: -9186590184305187810
+      tide_warning_loop_36: -8509513223474346244
+      tide_warning_loop_37: -7395519360518337817
+      tide_warning_loop_38: -5898101192573313080
+      tide_warning_loop_39: -3745704056326583474
+      tide_warning_loop_4: -2571000104599022666
+      tide_warning_loop_40: -2252453230218194599
+      tide_warning_loop_41: 610914505771103758
+      tide_warning_loop_5: -4409724751925138768
+      tide_warning_loop_6: -8814563425493692878
+      tide_warning_loop_7: 1476402295292280189
+      tide_warning_loop_8: -925488643219107113
+      tide_warning_loop_9: 9063632455856386820
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

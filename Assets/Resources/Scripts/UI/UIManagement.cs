@@ -5,6 +5,10 @@ using UnityEngine.UI;
 
 public class UIManagement : MonoBehaviour
 {
+    // Khung hiện tại có kích thước 757x127. Giữ đúng tỉ lệ này để không kéo dãn UI.
+    private const float GameplayFrameWidth = 420f;
+    private const float GameplayFrameHeight = GameplayFrameWidth * 127f / 757f;
+
     public GameObject topMotionPanel;
     public GameObject bottomMotionPanel;
     public GameObject seedBank;
@@ -19,13 +23,17 @@ public class UIManagement : MonoBehaviour
         //Thiết lập trước Start của SunNumber để màn đặc biệt có thể đổi lượng nắng đầu.
         GameObject sunObject = GameObject.Find("Sun Text");
         Text sunText = sunObject.GetComponent<Text>();
+        ConfigureGameplayFrame();
         PlaceSunCounterAboveSeedBank(sunObject);
         sunObject.SetActive(true);
         sunText.enabled = true;
         if (sunText.font == null) sunText.font = Resources.Load<Font>("Fonts/Baloo2");
         sunText.color = new Color(0.18f, 0.09f, 0.02f, 1f);
         sunText.fontStyle = FontStyle.Bold;
-        sunText.fontSize = 20;
+        sunText.fontSize = 16;
+        sunText.resizeTextForBestFit = true;
+        sunText.resizeTextMinSize = 10;
+        sunText.resizeTextMaxSize = 16;
         sunText.alignment = TextAnchor.MiddleCenter;
         sunText.horizontalOverflow = HorizontalWrapMode.Overflow;
         sunText.verticalOverflow = VerticalWrapMode.Overflow;
@@ -46,7 +54,7 @@ public class UIManagement : MonoBehaviour
 
         HorizontalLayoutGroup layout = cardGroup.GetComponent<HorizontalLayoutGroup>();
         if (layout == null) layout = cardGroup.AddComponent<HorizontalLayoutGroup>();
-        layout.spacing = 2f;
+        layout.spacing = 5f;
         layout.padding = new RectOffset(0, 0, 0, 0);
         layout.childAlignment = TextAnchor.UpperLeft;
         layout.childControlWidth = layout.childControlHeight = false;
@@ -70,12 +78,81 @@ public class UIManagement : MonoBehaviour
             .SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, cardGroupWidth);
         cardGroup.GetComponent<RectTransform>()
             .SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, SeedPacketFactory.GameplaySize.y);
-        seedBank.GetComponent<RectTransform>()
-            .SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, cardGroupWidth + 78);
-        shovelBank.GetComponent<RectTransform>()
-            .SetInsetAndSizeFromParentEdge(RectTransform.Edge.Left, cardGroupWidth + 108, 60);
         // Render the total after the dynamically-created cards so it cannot be hidden.
         sunObject.transform.SetAsLastSibling();
+    }
+
+    private void ConfigureGameplayFrame()
+    {
+        Sprite frame = Resources.Load<Sprite>("Prefabs/UI_LIST_PLANT_SELECTED");
+        Image bankImage = seedBank.GetComponent<Image>();
+        if (frame != null)
+        {
+            bankImage.sprite = frame;
+            bankImage.color = Color.white;
+            bankImage.type = Image.Type.Simple;
+            bankImage.preserveAspect = true;
+        }
+        bankImage.raycastTarget = false;
+
+        RectTransform motionRect = topMotionPanel.GetComponent<RectTransform>();
+        motionRect.anchorMin = motionRect.anchorMax = new Vector2(0f, 1f);
+        motionRect.pivot = new Vector2(0f, 1f);
+        motionRect.anchoredPosition = new Vector2(0f, motionRect.anchoredPosition.y);
+        motionRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 430f);
+        motionRect.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 88f);
+
+        RectTransform bankRect = seedBank.GetComponent<RectTransform>();
+        bankRect.anchorMin = bankRect.anchorMax = new Vector2(0f, 1f);
+        bankRect.pivot = new Vector2(0f, 1f);
+        bankRect.anchoredPosition = new Vector2(4f, -4f);
+        bankRect.sizeDelta = new Vector2(GameplayFrameWidth, GameplayFrameHeight);
+        bankRect.SetAsFirstSibling();
+
+        RectTransform cardsRect = cardGroup.GetComponent<RectTransform>();
+        cardsRect.anchorMin = cardsRect.anchorMax = new Vector2(0f, 1f);
+        cardsRect.pivot = new Vector2(0f, 1f);
+        cardsRect.anchoredPosition = new Vector2(128f, -15f);
+
+        RectTransform shovelRect = shovelBank.GetComponent<RectTransform>();
+        shovelRect.anchorMin = shovelRect.anchorMax = new Vector2(0f, 1f);
+        shovelRect.pivot = new Vector2(0f, 1f);
+        shovelRect.anchoredPosition = bankRect.anchoredPosition + new Vector2(358f, -12f);
+        shovelRect.sizeDelta = new Vector2(46f, 46f);
+        Image shovelFrame = shovelBank.GetComponent<Image>();
+        if (shovelFrame != null) shovelFrame.color = Color.clear;
+
+        RectTransform shovelIcon = shovelBank.transform.childCount > 0
+            ? shovelBank.transform.GetChild(0) as RectTransform
+            : null;
+        if (shovelIcon != null)
+        {
+            shovelIcon.anchorMin = shovelIcon.anchorMax = new Vector2(.5f, .5f);
+            shovelIcon.pivot = new Vector2(.5f, .5f);
+            shovelIcon.anchoredPosition = Vector2.zero;
+            shovelIcon.sizeDelta = new Vector2(40f, 40f);
+        }
+
+        CreateSunIcon();
+    }
+
+    private void CreateSunIcon()
+    {
+        Transform existing = seedBank.transform.Find("Sun Icon");
+        GameObject iconObject = existing != null ? existing.gameObject :
+            new GameObject("Sun Icon", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        iconObject.transform.SetParent(seedBank.transform, false);
+        RectTransform iconRect = iconObject.GetComponent<RectTransform>();
+        iconRect.anchorMin = iconRect.anchorMax = new Vector2(0f, 1f);
+        iconRect.pivot = new Vector2(.5f, .5f);
+        iconRect.anchoredPosition = new Vector2(42f, -36f);
+        iconRect.sizeDelta = new Vector2(34f, 34f);
+        Image icon = iconObject.GetComponent<Image>();
+        icon.sprite = Resources.Load<Sprite>("Sprites/Sun/Sun/Sun0001");
+        icon.color = Color.white;
+        icon.preserveAspect = true;
+        icon.raycastTarget = false;
+        iconObject.transform.SetAsLastSibling();
     }
 
     private void PlaceSunCounterAboveSeedBank(GameObject sunObject)
@@ -93,8 +170,8 @@ public class UIManagement : MonoBehaviour
         rect.SetParent(overlayParent, false);
         rect.anchorMin = rect.anchorMax = new Vector2(0f, 1f);
         rect.pivot = new Vector2(0.5f, 0.5f);
-        rect.anchoredPosition = bankRect.anchoredPosition + new Vector2(34f, -62.5f);
-        rect.sizeDelta = new Vector2(62f, 23f);
+        rect.anchoredPosition = bankRect.anchoredPosition + new Vector2(84f, -37f);
+        rect.sizeDelta = new Vector2(37f, 21f);
         rect.SetAsLastSibling();
 
         Text text = sunObject.GetComponent<Text>();

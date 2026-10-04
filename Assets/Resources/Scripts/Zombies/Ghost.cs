@@ -32,11 +32,8 @@ public class Ghost : Zombie
 
     protected override void die()
     {
-        //Vô hiệu collider
-        gameObject.GetComponent<Collider2D>().enabled = false;
-        //Chuyển animation
-        myAnimator.SetBool("Walk", false);
-        myAnimator.SetBool("Die", true);
+        //Dùng luồng chết chung để bộ đếm zombie được giảm và màn có thể kết thúc.
+        base.die();
     }
 
     //Bị tấn công
