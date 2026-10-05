@@ -41,9 +41,10 @@ public class NetLobbyUI : MonoBehaviour
         "Sông Băng Địa Cực",
         "Map Test",
         "Rừng Nhật Thực",
-        "Đảo Thiên Đường"
+        "Đảo Thiên Đường",
+        "Đền Mạch Năng Lượng"
     };
-    // Map 8 có trạng thái ô thay đổi theo thủy triều; tạm giữ ở chơi đơn.
+    // Map 8 và 9 có trạng thái môi trường riêng chưa đồng bộ; tạm giữ ở chơi đơn.
     private static readonly int[] LevelOrder = { 0, 1, 2, 3, 4, 6, 5 };
 
     private enum Page { Home, Host, Join }

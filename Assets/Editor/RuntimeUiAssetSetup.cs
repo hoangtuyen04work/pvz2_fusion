@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -5,6 +6,8 @@ using UnityEngine;
 [InitializeOnLoad]
 public static class RuntimeUiAssetSetup
 {
+    private const string Map9ArtFolder = "Assets/Resources/Sprites/Map9_Art";
+
     private static readonly string[] AssetPaths =
     {
         "Assets/Resources/Prefabs/UI_LIST_PLANT_SELECTED.png",
@@ -24,6 +27,9 @@ public static class RuntimeUiAssetSetup
         "Assets/Resources/GameUI/off.png",
         "Assets/Resources/GameUI/on.png",
         "Assets/Resources/GameUI/pause.png",
+        "Assets/Resources/GameUI/icon_information.png",
+        "Assets/Resources/GameUI/icon_arrow_down.png",
+        "Assets/Resources/GameUI/ui_notice_boxchat.png",
         "Assets/Resources/GameUI/play.png",
         "Assets/Resources/GameUI/return.png",
         "Assets/Resources/GameUI/setting.png",
@@ -41,27 +47,48 @@ public static class RuntimeUiAssetSetup
     [MenuItem("Tools/UI/Reimport Plant UI Frames")]
     private static void EnsureImported()
     {
-        foreach (string assetPath in AssetPaths)
+        var paths = new HashSet<string>(AssetPaths);
+        foreach (string guid in AssetDatabase.FindAssets("t:Texture2D", new[] { Map9ArtFolder }))
+            paths.Add(AssetDatabase.GUIDToAssetPath(guid));
+
+        foreach (string assetPath in paths)
         {
-            AssetDatabase.ImportAsset(assetPath,
-                ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate);
             TextureImporter importer = AssetImporter.GetAtPath(assetPath) as TextureImporter;
-            if (importer == null) continue;
+            if (importer == null)
+            {
+                AssetDatabase.ImportAsset(assetPath,
+                    ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate);
+                importer = AssetImporter.GetAtPath(assetPath) as TextureImporter;
+                if (importer == null) continue;
+            }
+
+            bool isMap9 = assetPath.StartsWith(Map9ArtFolder);
+            bool isMap9Background = assetPath.EndsWith("/background/map9.png");
+            bool isMap9Hud = assetPath.Contains("/ui/map9_circuit_hud");
+            bool isMap9Link = assetPath.Contains("/links/");
+            float pixelsPerUnit = isMap9 && !isMap9Background ? 256f : 100f;
+            int maxSize = isMap9Background || isMap9Hud ? 2048 : isMap9Link ? 512 : 256;
 
             bool changed = importer.textureType != TextureImporterType.Sprite
                 || importer.spriteImportMode != SpriteImportMode.Single
                 || importer.mipmapEnabled
                 || !importer.alphaIsTransparency
-                || importer.wrapMode != TextureWrapMode.Clamp;
+                || importer.wrapMode != TextureWrapMode.Clamp
+                || !Mathf.Approximately(importer.spritePixelsPerUnit, pixelsPerUnit);
             if (!changed) continue;
 
             importer.textureType = TextureImporterType.Sprite;
             importer.spriteImportMode = SpriteImportMode.Single;
-            importer.spritePixelsPerUnit = 100f;
+            importer.spritePixelsPerUnit = pixelsPerUnit;
             importer.mipmapEnabled = false;
             importer.alphaIsTransparency = true;
             importer.filterMode = FilterMode.Bilinear;
             importer.wrapMode = TextureWrapMode.Clamp;
+            if (isMap9)
+            {
+                importer.maxTextureSize = maxSize;
+                importer.textureCompression = TextureImporterCompression.CompressedHQ;
+            }
             importer.SaveAndReimport();
         }
     }

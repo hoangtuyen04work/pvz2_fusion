@@ -11,11 +11,14 @@ public class GameManagement : MonoBehaviour
     private bool startWithoutDialog;
     private UnityEngine.Object introDialogPrefab;
     private bool gameplayStarted;
+    private bool gameEnding;
     private GameObject zombiePreviewRoot;
     public static LevelData levelData;   //Dữ liệu màn hiện tại
 
     private const float ZombiePreviewHold = 1.25f;
     private const float CameraReturnDuration = 2.1f;
+    private const float GameOverCameraPanDuration = 1.35f;
+    private const float GameOverHouseHold = 0.8f;
 
     public List<GameObject> awakeList;  //Danh sách chờ đánh thức, dùng để đánh thức các đối tượng sau khi kết thúc cốt truyện mở màn
 
@@ -258,13 +261,50 @@ public class GameManagement : MonoBehaviour
 
     public void gameOver()
     {
+        if (gameEnding) return;
+        gameEnding = true;
         //Máy chủ báo kết quả cho máy khách trước khi hiện bảng kết thúc
         NetGameplay.NotifyGameEnd(true);
-        endMenuPanel.GetComponent<EndMenu>().gameOver();
+        StartCoroutine(playGameOverCamera());
+    }
+
+    private IEnumerator playGameOverCamera()
+    {
+        Camera mainCamera = Camera.main;
+        SpriteRenderer backgroundRenderer = background != null
+            ? background.GetComponent<SpriteRenderer>()
+            : null;
+        if (mainCamera != null && backgroundRenderer != null)
+        {
+            Vector3 start = mainCamera.transform.position;
+            float halfCameraWidth = mainCamera.orthographicSize * mainCamera.aspect;
+            float leftEdgeX = backgroundRenderer.bounds.min.x + halfCameraWidth;
+            Vector3 target = new Vector3(Mathf.Min(start.x, leftEdgeX), start.y, start.z);
+            float elapsed = 0f;
+            while (elapsed < GameOverCameraPanDuration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float progress = Mathf.SmoothStep(0f, 1f,
+                    Mathf.Clamp01(elapsed / GameOverCameraPanDuration));
+                mainCamera.transform.position = Vector3.Lerp(start, target, progress);
+                yield return null;
+            }
+            mainCamera.transform.position = target;
+        }
+
+        float hold = 0f;
+        while (hold < GameOverHouseHold)
+        {
+            hold += Time.unscaledDeltaTime;
+            yield return null;
+        }
+        if (endMenuPanel != null) endMenuPanel.GetComponent<EndMenu>()?.gameOver();
     }
 
     public void win()
     {
+        if (gameEnding) return;
+        gameEnding = true;
         NetGameplay.NotifyGameEnd(false);
         endMenuPanel.GetComponent<EndMenu>().win();
     }

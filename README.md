@@ -1,5 +1,14 @@
 # PvZ-Unity
 
+## Màn 9: Đền Mạch Năng Lượng
+
+Màn 9 biến cách xây đội hình thành một thử thách chủ động. Cứ sau một khoảng nghỉ, bốn nút năng
+lượng nối thành một mạch mới trên sân. Trồng cây phủ đủ cả bốn nút trước khi đồng hồ hết hạn để
+phóng xung điện gây 140 sát thương, đóng băng toàn bộ zombie và nhận 75 nắng. Nếu thất bại, cây
+đang đứng trên các nút bị quá tải và mất 80 máu. Mỗi mạch có 26 giây và ưu tiên vùng đang có ít cây,
+buộc người chơi cân bằng giữa tuyến phòng thủ lâu dài và Puff-shroom dùng để khép mạch đúng lúc.
+Màn bắt đầu với 200 nắng, nắng trời rơi mỗi 6–9 giây và có 10 giây nghỉ giữa hai mạch.
+
 ## Màn 8: Đảo Thiên Đường
 
 Màn 8 dùng chu kỳ thủy triều trên bãi biển. Sáu cột bên trái luôn an toàn; ba cột ven biển là vùng
@@ -95,4 +104,4 @@ này trên router hoặc dùng phần mềm tạo mạng ảo.
 
 ## Ghi chú dự án
 
-- Đối tượng Game Management trong scene có component script cùng tên; tham số level của nó dùng để chọn màn chơi sẽ tải, hiện dùng được các giá trị 0–7.
+- Đối tượng Game Management trong scene có component script cùng tên; tham số level của nó dùng để chọn màn chơi sẽ tải, hiện dùng được các giá trị 0–8.

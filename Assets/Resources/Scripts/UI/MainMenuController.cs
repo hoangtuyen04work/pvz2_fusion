@@ -28,9 +28,8 @@ public class MainMenuController : MonoBehaviour
     private float menuHoverTarget;
     private float menuHoverAmount;
 
-    // Giữ nguyên id dữ liệu màn, chỉ đổi thứ tự trình bày: campaign 1-2-3-4-5-7,
-    // sau đó mới tới sandbox Map Test.
-    private static readonly int[] LevelOrder = { 0, 1, 2, 3, 4, 6, 7, 5 };
+    // Giữ nguyên id dữ liệu màn, trình bày các màn campaign trước rồi mới tới sandbox Map Test.
+    private static readonly int[] LevelOrder = { 0, 1, 2, 3, 4, 6, 7, 8, 5 };
     private static readonly string[] LevelNames =
     {
         "Mèo Miu Xuất Trận",
@@ -40,7 +39,8 @@ public class MainMenuController : MonoBehaviour
         "Sông Băng Địa Cực",
         "Map Test",
         "Rừng Nhật Thực",
-        "Đảo Thiên Đường"
+        "Đảo Thiên Đường",
+        "Đền Mạch Năng Lượng"
     };
     private static readonly string[] LevelThumbnails =
     {
@@ -51,7 +51,8 @@ public class MainMenuController : MonoBehaviour
         "Sprites/BackGround/Background_Ice",
         "Sprites/BackGround/Background_Forest",
         "Sprites/BackGround/map7",
-        "Sprites/BackGround/map8"
+        "Sprites/BackGround/map8",
+        "Sprites/Map9_Art/background/map9"
     };
 
     private void Update()
@@ -279,7 +280,7 @@ public class MainMenuController : MonoBehaviour
         var contentObject = new GameObject("Danh sách màn", typeof(RectTransform), typeof(GridLayoutGroup));
         contentObject.transform.SetParent(panel.transform, false);
         RectTransform contentRect = contentObject.GetComponent<RectTransform>();
-        CenterRect(contentRect, new Vector2(512f, 226f), new Vector2(0f, 24f));
+        CenterRect(contentRect, new Vector2(642f, 226f), new Vector2(0f, 24f));
 
         var grid = contentObject.GetComponent<GridLayoutGroup>();
         grid.padding = new RectOffset(0, 0, 0, 0);
@@ -290,7 +291,7 @@ public class MainMenuController : MonoBehaviour
         grid.startAxis = GridLayoutGroup.Axis.Horizontal;
         grid.childAlignment = TextAnchor.UpperCenter;
         grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-        grid.constraintCount = 4;
+        grid.constraintCount = 5;
 
         for (int cardIndex = 0; cardIndex < LevelOrder.Length; cardIndex++)
         {

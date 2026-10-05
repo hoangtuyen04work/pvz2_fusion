@@ -77,7 +77,7 @@ public class EndMenu : MonoBehaviour
         if (presentationBuilt) return;
         presentationBuilt = true;
 
-        // HUD đặc biệt (220) và pause (1200) dùng Canvas riêng; kết quả phải nằm trên tất cả.
+        // HUD gameplay và pause dùng Canvas riêng; kết quả phải nằm trên tất cả.
         Canvas resultCanvas = GetComponent<Canvas>();
         if (resultCanvas == null) resultCanvas = gameObject.AddComponent<Canvas>();
         resultCanvas.overrideSorting = true;
