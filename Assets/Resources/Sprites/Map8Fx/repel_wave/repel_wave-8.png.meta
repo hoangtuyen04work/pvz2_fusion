@@ -1,0 +1,676 @@
+fileFormatVersion: 2
+guid: a4fb6460c4dacae459ba3013abdd7238
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 7617861669652995700
+    second: repel_wave-8_0
+  - first:
+      213: 6925878698573981544
+    second: repel_wave-8_1
+  - first:
+      213: -6545319366133723362
+    second: repel_wave-8_2
+  - first:
+      213: -7082965899666979046
+    second: repel_wave-8_3
+  - first:
+      213: -6112448436683084843
+    second: repel_wave-8_4
+  - first:
+      213: 7742918260970386734
+    second: repel_wave-8_5
+  - first:
+      213: 5986444118498131843
+    second: repel_wave-8_6
+  - first:
+      213: -6714328694940116754
+    second: repel_wave-8_7
+  - first:
+      213: 3670845627607876604
+    second: repel_wave-8_8
+  - first:
+      213: 7107193548057796493
+    second: repel_wave-8_9
+  - first:
+      213: -5598211283531686272
+    second: repel_wave-8_10
+  - first:
+      213: -2499018245696747948
+    second: repel_wave-8_11
+  - first:
+      213: 4120113418930217287
+    second: repel_wave-8_12
+  - first:
+      213: -6002025297000162917
+    second: repel_wave-8_13
+  - first:
+      213: 2534644455583517019
+    second: repel_wave-8_14
+  - first:
+      213: -6072877986024659501
+    second: repel_wave-8_15
+  - first:
+      213: -8069933626772326173
+    second: repel_wave-8_16
+  - first:
+      213: 5883935383248301324
+    second: repel_wave-8_17
+  - first:
+      213: 1539234001565997403
+    second: repel_wave-8_18
+  - first:
+      213: 3673342144555688976
+    second: repel_wave-8_19
+  - first:
+      213: 6210963172426341713
+    second: repel_wave-8_20
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 1
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: repel_wave-8_0
+      rect:
+        serializedVersion: 2
+        x: 158
+        y: 323
+        width: 73
+        height: 43
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 47e1bbfc3d418b960800000000000000
+      internalID: 7617861669652995700
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: repel_wave-8_1
+      rect:
+        serializedVersion: 2
+        x: 253
+        y: 366
+        width: 26
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 86762f14bf9ad1060800000000000000
+      internalID: 6925878698573981544
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: repel_wave-8_2
+      rect:
+        serializedVersion: 2
+        x: 41
+        y: 292
+        width: 45
+        height: 44
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e1f4d1017ba5a25a0800000000000000
+      internalID: -6545319366133723362
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: repel_wave-8_3
+      rect:
+        serializedVersion: 2
+        x: 56
+        y: 280
+        width: 51
+        height: 15
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a17052a9a0044bd90800000000000000
+      internalID: -7082965899666979046
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: repel_wave-8_4
+      rect:
+        serializedVersion: 2
+        x: 270
+        y: 279
+        width: 20
+        height: 19
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5dbec9f28883c2ba0800000000000000
+      internalID: -6112448436683084843
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: repel_wave-8_5
+      rect:
+        serializedVersion: 2
+        x: 120
+        y: 261
+        width: 19
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e257606722f547b60800000000000000
+      internalID: 7742918260970386734
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: repel_wave-8_6
+      rect:
+        serializedVersion: 2
+        x: 150
+        y: 233
+        width: 42
+        height: 41
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 38fbece453f141350800000000000000
+      internalID: 5986444118498131843
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: repel_wave-8_7
+      rect:
+        serializedVersion: 2
+        x: 221
+        y: 244
+        width: 18
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ee8d1e040a9e1d2a0800000000000000
+      internalID: -6714328694940116754
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: repel_wave-8_8
+      rect:
+        serializedVersion: 2
+        x: 42
+        y: 224
+        width: 17
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cf30dda36a671f230800000000000000
+      internalID: 3670845627607876604
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: repel_wave-8_9
+      rect:
+        serializedVersion: 2
+        x: 105
+        y: 221
+        width: 6
+        height: 7
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d8fdeed50e2d1a260800000000000000
+      internalID: 7107193548057796493
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: repel_wave-8_10
+      rect:
+        serializedVersion: 2
+        x: 194
+        y: 207
+        width: 35
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 08e928b8f782f42b0800000000000000
+      internalID: -5598211283531686272
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: repel_wave-8_11
+      rect:
+        serializedVersion: 2
+        x: 57
+        y: 148
+        width: 97
+        height: 50
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 456860a5524b15dd0800000000000000
+      internalID: -2499018245696747948
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: repel_wave-8_12
+      rect:
+        serializedVersion: 2
+        x: 135
+        y: 193
+        width: 25
+        height: 21
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 741e7a143559d2930800000000000000
+      internalID: 4120113418930217287
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: repel_wave-8_13
+      rect:
+        serializedVersion: 2
+        x: 177
+        y: 190
+        width: 10
+        height: 9
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b99956fdac584bca0800000000000000
+      internalID: -6002025297000162917
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: repel_wave-8_14
+      rect:
+        serializedVersion: 2
+        x: 326
+        y: 184
+        width: 35
+        height: 35
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b5908f604bddc2320800000000000000
+      internalID: 2534644455583517019
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: repel_wave-8_15
+      rect:
+        serializedVersion: 2
+        x: 39
+        y: 85
+        width: 148
+        height: 72
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3d5e5bea5adc8bba0800000000000000
+      internalID: -6072877986024659501
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: repel_wave-8_16
+      rect:
+        serializedVersion: 2
+        x: 225
+        y: 151
+        width: 38
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3e8714f6f16d10090800000000000000
+      internalID: -8069933626772326173
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: repel_wave-8_17
+      rect:
+        serializedVersion: 2
+        x: 290
+        y: 139
+        width: 19
+        height: 17
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c0deddf7e00f7a150800000000000000
+      internalID: 5883935383248301324
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: repel_wave-8_18
+      rect:
+        serializedVersion: 2
+        x: 217
+        y: 81
+        width: 37
+        height: 36
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b595b815b257c5510800000000000000
+      internalID: 1539234001565997403
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: repel_wave-8_19
+      rect:
+        serializedVersion: 2
+        x: 253
+        y: 102
+        width: 114
+        height: 29
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 014a6b0e7355af230800000000000000
+      internalID: 3673342144555688976
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: repel_wave-8_20
+      rect:
+        serializedVersion: 2
+        x: 329
+        y: 76
+        width: 22
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 15d51852916c13650800000000000000
+      internalID: 6210963172426341713
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      repel_wave-8_0: 7617861669652995700
+      repel_wave-8_1: 6925878698573981544
+      repel_wave-8_10: -5598211283531686272
+      repel_wave-8_11: -2499018245696747948
+      repel_wave-8_12: 4120113418930217287
+      repel_wave-8_13: -6002025297000162917
+      repel_wave-8_14: 2534644455583517019
+      repel_wave-8_15: -6072877986024659501
+      repel_wave-8_16: -8069933626772326173
+      repel_wave-8_17: 5883935383248301324
+      repel_wave-8_18: 1539234001565997403
+      repel_wave-8_19: 3673342144555688976
+      repel_wave-8_2: -6545319366133723362
+      repel_wave-8_20: 6210963172426341713
+      repel_wave-8_3: -7082965899666979046
+      repel_wave-8_4: -6112448436683084843
+      repel_wave-8_5: 7742918260970386734
+      repel_wave-8_6: 5986444118498131843
+      repel_wave-8_7: -6714328694940116754
+      repel_wave-8_8: 3670845627607876604
+      repel_wave-8_9: 7107193548057796493
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

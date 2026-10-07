@@ -13,6 +13,7 @@ public class SunManagement : MonoBehaviour
 
     //Đếm giờ mặt trời rơi
     float minInterval = 10f, maxInterval = 20f;
+    bool spawningPaused;
     //Vị trí ban đầu của mặt trời
     float posY =  3.4f;
     //Giới hạn trục x của vị trí mặt trời rơi
@@ -23,6 +24,11 @@ public class SunManagement : MonoBehaviour
     {
         minInterval = Mathf.Max(0.15f, minimum);
         maxInterval = Mathf.Max(minInterval, maximum);
+    }
+
+    public void SetSpawningPaused(bool paused)
+    {
+        spawningPaused = paused;
     }
 
     // Start is called before the first frame update
@@ -46,18 +52,27 @@ public class SunManagement : MonoBehaviour
 
     private void createSun()
     {
-        Instantiate(
-            skysunPrefab, 
-            new Vector3(Random.Range(leftEdge, rightEdge), posY, 0), 
-            Quaternion.Euler(0, 0, 0), 
-            transform
-        );
+        if (!spawningPaused)
+        {
+            Instantiate(
+                skysunPrefab,
+                new Vector3(Random.Range(leftEdge, rightEdge), posY, 0),
+                Quaternion.Euler(0, 0, 0),
+                transform
+            );
+        }
 
         Invoke(createFunc, Random.Range(minInterval, maxInterval));
     }
 
     private void createMoon()
     {
+        if (spawningPaused)
+        {
+            Invoke(createFunc, Random.Range(minInterval, maxInterval));
+            return;
+        }
+
         GameObject randPrefab;
         if (Random.Range(0.0f, 10.0f) > 3.0f) randPrefab = fullMoonPrefab;
         else randPrefab = crescentMoonPrefab;

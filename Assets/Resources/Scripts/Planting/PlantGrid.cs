@@ -19,6 +19,7 @@ public class PlantGrid : MonoBehaviour
     bool havePlanted = false;   //Ô này đã trồng cây chưa
     GameObject nowPlant;    //Cây đang trồng hiện tại
     bool fusionHighlighted;
+    bool plantingBlocked;
 
     // Getter cho GameStateCollector
     public bool HavePlanted => havePlanted;
@@ -44,7 +45,7 @@ public class PlantGrid : MonoBehaviour
         {
             nowPlant.GetComponent<Plant>().highlight();
         }
-        else if(havePlanted == false && toBePlanted.activeSelf == true)
+        else if(!plantingBlocked && havePlanted == false && toBePlanted.activeSelf == true)
         {
             spriteRenderer.sprite = toBePlanted.GetComponent<SpriteRenderer>().sprite;
         }
@@ -273,12 +274,13 @@ public class PlantGrid : MonoBehaviour
     //Ô này có nhận được cây đang chọn không: hoặc còn trống, hoặc ghép được với cây đang có
     private bool canAccept(string plantName)
     {
-        return !havePlanted || canFuse(plantName);
+        return !plantingBlocked && (!havePlanted || canFuse(plantName));
     }
 
     //Đặt cây xuống ô, không đụng gì tới nắng và hồi chiêu. Trả về true nếu đặt được.
     public bool placePlant(string plantName)
     {
+        if (plantingBlocked) return false;
         if (!havePlanted)
         {
             plant(plantName);
@@ -363,6 +365,14 @@ public class PlantGrid : MonoBehaviour
     {
         if (!havePlanted || nowPlant == null) return;
         nowPlant.GetComponent<Plant>().die(reason);
+    }
+
+    // Map đặc biệt có thể khóa tạm thời một ô mà vẫn cho phép dùng xẻng.
+    public void SetPlantingBlocked(bool blocked)
+    {
+        plantingBlocked = blocked;
+        if (blocked && !havePlanted && spriteRenderer != null)
+            spriteRenderer.sprite = null;
     }
 
     public void plant(string name)

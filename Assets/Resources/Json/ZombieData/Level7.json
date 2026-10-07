@@ -1,0 +1,12 @@
+{
+  "info": [
+    { "deltaTime": 10, "isWave": false, "isFinalWave": false, "number": 1, "zombie": "ZombieNormal" },
+    { "deltaTime": 10, "isWave": false, "isFinalWave": false, "number": 1, "zombie": "ZombieNormal" },
+    { "deltaTime": 10, "isWave": false, "isFinalWave": false, "number": 1, "zombie": "ConeZombie" },
+    { "deltaTime": 10, "isWave": false, "isFinalWave": false, "number": 1, "zombie": "ZombieNormal" },
+    { "deltaTime": 10, "isWave": true,  "isFinalWave": false, "number": 2, "zombie": "ZombieNormal" },
+    { "deltaTime": 10, "isWave": false, "isFinalWave": false, "number": 1, "zombie": "ConeZombie" },
+    { "deltaTime": 10, "isWave": false, "isFinalWave": false, "number": 1, "zombie": "ZombieNormal" },
+    { "deltaTime": 10, "isWave": true,  "isFinalWave": true,  "number": 2, "zombie": "ZombieNormal" }
+  ]
+}

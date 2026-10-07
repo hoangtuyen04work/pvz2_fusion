@@ -39,8 +39,13 @@ public class NetLobbyUI : MonoBehaviour
         "Thầy Luyện Xác",
         "Vùng Đất Bất Tử",
         "Sông Băng Địa Cực",
-        "Sân Thử Nghiệm"
+        "Map Test",
+        "Rừng Nhật Thực",
+        "Đảo Thiên Đường",
+        "Đền Mạch Năng Lượng"
     };
+    // Map 8 và 9 có trạng thái môi trường riêng chưa đồng bộ; tạm giữ ở chơi đơn.
+    private static readonly int[] LevelOrder = { 0, 1, 2, 3, 4, 6, 5 };
 
     private enum Page { Home, Host, Join }
 
@@ -97,13 +102,13 @@ public class NetLobbyUI : MonoBehaviour
 
     /// <summary>
     /// Mở sảnh chờ kèm màn chơi vừa chọn ở bảng Phiêu lưu.
-    /// Màn ngoài danh sách chơi mạng (như Đấu trường Gargantuar) thì bỏ qua, giữ màn mặc định.
+    /// Màn ngoài danh sách chơi mạng thì bỏ qua, giữ màn mặc định.
     /// </summary>
     public static void Open(int preferredLevel)
     {
         if (instance == null) return;
 
-        if (preferredLevel >= 0 && preferredLevel < LevelNames.Length)
+        if (System.Array.IndexOf(LevelOrder, preferredLevel) >= 0)
             instance.chosenLevel = preferredLevel;
 
         instance.Show();
@@ -215,7 +220,10 @@ public class NetLobbyUI : MonoBehaviour
 
     private void ChangeLevel(int delta)
     {
-        chosenLevel = Mathf.Clamp(chosenLevel + delta, 0, LevelNames.Length - 1);
+        int orderIndex = System.Array.IndexOf(LevelOrder, chosenLevel);
+        if (orderIndex < 0) orderIndex = 0;
+        orderIndex = Mathf.Clamp(orderIndex + delta, 0, LevelOrder.Length - 1);
+        chosenLevel = LevelOrder[orderIndex];
         UpdateHostLevelText();
         if (peerReady)
             NetManager.Instance.Send(NetMessage.Of(NetMsg.Lobby).Int(chosenLevel));
@@ -223,7 +231,14 @@ public class NetLobbyUI : MonoBehaviour
 
     private void UpdateHostLevelText()
     {
-        hostLevelText.text = "Màn " + (chosenLevel + 1) + " — " + LevelNames[chosenLevel];
+        hostLevelText.text = LevelDisplay(chosenLevel);
+    }
+
+    private static string LevelDisplay(int level)
+    {
+        return level == 5
+            ? "MAP TEST — " + LevelNames[level]
+            : "Màn " + (level + 1) + " — " + LevelNames[level];
     }
 
     private void StartMatch()
@@ -317,8 +332,8 @@ public class NetLobbyUI : MonoBehaviour
             case NetMsg.Lobby:
                 chosenLevel = Mathf.Clamp(message.i, 0, LevelNames.Length - 1);
                 if (page == Page.Join)
-                    joinStatusText.text = "Đã vào phòng.\nChủ phòng chọn: Màn " + (chosenLevel + 1)
-                        + " — " + LevelNames[chosenLevel] + "\nĐang chờ bắt đầu...";
+                    joinStatusText.text = "Đã vào phòng.\nChủ phòng chọn: "
+                        + LevelDisplay(chosenLevel) + "\nĐang chờ bắt đầu...";
                 break;
 
             case NetMsg.Start:
@@ -373,7 +388,7 @@ public class NetLobbyUI : MonoBehaviour
         string role = chosenMode == NetGameMode.Pvp ? "Bạn sẽ điều khiển PHE ZOMBIE." : "Hai người cùng phe trồng cây.";
         joinStatusText.text = "Đã vào phòng của " + NetSession.PeerName + ".\n"
             + "Chế độ: " + (chosenMode == NetGameMode.Pvp ? "Đối kháng" : "Đồng đội") + " — " + role + "\n"
-            + "Màn " + (chosenLevel + 1) + " — " + LevelNames[chosenLevel] + "\nĐang chờ chủ phòng bắt đầu...";
+            + LevelDisplay(chosenLevel) + "\nĐang chờ chủ phòng bắt đầu...";
     }
 
     private void HandleStart(NetMessage message)

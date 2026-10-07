@@ -32,6 +32,7 @@ public class Zombie : MonoBehaviour
     public bool IsBurning => burning;
     public bool IsSlowed => slowed;
     public bool IsFrozen => frozen;
+    public bool IsAlive => alive;
 
     //Liên quan tới tấn công
     public int attackPower;  //Sức tấn công
@@ -269,6 +270,7 @@ public class Zombie : MonoBehaviour
 
     public void ApplyFreeze(float immobilizeDuration, float chilledDuration)
     {
+        if (!alive || (immobilizeDuration <= 0f && chilledDuration <= 0f)) return;
         if (slowed) ClearSlow();
         slowed = true;
         frozen = true;

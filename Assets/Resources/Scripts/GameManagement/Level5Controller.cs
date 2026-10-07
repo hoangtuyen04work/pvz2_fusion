@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-// MÃ n sandbox Ä‘á»ƒ thá»­ cÃ¢y vÃ  cÆ¡ cháº¿ fusion, khÃ´ng cÃ³ pháº§n hÆ°á»›ng dáº«n.
+// Sandbox để thử cây, zombie và cơ chế fusion; không thuộc tuyến màn campaign.
 public class Level5Controller : LevelController
 {
     public override void init()
@@ -9,8 +9,8 @@ public class Level5Controller : LevelController
         GameManagement.levelData = new LevelData()
         {
             level = 5,
-            levelName = "SÃ¢n Thá»­ Nghiá»‡m",
-            mapSuffix = "_Day",
+            levelName = "Map Test",
+            mapSuffix = "_Forest",
             rowCount = 5,
             landRowCount = 5,
             isDay = true,

@@ -24,6 +24,60 @@ public sealed class PlantLoadoutEntry
     }
 }
 
+/// <summary>
+/// Xếp thẻ theo kích thước ảnh thực và tự xuống hàng, không phụ thuộc các ô cố định trên nền.
+/// </summary>
+public sealed class AdaptiveCardFlowLayout : LayoutGroup
+{
+    public float horizontalSpacing = 18f;
+    public float verticalSpacing = 18f;
+
+    public override void CalculateLayoutInputHorizontal()
+    {
+        base.CalculateLayoutInputHorizontal();
+        SetLayoutInputForAxis(padding.horizontal, padding.horizontal, -1f, 0);
+    }
+
+    public override void CalculateLayoutInputVertical()
+    {
+        float height = MeasureAndArrange(false);
+        SetLayoutInputForAxis(height, height, -1f, 1);
+    }
+
+    public override void SetLayoutHorizontal() => MeasureAndArrange(true);
+    public override void SetLayoutVertical() => MeasureAndArrange(true);
+
+    private float MeasureAndArrange(bool arrange)
+    {
+        float availableWidth = Mathf.Max(1f, rectTransform.rect.width - padding.horizontal);
+        float x = padding.left;
+        float y = padding.top;
+        float rowHeight = 0f;
+
+        foreach (RectTransform child in rectChildren)
+        {
+            float width = Mathf.Max(1f, LayoutUtility.GetPreferredWidth(child));
+            float height = Mathf.Max(1f, LayoutUtility.GetPreferredHeight(child));
+            if (x > padding.left && x + width > padding.left + availableWidth)
+            {
+                x = padding.left;
+                y += rowHeight + verticalSpacing;
+                rowHeight = 0f;
+            }
+
+            if (arrange)
+            {
+                SetChildAlongAxis(child, 0, x, width);
+                SetChildAlongAxis(child, 1, y, height);
+            }
+            x += width + horizontalSpacing;
+            rowHeight = Mathf.Max(rowHeight, height);
+        }
+
+        return y + rowHeight + padding.bottom;
+    }
+}
+
 public static class PlantLoadoutCatalog
 {
     public const int MaxSelected = 6;
@@ -72,6 +126,7 @@ public static class PlantLoadoutCatalog
 
 public sealed class PlantSelectionOverlay : MonoBehaviour
 {
+    private static Sprite roundedUiSprite;
     private readonly List<string> selected = new List<string>();
     private readonly Dictionary<string, SeedPacketView> packets = new Dictionary<string, SeedPacketView>();
     private Text status;
@@ -88,7 +143,9 @@ public sealed class PlantSelectionOverlay : MonoBehaviour
         canvas.sortingOrder = 300;
         var scaler = root.GetComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1000f, 750f);
+        scaler.referenceResolution = new Vector2(1672f, 941f);
+        scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+        scaler.matchWidthOrHeight = 0.5f;
         root.GetComponent<PlantSelectionOverlay>().Build(level, onConfirmed);
     }
 
@@ -100,31 +157,39 @@ public sealed class PlantSelectionOverlay : MonoBehaviour
 
         var shade = ImageObject("Shade", transform, null, new Color(0f, 0f, 0f, 0.88f));
         Stretch(shade.rectTransform);
-        var panel = ImageObject("Panel", transform, null, new Color(0.12f, 0.18f, 0.07f, 0.98f));
-        Anchor(panel.rectTransform, 0.06f, 0.06f, 0.94f, 0.94f);
+        Sprite panelSprite = Resources.Load<Sprite>("Prefabs/UI_management_list_plant");
+        var panel = ImageObject("Panel", transform, panelSprite,
+            panelSprite != null ? Color.white : new Color(0.12f, 0.18f, 0.07f, 0.98f));
+        Anchor(panel.rectTransform, 0.01f, 0.01f, 0.99f, 0.99f);
+        var panelAspect = panel.gameObject.AddComponent<AspectRatioFitter>();
+        panelAspect.aspectMode = AspectRatioFitter.AspectMode.FitInParent;
+        panelAspect.aspectRatio = 1672f / 941f;
+        panel.raycastTarget = true;
 
         var title = TextObject("Title", panel.transform, "CHOOSE YOUR PLANTS", 40, TextAnchor.MiddleCenter, new Color(0.65f, 1f, 0.28f));
-        Anchor(title.rectTransform, 0.08f, 0.90f, 0.92f, 0.98f);
+        Anchor(title.rectTransform, 0.31f, 0.875f, 0.68f, 0.985f);
         var back = ButtonObject("Back", panel.transform, "BACK", () => Destroy(gameObject));
-        Anchor(back.GetComponent<RectTransform>(), 0.03f, 0.91f, 0.15f, 0.97f);
+        back.GetComponent<Image>().color = Color.clear;
+        Anchor(back.GetComponent<RectTransform>(), 0.03f, 0.825f, 0.15f, 0.97f);
 
-        var bank=ImageObject("Selected Seed Bank",panel.transform,null,new Color(.34f,.24f,.10f,1)); Anchor(bank.rectTransform,.17f,.74f,.83f,.89f);
-        var selectedObject=new GameObject("Selected Cards",typeof(RectTransform),typeof(HorizontalLayoutGroup)); selectedObject.transform.SetParent(bank.transform,false); Anchor(selectedObject.GetComponent<RectTransform>(),.03f,.04f,.97f,.96f);
-        var selectedLayout=selectedObject.GetComponent<HorizontalLayoutGroup>(); selectedLayout.spacing=7; selectedLayout.childAlignment=TextAnchor.MiddleCenter; selectedLayout.childControlWidth=selectedLayout.childControlHeight=false; selectedLayout.childForceExpandWidth=selectedLayout.childForceExpandHeight=false; selectedBank=selectedObject.transform;
-        var hint=TextObject("Hint",panel.transform,"Pick up to 6 plants. Click a selected packet to remove it.",18,TextAnchor.MiddleCenter,new Color(.9f,.92f,.76f)); Anchor(hint.rectTransform,.12f,.69f,.88f,.74f);
+        var bank=ImageObject("Selected Seed Bank",panel.transform,null,Color.clear); Anchor(bank.rectTransform,.205f,.655f,.80f,.835f);
+        var selectedObject=new GameObject("Selected Cards",typeof(RectTransform),typeof(HorizontalLayoutGroup)); selectedObject.transform.SetParent(bank.transform,false); Anchor(selectedObject.GetComponent<RectTransform>(),0f,.02f,1f,.98f);
+        var selectedLayout=selectedObject.GetComponent<HorizontalLayoutGroup>(); selectedLayout.spacing=40f; selectedLayout.childAlignment=TextAnchor.MiddleCenter; selectedLayout.childControlWidth=selectedLayout.childControlHeight=false; selectedLayout.childForceExpandWidth=selectedLayout.childForceExpandHeight=false; selectedBank=selectedObject.transform;
+        var hint=TextObject("Hint",panel.transform,"CHỌN TỐI ĐA 6 CÂY",18,TextAnchor.MiddleCenter,new Color(.97f,.91f,.69f)); Anchor(hint.rectTransform,.34f,.615f,.66f,.65f);
 
         var scrollObject = new GameObject("Plant Scroll View", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(ScrollRect));
         scrollObject.transform.SetParent(panel.transform, false);
-        Anchor(scrollObject.GetComponent<RectTransform>(), 0.08f, 0.17f, 0.92f, 0.69f);
-        scrollObject.GetComponent<Image>().color = new Color(.24f, .18f, .08f, .92f);
+        Anchor(scrollObject.GetComponent<RectTransform>(), 0.065f, 0.185f, 0.955f, 0.575f);
+        scrollObject.GetComponent<Image>().color = Color.clear;
 
         var viewportObject = new GameObject("Viewport", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(RectMask2D));
         viewportObject.transform.SetParent(scrollObject.transform, false);
         var viewport = viewportObject.GetComponent<RectTransform>();
-        Anchor(viewport, 0.01f, 0.025f, 0.96f, 0.975f);
-        viewportObject.GetComponent<Image>().color = new Color(.11f, .17f, .065f, .95f);
+        Anchor(viewport, 0f, 0f, 0.945f, 1f);
+        // Artwork mới đã có vùng gỗ trống; chỉ giữ một graphic gần trong suốt cho RectMask2D.
+        viewportObject.GetComponent<Image>().color = new Color(1f, 1f, 1f, .001f);
 
-        var gridObject = new GameObject("Plant Grid", typeof(RectTransform), typeof(GridLayoutGroup), typeof(ContentSizeFitter));
+        var gridObject = new GameObject("Plant Flow", typeof(RectTransform), typeof(AdaptiveCardFlowLayout), typeof(ContentSizeFitter));
         gridObject.transform.SetParent(viewportObject.transform, false);
         var content = gridObject.GetComponent<RectTransform>();
         content.anchorMin = new Vector2(0f, 1f);
@@ -132,20 +197,32 @@ public sealed class PlantSelectionOverlay : MonoBehaviour
         content.pivot = new Vector2(.5f, 1f);
         content.anchoredPosition = Vector2.zero;
         content.sizeDelta = Vector2.zero;
-        var grid = gridObject.GetComponent<GridLayoutGroup>();
-        grid.padding = new RectOffset(8, 8, 2, 2);
-        grid.spacing = new Vector2(14f, 8f);
-        grid.cellSize = SeedPacketFactory.ChoiceSize;
-        grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-        grid.constraintCount = 7;
+        var flow = gridObject.GetComponent<AdaptiveCardFlowLayout>();
+        flow.padding = new RectOffset(18, 18, 18, 18);
+        flow.horizontalSpacing = 18f;
+        flow.verticalSpacing = 18f;
         gridObject.GetComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
         var scrollbarObject = new GameObject("Scrollbar", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Scrollbar));
         scrollbarObject.transform.SetParent(scrollObject.transform, false);
-        Anchor(scrollbarObject.GetComponent<RectTransform>(), .965f, .025f, .992f, .975f);
-        scrollbarObject.GetComponent<Image>().color = new Color(.16f, .10f, .035f, 1f);
-        var handle = ImageObject("Handle", scrollbarObject.transform, null, new Color(.72f, .52f, .18f, 1f));
+        Anchor(scrollbarObject.GetComponent<RectTransform>(), .955f, .02f, .995f, .98f);
+        scrollbarObject.GetComponent<Image>().color = Color.clear;
+
+        // Vùng tương tác vẫn rộng để dễ kéo, nhưng rãnh và tay kéo nhìn thấy chỉ rộng khoảng 9 px.
+        var slidingArea = new GameObject("Sliding Area", typeof(RectTransform));
+        slidingArea.transform.SetParent(scrollbarObject.transform, false);
+        Anchor(slidingArea.GetComponent<RectTransform>(), .39f, .02f, .61f, .98f);
+        Sprite roundedSprite = GetRoundedUiSprite();
+        var track = ImageObject("Thin Track", slidingArea.transform, roundedSprite,
+            new Color(.12f, .045f, .018f, .72f));
+        Stretch(track.rectTransform);
+        track.type = Image.Type.Sliced;
+        track.raycastTarget = false;
+
+        var handle = ImageObject("Rounded Handle", slidingArea.transform, roundedSprite,
+            new Color(.96f, .72f, .20f, .98f));
         Stretch(handle.rectTransform);
+        handle.type = Image.Type.Sliced;
         var scrollbar = scrollbarObject.GetComponent<Scrollbar>();
         scrollbar.handleRect = handle.rectTransform;
         scrollbar.targetGraphic = handle;
@@ -169,9 +246,12 @@ public sealed class PlantSelectionOverlay : MonoBehaviour
                 CreateChoice(entry, gridObject.transform);
 
         status = TextObject("Status", panel.transform, string.Empty, 23, TextAnchor.MiddleLeft, Color.white);
-        Anchor(status.rectTransform, 0.06f, 0.055f, 0.64f, 0.16f);
+        status.color = new Color(.28f, .12f, .035f, 1f);
+        status.alignment = TextAnchor.MiddleCenter;
+        Anchor(status.rectTransform, 0.07f, 0.03f, 0.26f, 0.12f);
         confirm = ButtonObject("Confirm", panel.transform, "PLAY", Confirm).GetComponent<Button>();
-        Anchor(confirm.GetComponent<RectTransform>(), 0.70f, 0.055f, 0.91f, 0.16f);
+        confirm.GetComponent<Image>().color = Color.clear;
+        Anchor(confirm.GetComponent<RectTransform>(), 0.745f, 0.025f, 0.96f, 0.155f);
 
         foreach (string key in GameSession.SelectedPlants)
             if (selected.Count < PlantLoadoutCatalog.MaxSelected && PlantLoadoutCatalog.IsSelectionChoice(key) &&
@@ -180,9 +260,48 @@ public sealed class PlantSelectionOverlay : MonoBehaviour
         UpdateState();
     }
 
+    private static Sprite GetRoundedUiSprite()
+    {
+        if (roundedUiSprite != null) return roundedUiSprite;
+
+        const int size = 16;
+        const float radius = 6.5f;
+        var texture = new Texture2D(size, size, TextureFormat.RGBA32, false)
+        {
+            name = "Runtime Rounded UI Texture",
+            filterMode = FilterMode.Bilinear,
+            wrapMode = TextureWrapMode.Clamp,
+            hideFlags = HideFlags.HideAndDontSave
+        };
+
+        var pixels = new Color32[size * size];
+        for (int y = 0; y < size; y++)
+        {
+            for (int x = 0; x < size; x++)
+            {
+                float px = x + .5f;
+                float py = y + .5f;
+                float nearestX = Mathf.Clamp(px, radius, size - radius);
+                float nearestY = Mathf.Clamp(py, radius, size - radius);
+                float distance = Vector2.Distance(new Vector2(px, py), new Vector2(nearestX, nearestY));
+                byte alpha = (byte)Mathf.RoundToInt(Mathf.Clamp01(radius + .5f - distance) * 255f);
+                pixels[y * size + x] = new Color32(255, 255, 255, alpha);
+            }
+        }
+
+        texture.SetPixels32(pixels);
+        texture.Apply(false, true);
+        roundedUiSprite = Sprite.Create(texture, new Rect(0f, 0f, size, size),
+            new Vector2(.5f, .5f), 100f, 0u, SpriteMeshType.FullRect,
+            new Vector4(7f, 7f, 7f, 7f));
+        roundedUiSprite.name = "Runtime Rounded UI Sprite";
+        roundedUiSprite.hideFlags = HideFlags.HideAndDontSave;
+        return roundedUiSprite;
+    }
+
     private void CreateChoice(PlantLoadoutEntry entry, Transform parent)
     {
-        packets.Add(entry.Key,SeedPacketFactory.CreateChoice(entry,parent,SeedPacketFactory.ChoiceSize,()=>Toggle(entry.Key)));
+        packets.Add(entry.Key,SeedPacketFactory.CreateSelectionCard(entry,parent,150f,()=>Toggle(entry.Key)));
     }
 
     private void Toggle(string key)
@@ -198,8 +317,8 @@ public sealed class PlantSelectionOverlay : MonoBehaviour
         foreach(var pair in packets) pair.Value.SetSelected(selected.Contains(pair.Key));
         for(int i=selectedBank.childCount-1;i>=0;i--) Destroy(selectedBank.GetChild(i).gameObject);
         foreach(string key in selected)
-            if(PlantLoadoutCatalog.TryGet(key,out var entry)) SeedPacketFactory.CreateChoice(entry,selectedBank,new Vector2(56,76),()=>Toggle(key));
-        status.text = "Selected: " + selected.Count + "/" + PlantLoadoutCatalog.MaxSelected;
+            if(PlantLoadoutCatalog.TryGet(key,out var entry)) SeedPacketFactory.CreateSelectionCard(entry,selectedBank,112f,()=>Toggle(key));
+        status.text = "ĐÃ CHỌN  " + selected.Count + "/" + PlantLoadoutCatalog.MaxSelected;
         confirm.interactable = selected.Count > 0;
     }
 

@@ -10,10 +10,16 @@ public class DetectZombieRegion : MonoBehaviour
 
     private void Start()
     {
+        configureCollider();
+    }
+
+    private void configureCollider()
+    {
         float rightEdge = 5.3f;
         float leftEdge = myPlant.transform.position.x;
-        myCollider.size = new Vector2(rightEdge - leftEdge, myCollider.size.y);
-        myCollider.offset = new Vector2((rightEdge - leftEdge) / 2, 0);
+        float width = Mathf.Max(0.1f, rightEdge - leftEdge);
+        myCollider.size = new Vector2(width, myCollider.size.y);
+        myCollider.offset = new Vector2(width / 2f, 0f);
         myCollider.enabled = true;
     }
 
