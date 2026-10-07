@@ -80,7 +80,7 @@ public static class EndlessLeaderboard
         for (int index = 0; index < count; index++)
         {
             EndlessScoreRecord item = records[index];
-            lines.Add(string.Format("{0,2}. {1,-12}  W{2,-3}  {3,7:N0} điểm",
+            lines.Add(string.Format("{0,2}. {1,-12}  Màn {2,-3}  {3,7:N0} điểm",
                 index + 1, ShortName(item.playerName), item.wave, item.score));
         }
         return string.Join("\n", lines);

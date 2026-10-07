@@ -23,6 +23,7 @@ public abstract class SunBase : MonoBehaviour
     // Start is called before the first frame update
     protected virtual void Start()
     {
+        EndlessModifierSystem.ApplyToSun(this);
         dropState = true;
         pickState = false;
         mySpriteRenderer = gameObject.GetComponent<SpriteRenderer>();

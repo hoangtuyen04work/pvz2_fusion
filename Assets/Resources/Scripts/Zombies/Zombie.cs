@@ -15,6 +15,8 @@ public class Zombie : MonoBehaviour
     protected int bloodVolumeMax;
     public int BloodVolumeMax => bloodVolumeMax; // Getter cho GameStateCollector
     protected bool alive = true;
+    public bool IsAlive => alive && bloodVolume > 0;
+    public virtual bool IsDefeatedForEndless => !alive || bloodVolume <= 0;
     private bool burning;
     private float burnEndTime;
     private int burnDamagePerTick;
@@ -180,11 +182,32 @@ public class Zombie : MonoBehaviour
         //Chơi mạng: máu do máy chủ giữ, máy khách nhận số máu qua gói đồng bộ
         if (!NetSession.IsAuthority) return;
 
+        hurt = ModifyDamageForEndless(hurt);
         bloodVolume -= hurt;
         if (bloodVolume <= 0 && alive == true)
         {
             die();
         }
+    }
+
+    protected int ModifyDamageForEndless(int damage)
+    {
+        EndlessEliteRuntime elite = GetComponent<EndlessEliteRuntime>();
+        return elite != null ? elite.ModifyIncomingDamage(damage) : damage;
+    }
+
+    public void Heal(int value)
+    {
+        if (!alive || value <= 0) return;
+        bloodVolume = Mathf.Min(bloodVolumeMax, bloodVolume + value);
+    }
+
+    public void ApplyEndlessSpeedFactor(float factor)
+    {
+        if (!EndlessRun.Active) return;
+        factor = Mathf.Clamp(factor, 0.1f, 3f);
+        speed *= factor;
+        if (myAnimator != null) myAnimator.speed *= factor;
     }
 
     public virtual void playAudioOfBeingAttacked()

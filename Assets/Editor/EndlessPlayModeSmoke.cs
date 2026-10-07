@@ -20,6 +20,7 @@ public static class EndlessPlayModeSmoke
 
     public static void Run()
     {
+        EndlessRun.DeleteProgress();
         GameSession.SelectedPlants.Clear();
         SessionState.SetBool(RunningKey, true);
         SessionState.SetInt(StageKey, 0);
@@ -93,10 +94,26 @@ public static class EndlessPlayModeSmoke
         if (controller == null || !controller.Running || GameManagement.levelData == null) return;
 
         if (!EndlessRun.Active) throw new InvalidOperationException("Endless session is not active.");
+        if (EndlessRun.Session == null || EndlessRun.Session.CurrentStage != 1)
+            throw new InvalidOperationException("Endless progression state was not initialized.");
         if (GameManagement.levelData.levelName != "Sinh Tồn Vô Hạn" || GameManagement.levelData.initialSun != 150)
             throw new InvalidOperationException("Endless level profile was not applied.");
         if (GameObject.Find("Endless Canvas") == null)
             throw new InvalidOperationException("Endless HUD was not created.");
+        UIManagement ui = UnityEngine.Object.FindAnyObjectByType<UIManagement>();
+        SunNumber sun = UnityEngine.Object.FindAnyObjectByType<SunNumber>();
+        if (ui == null || sun == null)
+            throw new InvalidOperationException("Endless deck UI was not initialized.");
+        int sunBeforeDeckRefresh = sun.Current;
+        ui.RefreshEndlessDeck();
+        if (sun.Current != sunBeforeDeckRefresh)
+            throw new InvalidOperationException("Refreshing the Endless deck reset the current sun amount.");
+        Invoke(controller, "ToggleSpeed");
+        if (!Mathf.Approximately(Time.timeScale, 2f))
+            throw new InvalidOperationException("Endless x2 speed did not activate.");
+        Invoke(controller, "ToggleSpeed");
+        if (!Mathf.Approximately(Time.timeScale, 1f))
+            throw new InvalidOperationException("Endless speed did not return to x1.");
         ZombieManagement manager = UnityEngine.Object.FindAnyObjectByType<ZombieManagement>();
         if (manager == null || manager.NowNode_index != 0)
             throw new InvalidOperationException("Legacy zombie timeline advanced during Endless.");

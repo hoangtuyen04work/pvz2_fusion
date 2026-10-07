@@ -8,6 +8,9 @@ public sealed class EndlessMenuOverlay : MonoBehaviour
 {
     private const string PlayerNameKey = "Endless.PlayerName";
     private InputField playerNameInput;
+    private Text subtitle;
+    private Button playButton;
+    private bool newRunArmed;
 
     public static void Show()
     {
@@ -39,7 +42,7 @@ public sealed class EndlessMenuOverlay : MonoBehaviour
             TextAnchor.MiddleCenter, new Color(0.65f, 1f, 0.28f));
         Anchor(title.rectTransform, 0.08f, 0.86f, 0.92f, 0.97f);
 
-        Text subtitle = TextObject("Subtitle", panel.transform,
+        subtitle = TextObject("Subtitle", panel.transform,
             "Cầm cự qua càng nhiều đợt zombie càng tốt", 22,
             TextAnchor.MiddleCenter, new Color(0.9f, 0.94f, 0.78f));
         Anchor(subtitle.rectTransform, 0.08f, 0.79f, 0.92f, 0.86f);
@@ -59,20 +62,32 @@ public sealed class EndlessMenuOverlay : MonoBehaviour
         board.fontStyle = FontStyle.Bold;
         Anchor(board.rectTransform, 0.08f, 0.22f, 0.92f, 0.62f);
 
+        bool hasSave = EndlessRun.HasSavedProgress;
         GameObject close = ButtonObject("Close", panel.transform, "QUAY LẠI", new Color(0.30f, 0.40f, 0.20f), Close);
-        Anchor(close.GetComponent<RectTransform>(), 0.10f, 0.07f, 0.43f, 0.17f);
-        GameObject play = ButtonObject("Play", panel.transform, "CHỌN CÂY & CHƠI", new Color(0.45f, 0.70f, 0.14f), Play);
-        Anchor(play.GetComponent<RectTransform>(), 0.48f, 0.07f, 0.90f, 0.17f);
+        Anchor(close.GetComponent<RectTransform>(), hasSave ? 0.05f : 0.10f, 0.07f, hasSave ? 0.30f : 0.43f, 0.17f);
+        if (hasSave)
+        {
+            GameObject resume = ButtonObject("Resume", panel.transform, "TIẾP TỤC", new Color(0.72f, 0.52f, 0.14f), Resume);
+            Anchor(resume.GetComponent<RectTransform>(), 0.35f, 0.07f, 0.63f, 0.17f);
+        }
+        GameObject play = ButtonObject("Play", panel.transform, hasSave ? "CHƠI MỚI" : "CHỌN CÂY & CHƠI",
+            new Color(0.45f, 0.70f, 0.14f), Play);
+        Anchor(play.GetComponent<RectTransform>(), hasSave ? 0.68f : 0.48f, 0.07f, hasSave ? 0.95f : 0.90f, 0.17f);
+        playButton = play.GetComponent<Button>();
     }
 
     private void Play()
     {
-        string playerName = string.IsNullOrWhiteSpace(playerNameInput.text)
-            ? "Người chơi" : playerNameInput.text.Trim();
-        if (playerName.Length > 20) playerName = playerName.Substring(0, 20);
-        PlayerPrefs.SetString(PlayerNameKey, playerName);
-        PlayerPrefs.Save();
-        NetSession.LocalName = playerName;
+        if (EndlessRun.HasSavedProgress && !newRunArmed)
+        {
+            newRunArmed = true;
+            subtitle.text = "Lượt đang lưu sẽ bị thay thế. Bấm lần nữa để xác nhận chơi mới.";
+            Text label = playButton != null ? playButton.GetComponentInChildren<Text>() : null;
+            if (label != null) label.text = "XÁC NHẬN CHƠI MỚI";
+            return;
+        }
+
+        SavePlayerName();
 
         Destroy(gameObject);
         PlantSelectionOverlay.Show(0, () =>
@@ -80,6 +95,28 @@ public sealed class EndlessMenuOverlay : MonoBehaviour
             EndlessRun.Begin();
             SceneManager.LoadScene(EndlessRun.EntrySceneName);
         });
+    }
+
+    private void Resume()
+    {
+        SavePlayerName();
+        if (!EndlessRun.TryResume())
+        {
+            subtitle.text = "Không thể đọc lượt đã lưu. Bạn có thể bắt đầu lượt mới.";
+            return;
+        }
+        Destroy(gameObject);
+        SceneManager.LoadScene(EndlessRun.EntrySceneName);
+    }
+
+    private void SavePlayerName()
+    {
+        string playerName = string.IsNullOrWhiteSpace(playerNameInput.text)
+            ? "Người chơi" : playerNameInput.text.Trim();
+        if (playerName.Length > 20) playerName = playerName.Substring(0, 20);
+        PlayerPrefs.SetString(PlayerNameKey, playerName);
+        PlayerPrefs.Save();
+        NetSession.LocalName = playerName;
     }
 
     private void Close() => Destroy(gameObject);
@@ -106,7 +143,14 @@ public sealed class EndlessMenuOverlay : MonoBehaviour
         var root = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(Button));
         root.transform.SetParent(parent, false);
         root.GetComponent<Image>().color = color;
-        root.GetComponent<Button>().onClick.AddListener(action);
+        Button button = root.GetComponent<Button>();
+        button.onClick.AddListener(action);
+        ColorBlock colors = button.colors;
+        colors.normalColor = color;
+        colors.highlightedColor = Color.Lerp(color, Color.white, 0.16f);
+        colors.pressedColor = Color.Lerp(color, Color.black, 0.20f);
+        colors.disabledColor = new Color(color.r, color.g, color.b, 0.45f);
+        button.colors = colors;
         Text text = TextObject("Label", root.transform, label, 25, TextAnchor.MiddleCenter, Color.white);
         Stretch(text.rectTransform);
         text.raycastTarget = false;

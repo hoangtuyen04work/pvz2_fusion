@@ -31,6 +31,7 @@ public class Card : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHand
     {
         //Component này phải do đối tượng quản lý tải, nên lấy trong Start
         planting = GameObject.Find("Planting Management").GetComponent<PlantingManagement>();
+        EndlessModifierSystem.ApplyToCard(this);
 
         if (coolingTime > 10f) cooling();
         else endCooling();

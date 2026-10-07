@@ -300,7 +300,7 @@ public class AIAdvisorUI : MonoBehaviour
         }
         else
         {
-            Time.timeScale = 1f;
+            Time.timeScale = EndlessRun.GameplayTimeScale;
             isPausedByAdvisor = false;
             Debug.Log("[AIAdvisor] Game đã TIẾP TỤC (Resume).");
         }

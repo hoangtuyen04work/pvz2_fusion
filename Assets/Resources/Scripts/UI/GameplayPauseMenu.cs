@@ -285,7 +285,7 @@ public class GameplayPauseMenu : MonoBehaviour
         informationButton.SetActive(true);
         isPaused = false;
         AudioListener.pause = false;
-        Time.timeScale = 1f;
+        Time.timeScale = EndlessRun.GameplayTimeScale;
     }
 
     private void ToggleSound()

@@ -39,10 +39,25 @@ public class UIManagement : MonoBehaviour
         levelNameText.text = GameManagement.levelData.levelName;
 
         //Tải nhóm thẻ cây và đặt kích thước, vị trí cho UI liên quan
-        List<string> plantCards = GameManagement.levelData.plantCards;
+        RebuildCardGroup(GameManagement.levelData.plantCards, true);
+    }
+
+    public void RefreshEndlessDeck()
+    {
+        if (!EndlessRun.Active || GameManagement.levelData == null) return;
+        GameManagement.levelData.plantCards = new List<string>(GameSession.SelectedPlants);
+        RebuildCardGroup(GameManagement.levelData.plantCards, false);
+    }
+
+    private void RebuildCardGroup(List<string> plantCards, bool initializeSun)
+    {
         List<Card> cards = new List<Card>();
         for (int i = cardGroup.transform.childCount - 1; i >= 0; i--)
-            Destroy(cardGroup.transform.GetChild(i).gameObject);
+        {
+            GameObject oldCard = cardGroup.transform.GetChild(i).gameObject;
+            oldCard.SetActive(false);
+            Destroy(oldCard);
+        }
 
         HorizontalLayoutGroup layout = cardGroup.GetComponent<HorizontalLayoutGroup>();
         if (layout == null) layout = cardGroup.AddComponent<HorizontalLayoutGroup>();
@@ -62,9 +77,14 @@ public class UIManagement : MonoBehaviour
             if (GameManagement.levelData.isTestMode) { card.sunNeeded = 0; card.coolingTime = 0f; }
             cards.Add(card);
         }
-        SunNumber sunNumber = sunObject.GetComponent<SunNumber>();
-        sunNumber.SetForegroundText(null);
-        sunNumber.Initialize(GameManagement.levelData.initialSun, cards);
+        GameObject sunObject = GameObject.Find("Sun Text");
+        SunNumber sunNumber = sunObject != null ? sunObject.GetComponent<SunNumber>() : null;
+        if (sunNumber != null)
+        {
+            sunNumber.SetForegroundText(null);
+            if (initializeSun) sunNumber.Initialize(GameManagement.levelData.initialSun, cards);
+            else sunNumber.setCardGroup(cards);
+        }
         float cardGroupWidth = cards.Count == 0 ? 0f : cards.Count * SeedPacketFactory.GameplaySize.x + (cards.Count - 1) * layout.spacing;
         cardGroup.GetComponent<RectTransform>()
             .SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, cardGroupWidth);
@@ -76,7 +96,8 @@ public class UIManagement : MonoBehaviour
             .SetInsetAndSizeFromParentEdge(RectTransform.Edge.Left, cardGroupWidth + 108, 60);
         CreatePlantGloveButton(cardGroupWidth);
         // Render the total after the dynamically-created cards so it cannot be hidden.
-        sunObject.transform.SetAsLastSibling();
+        if (sunObject != null) sunObject.transform.SetAsLastSibling();
+        EndlessModifierSystem.ApplyToExistingCards();
     }
 
     private void CreatePlantGloveButton(float cardGroupWidth)

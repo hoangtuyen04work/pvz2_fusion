@@ -43,7 +43,7 @@ public class GameManagement : MonoBehaviour
         if (EndlessRun.Active)
         {
             levelData.levelName = "Sinh Tồn Vô Hạn";
-            levelData.initialSun = 150;
+            levelData.initialSun = 150 + EndlessRun.StartingSunBonus;
             levelData.skipIntro = true;
         }
 

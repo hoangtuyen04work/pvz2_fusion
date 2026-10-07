@@ -133,8 +133,16 @@ public sealed class PlantSelectionOverlay : MonoBehaviour
     private Button confirm;
     private Transform selectedBank;
     private Action onConfirmed;
+    private bool allowCancel = true;
+    private string titleOverride;
+    private string confirmLabel = "PLAY";
 
     public static void Show(int level, Action onConfirmed)
+    {
+        Show(level, onConfirmed, true, null, "PLAY");
+    }
+
+    public static void Show(int level, Action onConfirmed, bool allowCancel, string title, string confirmText)
     {
         if (FindAnyObjectByType<PlantSelectionOverlay>() != null) return;
         var root = new GameObject("Plant Selection", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster), typeof(PlantSelectionOverlay));
@@ -146,7 +154,11 @@ public sealed class PlantSelectionOverlay : MonoBehaviour
         scaler.referenceResolution = new Vector2(1672f, 941f);
         scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
         scaler.matchWidthOrHeight = 0.5f;
-        root.GetComponent<PlantSelectionOverlay>().Build(level, onConfirmed);
+        PlantSelectionOverlay overlay = root.GetComponent<PlantSelectionOverlay>();
+        overlay.allowCancel = allowCancel;
+        overlay.titleOverride = title;
+        overlay.confirmLabel = string.IsNullOrWhiteSpace(confirmText) ? "PLAY" : confirmText;
+        overlay.Build(level, onConfirmed);
     }
 
     private void Build(int level, Action callback)
@@ -166,11 +178,18 @@ public sealed class PlantSelectionOverlay : MonoBehaviour
         panelAspect.aspectRatio = 1672f / 941f;
         panel.raycastTarget = true;
 
-        var title = TextObject("Title", panel.transform, "CHOOSE YOUR PLANTS", 40, TextAnchor.MiddleCenter, new Color(0.65f, 1f, 0.28f));
-        Anchor(title.rectTransform, 0.31f, 0.875f, 0.68f, 0.985f);
-        var back = ButtonObject("Back", panel.transform, "BACK", () => Destroy(gameObject));
-        back.GetComponent<Image>().color = Color.clear;
-        Anchor(back.GetComponent<RectTransform>(), 0.03f, 0.825f, 0.15f, 0.97f);
+        var title = TextObject("Title", panel.transform,
+            string.IsNullOrWhiteSpace(titleOverride) ? "CHOOSE YOUR PLANTS" : titleOverride,
+            40, TextAnchor.MiddleCenter, new Color(0.65f, 1f, 0.28f));
+        title.resizeTextForBestFit = true;
+        title.resizeTextMinSize = 22;
+        Anchor(title.rectTransform, 0.08f, 0.90f, 0.92f, 0.98f);
+        if (allowCancel)
+        {
+            var back = ButtonObject("Back", panel.transform, "BACK", () => Destroy(gameObject));
+            back.GetComponent<Image>().color = Color.clear;
+            Anchor(back.GetComponent<RectTransform>(), 0.03f, 0.91f, 0.15f, 0.97f);
+        }
 
         var bank=ImageObject("Selected Seed Bank",panel.transform,null,Color.clear); Anchor(bank.rectTransform,.205f,.655f,.80f,.835f);
         var selectedObject=new GameObject("Selected Cards",typeof(RectTransform),typeof(HorizontalLayoutGroup)); selectedObject.transform.SetParent(bank.transform,false); Anchor(selectedObject.GetComponent<RectTransform>(),0f,.02f,1f,.98f);
@@ -249,7 +268,7 @@ public sealed class PlantSelectionOverlay : MonoBehaviour
         status.color = new Color(.28f, .12f, .035f, 1f);
         status.alignment = TextAnchor.MiddleCenter;
         Anchor(status.rectTransform, 0.07f, 0.03f, 0.26f, 0.12f);
-        confirm = ButtonObject("Confirm", panel.transform, "PLAY", Confirm).GetComponent<Button>();
+        confirm = ButtonObject("Confirm", panel.transform, confirmLabel, Confirm).GetComponent<Button>();
         confirm.GetComponent<Image>().color = Color.clear;
         Anchor(confirm.GetComponent<RectTransform>(), 0.745f, 0.025f, 0.96f, 0.155f);
 
