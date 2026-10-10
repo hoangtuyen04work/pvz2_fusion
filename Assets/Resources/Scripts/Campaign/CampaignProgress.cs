@@ -63,9 +63,42 @@ public static class CampaignProgress
     public static void SetSfx(bool value) => SetBool("Sfx", value);
     public static void SetShake(bool value) => SetBool("Shake", value);
 
+    // Mở khóa các màn chơi chính (mặc định mở sẵn Màn 1 và Màn 2, tương đương unlockedCount = 2)
+    public const string PrefUnlockedLevels = "Adventure.UnlockedLevelsCount";
+
+    public static int UnlockedLevelsCount => Mathf.Clamp(PlayerPrefs.GetInt(PrefUnlockedLevels, 2), 2, 8);
+
+    public static bool IsLevelUnlocked(int cardIndex)
+    {
+        return cardIndex < UnlockedLevelsCount;
+    }
+
+    public static void UnlockNextLevel(int completedLevelIndex)
+    {
+        // completedLevelIndex là levelId (0, 1, 2, 3, 4, 6, 7, 8)
+        int[] levelOrder = { 0, 1, 2, 3, 4, 6, 7, 8 };
+        int cardIndex = Array.IndexOf(levelOrder, completedLevelIndex);
+        if (cardIndex >= 0)
+        {
+            int nextCount = cardIndex + 2; // hoàn thành màn 2 (cardIndex 1) -> mở màn 3 (count = 3)
+            if (nextCount > UnlockedLevelsCount)
+            {
+                PlayerPrefs.SetInt(PrefUnlockedLevels, Mathf.Clamp(nextCount, 2, levelOrder.Length));
+                PlayerPrefs.Save();
+            }
+        }
+    }
+
+    public static void UnlockAllLevels()
+    {
+        PlayerPrefs.SetInt(PrefUnlockedLevels, 8);
+        PlayerPrefs.Save();
+    }
+
     private static void SetBool(string key, bool value)
     {
         PlayerPrefs.SetInt(Prefix + key, value ? 1 : 0);
         PlayerPrefs.Save();
     }
 }
+

@@ -29,6 +29,11 @@ public class EndMenu : MonoBehaviour
     private void win_real()
     {
         bool localWins = !NetSession.ControlsZombies;
+        if (localWins && !NetSession.IsOnline && !EndlessRun.Active && GameSession.SelectedLevel >= 0)
+        {
+            CampaignProgress.UnlockNextLevel(GameSession.SelectedLevel);
+        }
+
         show(localWins, localWins
             ? "Bạn đã đẩy lùi được lũ zombie"
             : "Hàng cây đã cầm cự tới cùng, bạn thua");

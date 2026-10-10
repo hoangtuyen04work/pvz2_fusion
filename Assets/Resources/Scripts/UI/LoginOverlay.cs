@@ -305,6 +305,7 @@ public class LoginOverlay : MonoBehaviour
         RefreshView();
         messageText.color = new Color(1f, 0.9f, 0.4f);
         messageText.text = "Đã đăng xuất!";
+        onLoginSuccessCallback?.Invoke();
     }
 
     private void SetInteractable(bool interactable)

@@ -55,9 +55,9 @@ public class GameplayPauseMenu : MonoBehaviour
         {
             new[]
             {
-                "MỤC TIÊU\n\nBảo vệ ngôi nhà qua toàn bộ các đợt tấn công. Thu thập nắng, trồng cây trên 5 hàng và không để zombie chạm vạch cuối sân.",
-                "GAMEPLAY\n\nĐây là màn giới thiệu đội hình đầy đủ. Zombie Tuyết làm lạnh cây; Yeti có sức chịu đựng cao. Mèo Miu là cây đặc biệt của màn, thích hợp xử lý mục tiêu nguy hiểm.",
-                "CÁCH CHƠI\n\nƯu tiên Hướng Dương ở phía sau, dựng phòng tuyến Óc Chó rồi đặt cây bắn phía trong. Giữ Bí Đao cho hàng bị thủng và tập trung hỏa lực khi Yeti xuất hiện."
+                "MỤC TIÊU & HƯỚNG DẪN\n\nLàm quen tính năng Ghép Cây (Fusion) và các biến thể Zombie Ghép đặc biệt. Thu thập nắng, trồng cây bảo vệ sân và đánh bại toàn bộ các đợt zombie.",
+                "HƯỚNG DẪN GHÉP (FUSION)\n\n• Ghép Cây: Trồng 1 cây trước (Đậu Bắn, Hướng Dương, Đuốc, Óc Chó), sau đó chọn thẻ cây tương thích rồi bấm đè lên ô đó để hợp thể (ví dụ: Đậu + Đuốc = PeaTorch bắn đạn lửa; Đậu + Hướng Dương = SunPea vừa bắn vừa tạo nắng).\n\n• Zombie Ghép: Cẩn thận Zombie Súng Đậu (nã đạn liên thanh về phía cây), Mũ Xô Siêu Giáp (2 tầng giáp cực trâu), Quỷ Lùn Lửa (lao cực nhanh).",
+                "CHIẾN THUẬT GỢI Ý\n\nTrồng Hướng Dương sớm, dựng Óc Chó ở hàng trước. Kết hợp Đậu Bắn và Đuốc để tối đa hỏa lực diệt nhanh các Zombie Ghép nhiều máu. Mèo Miu là át chủ bài dọn dẹp các mục tiêu hiểm hóc."
             }
         },
         new[]

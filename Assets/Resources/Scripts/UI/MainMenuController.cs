@@ -32,7 +32,7 @@ public class MainMenuController : MonoBehaviour
     private static readonly int[] LevelOrder = { 0, 1, 2, 3, 4, 6, 7, 8 };
     private static readonly string[] LevelNames =
     {
-        "Mèo Miu Xuất Trận",
+        "Hướng Dẫn Tân Thủ",
         "Hành Trình Mới",
         "Thầy Luyện Xác",
         "Vùng Đất Bất Tử",
@@ -57,6 +57,16 @@ public class MainMenuController : MonoBehaviour
 
     private void Update()
     {
+        // Phím tắt F12 trên máy tính (Editor, Windows, macOS, Linux) để mở khóa tất cả màn chơi
+#if UNITY_EDITOR || UNITY_STANDALONE
+        if (Input.GetKeyDown(KeyCode.F12))
+        {
+            CampaignProgress.UnlockAllLevels();
+            RefreshLevelCardsLockState();
+            ShowNotice("ĐÃ MỞ KHÓA TẤT CẢ CÁC MÀN CHƠI (F12)!");
+        }
+#endif
+
         if (menuHoverMaterial == null) return;
         menuHoverAmount = Mathf.Lerp(menuHoverAmount, menuHoverTarget, 18f * Time.unscaledDeltaTime);
         menuHoverMaterial.SetFloat("_HoverAmount", menuHoverAmount);
@@ -112,11 +122,10 @@ public class MainMenuController : MonoBehaviour
             background.material = menuHoverMaterial;
         }
 
-        // Các hitbox bám theo đúng vị trí artwork menu_Main_final 1536x1024.
+        // Các hitbox bám theo đúng vị trí artwork menu_Main_final 1536x1024 (3 chế độ trên bia đá).
         CreateHotspot(menuFrame, "Phiêu lưu", 0.615f, 0.710f, 0.912f, 0.895f, new Vector4(0.655f, 0.755f, 0.885f, 0.855f), StartAdventure);
-        CreateHotspot(menuFrame, "Đấu trường", 0.620f, 0.590f, 0.910f, 0.715f, new Vector4(0.650f, 0.615f, 0.880f, 0.690f), OpenNetLobby);
-        CreateHotspot(menuFrame, "Giải đố", 0.632f, 0.475f, 0.902f, 0.595f, new Vector4(0.680f, 0.500f, 0.865f, 0.570f), () => ShowNotice("Chế độ Giải đố sẽ sớm ra mắt!"));
-        CreateHotspot(menuFrame, "Sinh tồn", 0.642f, 0.355f, 0.895f, 0.485f, new Vector4(0.685f, 0.385f, 0.860f, 0.455f), StartSurvival);
+        CreateHotspot(menuFrame, "Kết hợp", 0.620f, 0.590f, 0.910f, 0.715f, new Vector4(0.679f, 0.592f, 0.850f, 0.676f), OpenNetLobby);
+        CreateHotspot(menuFrame, "Sinh tồn", 0.632f, 0.470f, 0.902f, 0.595f, new Vector4(0.680f, 0.500f, 0.865f, 0.570f), StartSurvival);
         CreateHotspot(menuFrame, "Bảng xếp hạng", 0.130f, 0.085f, 0.345f, 0.245f, new Vector4(0.205f, 0.115f, 0.335f, 0.195f), ShowLeaderboard);
         CreateHotspot(menuFrame, "Zombie", 0.488f, 0.102f, 0.671f, 0.365f, new Vector4(0.488f, 0.200f, 0.676f, 0.355f), ShowZombieAlmanac);
         CreateHotspot(menuFrame, "Cây trồng", 0.684f, 0.082f, 0.827f, 0.268f, new Vector4(0.690f, 0.102f, 0.833f, 0.228f), ShowPlantAlmanac);
@@ -130,12 +139,12 @@ public class MainMenuController : MonoBehaviour
         optionsPanel = BuildModal(menuFrame, "TÙY CHỌN", "Âm thanh và thiết lập nâng cao sẽ được bổ sung trong bản cập nhật tiếp theo.");
         helpPanel = BuildModal(menuFrame, "TRỢ GIÚP",
             "Chọn PHIÊU LƯU để chơi một mình: chọn thẻ cây rồi nhấn vào ô đất để trồng cây chống zombie.\n\n"
-            + "ĐẤU TRƯỜNG (CHƠI MẠNG): nhấn trực tiếp vào nút ĐẤU TRƯỜNG ở menu chính (hoặc nút CHƠI MẠNG trong bảng chọn màn). Một người bấm TẠO PHÒNG rồi đọc địa chỉ hiện trên màn hình, người kia bấm THAM GIA và gõ địa chỉ đó vào.\n\n"
+            + "KẾT HỢP (CHƠI MẠNG): nhấn trực tiếp vào nút KẾT HỢP ở menu chính (hoặc nút CHƠI MẠNG trong bảng chọn màn). Một người bấm TẠO PHÒNG rồi đọc địa chỉ hiện trên màn hình, người kia bấm THAM GIA và gõ địa chỉ đó vào.\n\n"
             + "Chế độ ĐỒNG ĐỘI: hai người cùng trồng cây, dùng chung kho nắng và dãy thẻ.\n"
             + "Chế độ ĐỐI KHÁNG: chủ phòng giữ phe Cây, người tham gia chỉ huy phe Zombie, tích não để thả quân theo từng hàng.\n\n"
             + "Hai máy phải cùng mạng nội bộ. Nếu chơi qua Internet thì cần mở cổng 7777 hoặc dùng phần mềm tạo mạng ảo.");
 
-        // Nút Tài Khoản / Đăng Nhập Cloud ở góc trên bên trái
+        // Nút Tài Khoản / Tên người chơi ở góc trên bên trái
         CreateUserAccountBar(menuFrame);
 
         fadeImage = CreateImage("Chuyển cảnh", canvasObject.transform, null);
@@ -146,29 +155,30 @@ public class MainMenuController : MonoBehaviour
         fadeImage.gameObject.SetActive(false);
     }
 
+    private GameObject userAccountBarObj;
     private Text userAccountText;
 
     private void CreateUserAccountBar(Transform parent)
     {
-        var barObj = new GameObject("UserAccountBar", typeof(RectTransform), typeof(Image), typeof(Button), typeof(MenuButtonMotion));
-        barObj.transform.SetParent(parent, false);
-        SetAnchors(barObj.GetComponent<RectTransform>(), 0.02f, 0.90f, 0.28f, 0.97f);
+        userAccountBarObj = new GameObject("UserAccountBar", typeof(RectTransform), typeof(Image), typeof(Button), typeof(MenuButtonMotion));
+        userAccountBarObj.transform.SetParent(parent, false);
+        SetAnchors(userAccountBarObj.GetComponent<RectTransform>(), 0.02f, 0.90f, 0.28f, 0.97f);
 
-        var bgImage = barObj.GetComponent<Image>();
+        var bgImage = userAccountBarObj.GetComponent<Image>();
         bgImage.sprite = Resources.Load<Sprite>("GameUI/button1");
         bgImage.type = Image.Type.Sliced;
         bgImage.color = new Color(1f, 1f, 1f, 0.9f);
 
-        var btn = barObj.GetComponent<Button>();
+        var btn = userAccountBarObj.GetComponent<Button>();
         btn.onClick.AddListener(() =>
         {
             PlayClick();
             LoginOverlay.Show(UpdateAccountBarText);
         });
 
-        barObj.GetComponent<MenuButtonMotion>().targetGraphic = bgImage;
+        userAccountBarObj.GetComponent<MenuButtonMotion>().targetGraphic = bgImage;
 
-        userAccountText = CreateText("UserText", barObj.transform, "", 16, TextAnchor.MiddleCenter, new Color(1f, 0.95f, 0.7f));
+        userAccountText = CreateText("UserText", userAccountBarObj.transform, "", 16, TextAnchor.MiddleCenter, new Color(1f, 0.95f, 0.7f));
         Stretch(userAccountText.rectTransform);
         userAccountText.fontStyle = FontStyle.Bold;
         userAccountText.raycastTarget = false;
@@ -181,17 +191,19 @@ public class MainMenuController : MonoBehaviour
 
     private void UpdateAccountBarText()
     {
-        if (userAccountText == null) return;
+        if (userAccountBarObj == null || userAccountText == null) return;
         if (FirebaseAuthService.IsLoggedIn)
         {
+            userAccountBarObj.SetActive(true);
             string email = FirebaseAuthService.CurrentUserEmail;
             if (email.Contains("@pvzgame.com"))
                 email = email.Replace("@pvzgame.com", "");
-            userAccountText.text = "TÀI KHOẢN: " + email;
+            userAccountText.text = email;
         }
         else
         {
-            userAccountText.text = "ĐĂNG NHẬP CLOUD";
+            userAccountText.text = string.Empty;
+            userAccountBarObj.SetActive(false);
         }
     }
 
@@ -348,7 +360,7 @@ public class MainMenuController : MonoBehaviour
         for (int cardIndex = 0; cardIndex < LevelOrder.Length; cardIndex++)
         {
             int levelId = LevelOrder[cardIndex];
-            CreateLevelCard(contentObject.transform, levelId, LevelNames[levelId],
+            CreateLevelCard(contentObject.transform, cardIndex, levelId, LevelNames[levelId],
                 LevelThumbnails[levelId], DisplayLevelLabel(levelId));
         }
 
@@ -371,13 +383,29 @@ public class MainMenuController : MonoBehaviour
         return panel;
     }
 
+    private readonly List<GameObject> levelLockOverlays = new List<GameObject>();
+    private readonly List<Button> levelCardButtons = new List<Button>();
+
+    private void RefreshLevelCardsLockState()
+    {
+        for (int cardIndex = 0; cardIndex < LevelOrder.Length; cardIndex++)
+        {
+            bool unlocked = CampaignProgress.IsLevelUnlocked(cardIndex);
+            if (cardIndex < levelLockOverlays.Count && levelLockOverlays[cardIndex] != null)
+                levelLockOverlays[cardIndex].SetActive(!unlocked);
+
+            if (cardIndex < levelCardButtons.Count && levelCardButtons[cardIndex] != null)
+                levelCardButtons[cardIndex].interactable = true; // vẫn cho click để phát âm thanh hoặc thông báo nếu khóa
+        }
+    }
+
     private static string DisplayLevelLabel(int levelId)
     {
         int index = System.Array.IndexOf(LevelOrder, levelId);
         return index >= 0 ? "MÀN " + (index + 1) : "MÀN " + (levelId + 1);
     }
 
-    private void CreateLevelCard(Transform parent, int levelIndex, string levelName,
+    private void CreateLevelCard(Transform parent, int cardIndex, int levelIndex, string levelName,
         string thumbnailPath, string displayLabel)
     {
         var card = new GameObject(displayLabel, typeof(RectTransform), typeof(Image), typeof(Button), typeof(MenuButtonMotion));
@@ -391,7 +419,9 @@ public class MainMenuController : MonoBehaviour
         var button = card.GetComponent<Button>();
         button.transition = Selectable.Transition.None;
         int capturedLevel = levelIndex;
-        button.onClick.AddListener(() => SelectLevel(capturedLevel));
+        int capturedCard = cardIndex;
+        button.onClick.AddListener(() => OnClickLevelCard(capturedCard, capturedLevel));
+        levelCardButtons.Add(button);
         card.GetComponent<MenuButtonMotion>().targetGraphic = frame;
 
         var thumbnail = CreateImage("Ảnh preview màn", card.transform, Resources.Load<Sprite>(thumbnailPath));
@@ -409,6 +439,35 @@ public class MainMenuController : MonoBehaviour
         label.resizeTextMaxSize = 12;
         label.horizontalOverflow = HorizontalWrapMode.Wrap;
         label.raycastTarget = false;
+
+        // Lớp khóa màn chơi (Lock Overlay)
+        var lockOverlay = new GameObject("LockOverlay", typeof(RectTransform), typeof(Image));
+        lockOverlay.transform.SetParent(card.transform, false);
+        Stretch(lockOverlay.GetComponent<RectTransform>());
+        var lockBg = lockOverlay.GetComponent<Image>();
+        lockBg.color = new Color(0f, 0f, 0f, 0.65f);
+        lockBg.raycastTarget = false;
+
+        var lockIcon = CreateImage("LockIcon", lockOverlay.transform, Resources.Load<Sprite>("GameUI/icon_lock"));
+        CenterRect(lockIcon.rectTransform, new Vector2(48f, 54f), new Vector2(0f, 12f));
+        lockIcon.preserveAspect = true;
+        lockIcon.raycastTarget = false;
+
+        bool unlocked = CampaignProgress.IsLevelUnlocked(cardIndex);
+        lockOverlay.SetActive(!unlocked);
+        levelLockOverlays.Add(lockOverlay);
+    }
+
+    private void OnClickLevelCard(int cardIndex, int levelIndex)
+    {
+        if (!CampaignProgress.IsLevelUnlocked(cardIndex))
+        {
+            PlayClick();
+            ShowNotice("Hãy hoàn thành " + DisplayLevelLabel(LevelOrder[cardIndex - 1]) + " để mở khóa màn này!");
+            return;
+        }
+
+        SelectLevel(levelIndex);
     }
 
     private GameObject CreateGameUiButton(string name, Transform parent, string label, int fontSize,
@@ -478,6 +537,16 @@ public class MainMenuController : MonoBehaviour
         if (selectedLevel < 0 || transitioning) return;
 
         GameSession.SelectedLevel = selectedLevel;
+
+        // Nếu là Màn 1 (Hướng Dẫn Tân Thủ), đưa thẳng vào trận với bộ cây mặc định để hiện bảng hướng dẫn giống như vừa tải game
+        if (selectedLevel == 0)
+        {
+            GameSession.SelectedPlants.Clear();
+            GameSession.SelectedPlants.AddRange(new[] { "SunFlower", "PeaShooter", "WallNut", "Squash", "TorchWood", "MiaoMiao" });
+            StartCoroutine(LoadSceneWithFade("GameScene"));
+            return;
+        }
+
         PlantSelectionOverlay.Show(selectedLevel, () => StartCoroutine(LoadSceneWithFade("GameScene")));
     }
 
@@ -503,6 +572,8 @@ public class MainMenuController : MonoBehaviour
     private void OpenModal(GameObject panel)
     {
         if (transitioning || panel == null) return;
+        if (panel == levelPanel)
+            RefreshLevelCardsLockState();
         panel.SetActive(true);
         StartCoroutine(FadeCanvasGroup(panel.GetComponent<CanvasGroup>(), 0f, 1f, 0.2f, false));
     }
@@ -533,8 +604,20 @@ public class MainMenuController : MonoBehaviour
 
     private void StartAdventure()
     {
-        if (!transitioning)
-            OpenModal(levelPanel);
+        if (transitioning) return;
+
+        // Nếu người chơi mới tải game về (chưa hoàn thành/xem hướng dẫn), đưa ngay vào Màn 1 đơn giản hướng dẫn Ghép Cây & Zombie Fusion
+        if (PlayerPrefs.GetInt(DialogLevel0.FirstTimeTutorialKey, 0) == 0)
+        {
+            selectedLevel = 0;
+            GameSession.SelectedLevel = 0;
+            GameSession.SelectedPlants.Clear();
+            GameSession.SelectedPlants.AddRange(new[] { "SunFlower", "PeaShooter", "WallNut", "Squash", "TorchWood", "MiaoMiao" });
+            StartCoroutine(LoadSceneWithFade("GameScene"));
+            return;
+        }
+
+        OpenModal(levelPanel);
     }
 
     private void StartSurvival()
