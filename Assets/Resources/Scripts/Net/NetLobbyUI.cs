@@ -44,8 +44,8 @@ public class NetLobbyUI : MonoBehaviour
         "Đảo Thiên Đường",
         "Đền Mạch Năng Lượng"
     };
-    // Map 8 và 9 có trạng thái môi trường riêng chưa đồng bộ; tạm giữ ở chơi đơn.
-    private static readonly int[] LevelOrder = { 0, 1, 2, 3, 4, 6, 5 };
+    // Map 8 và 9 có trạng thái môi trường riêng chưa đồng bộ; tạm giữ ở chơi đơn. Bỏ màn thử nghiệm Map Test (5).
+    private static readonly int[] LevelOrder = { 0, 1, 2, 3, 4, 6 };
 
     private enum Page { Home, Host, Join }
 
@@ -236,8 +236,9 @@ public class NetLobbyUI : MonoBehaviour
 
     private static string LevelDisplay(int level)
     {
-        return level == 5
-            ? "MAP TEST — " + LevelNames[level]
+        int index = System.Array.IndexOf(LevelOrder, level);
+        return index >= 0
+            ? "Màn " + (index + 1) + " — " + LevelNames[level]
             : "Màn " + (level + 1) + " — " + LevelNames[level];
     }
 

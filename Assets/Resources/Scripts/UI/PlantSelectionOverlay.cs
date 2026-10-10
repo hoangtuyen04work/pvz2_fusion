@@ -88,7 +88,7 @@ public static class PlantLoadoutCatalog
         new PlantLoadoutEntry("PeaShooter", "PeaShooterSingle", "Peashooter", "Sprites/Plants/PeaShooterSingle", 100, 7.5f),
         new PlantLoadoutEntry("WallNut", "WallNut", "Wall-nut", "Sprites/Plants/WallNut", 50, 30f),
         new PlantLoadoutEntry("Squash", "Squash", "Squash", "Sprites/Plants/Squash", 50, 30f),
-        new PlantLoadoutEntry("TorchWood", "TorchWood", "Torchwood", "Sprites/Plants/TorchWood", 175, 7.5f),
+        new PlantLoadoutEntry("TorchWood", "TorchWood", "Torchwood", "Sprites/Plants/Torchwood", 175, 7.5f),
         new PlantLoadoutEntry("MiaoMiao", "MiaoMiao", "Miao Miao", "Sprites/Plants/MiaoMiao", 200, 7.5f),
         new PlantLoadoutEntry("SnowKing", "SnowKing", "Snow King", "Sprites/Plants/SnowKing", 275, 7.5f),
         new PlantLoadoutEntry("SunNut", "SunNut", "Sun-nut", "Sprites/Plants/SunNut/States/SunNut0", 125, 7.5f),
@@ -142,6 +142,11 @@ public sealed class PlantSelectionOverlay : MonoBehaviour
         Show(level, onConfirmed, true, null, "PLAY");
     }
 
+    public static void ShowAlmanac()
+    {
+        PlantAlmanacOverlay.Show();
+    }
+
     public static void Show(int level, Action onConfirmed, bool allowCancel, string title, string confirmText)
     {
         if (FindAnyObjectByType<PlantSelectionOverlay>() != null) return;
@@ -179,69 +184,115 @@ public sealed class PlantSelectionOverlay : MonoBehaviour
         panel.raycastTarget = true;
 
         var title = TextObject("Title", panel.transform,
-            string.IsNullOrWhiteSpace(titleOverride) ? "CHOOSE YOUR PLANTS" : titleOverride,
-            40, TextAnchor.MiddleCenter, new Color(0.65f, 1f, 0.28f));
+            string.IsNullOrWhiteSpace(titleOverride) ? "CHỌN CÂY VÀO TRẬN" : titleOverride,
+            34, TextAnchor.MiddleCenter, new Color(1f, 0.95f, 0.72f, 1f));
         title.resizeTextForBestFit = true;
-        title.resizeTextMinSize = 22;
-        Anchor(title.rectTransform, 0.08f, 0.90f, 0.92f, 0.98f);
+        title.resizeTextMinSize = 20;
+        title.resizeTextMaxSize = 36;
+        title.fontStyle = FontStyle.Bold;
+        AddTextShadow(title.gameObject, new Color(0.24f, 0.10f, 0.02f, 0.95f), new Vector2(2f, -2f));
+        Anchor(title.rectTransform, 0.345f, 0.865f, 0.645f, 0.970f);
+
         if (allowCancel)
         {
-            var back = ButtonObject("Back", panel.transform, "BACK", () => Destroy(gameObject));
-            back.GetComponent<Image>().color = Color.clear;
-            Anchor(back.GetComponent<RectTransform>(), 0.03f, 0.91f, 0.15f, 0.97f);
+            var back = ButtonObject("Back", panel.transform, "TRỞ VỀ", () => Destroy(gameObject));
+            var backImg = back.GetComponent<Image>();
+            Sprite btnSprite = Resources.Load<Sprite>("GameUI/button1");
+            if (btnSprite != null)
+            {
+                backImg.sprite = btnSprite;
+                backImg.type = Image.Type.Sliced;
+                backImg.color = Color.white;
+                var backBtn = back.GetComponent<Button>();
+                backBtn.transition = Selectable.Transition.SpriteSwap;
+                Sprite btnHigh = Resources.Load<Sprite>("GameUI/button2");
+                SpriteState st = backBtn.spriteState;
+                st.highlightedSprite = btnHigh;
+                st.pressedSprite = btnHigh;
+                st.selectedSprite = btnHigh;
+                backBtn.spriteState = st;
+            }
+            else
+            {
+                backImg.color = Color.clear;
+            }
+            var backMotion = back.AddComponent<MenuButtonMotion>();
+            var backText = back.GetComponentInChildren<Text>();
+            if (backText != null)
+            {
+                backText.fontSize = 22;
+                backText.color = new Color(1f, 0.95f, 0.72f, 1f);
+                backText.fontStyle = FontStyle.Bold;
+                AddTextShadow(backText.gameObject, new Color(0.24f, 0.10f, 0.02f, 0.95f), new Vector2(1.8f, -1.8f));
+                backMotion.targetGraphic = backImg;
+            }
+            Anchor(back.GetComponent<RectTransform>(), 0.048f, 0.850f, 0.145f, 0.945f);
         }
 
-        var bank=ImageObject("Selected Seed Bank",panel.transform,null,Color.clear); Anchor(bank.rectTransform,.205f,.655f,.80f,.835f);
-        var selectedObject=new GameObject("Selected Cards",typeof(RectTransform),typeof(HorizontalLayoutGroup)); selectedObject.transform.SetParent(bank.transform,false); Anchor(selectedObject.GetComponent<RectTransform>(),0f,.02f,1f,.98f);
-        var selectedLayout=selectedObject.GetComponent<HorizontalLayoutGroup>(); selectedLayout.spacing=40f; selectedLayout.childAlignment=TextAnchor.MiddleCenter; selectedLayout.childControlWidth=selectedLayout.childControlHeight=false; selectedLayout.childForceExpandWidth=selectedLayout.childForceExpandHeight=false; selectedBank=selectedObject.transform;
-        var hint=TextObject("Hint",panel.transform,"CHỌN TỐI ĐA 6 CÂY",18,TextAnchor.MiddleCenter,new Color(.97f,.91f,.69f)); Anchor(hint.rectTransform,.34f,.615f,.66f,.65f);
+        var bank = ImageObject("Selected Seed Bank", panel.transform, null, Color.clear);
+        Anchor(bank.rectTransform, 0.165f, 0.660f, 0.835f, 0.815f);
+        var selectedObject = new GameObject("Selected Cards", typeof(RectTransform), typeof(HorizontalLayoutGroup));
+        selectedObject.transform.SetParent(bank.transform, false);
+        Stretch(selectedObject.GetComponent<RectTransform>());
+        var selectedLayout = selectedObject.GetComponent<HorizontalLayoutGroup>();
+        selectedLayout.spacing = 30f;
+        selectedLayout.childAlignment = TextAnchor.MiddleCenter;
+        selectedLayout.childControlWidth = selectedLayout.childControlHeight = false;
+        selectedLayout.childForceExpandWidth = selectedLayout.childForceExpandHeight = false;
+        selectedBank = selectedObject.transform;
+
+        var hint = TextObject("Hint", panel.transform, "CHỌN TỐI ĐA 6 CÂY", 18, TextAnchor.MiddleCenter, new Color(0.40f, 0.22f, 0.08f, 0.90f));
+        hint.fontStyle = FontStyle.Bold;
+        Anchor(hint.rectTransform, 0.35f, 0.620f, 0.65f, 0.655f);
 
         var scrollObject = new GameObject("Plant Scroll View", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(ScrollRect));
         scrollObject.transform.SetParent(panel.transform, false);
-        Anchor(scrollObject.GetComponent<RectTransform>(), 0.065f, 0.185f, 0.955f, 0.575f);
+        Anchor(scrollObject.GetComponent<RectTransform>(), 0.042f, 0.192f, 0.950f, 0.586f);
         scrollObject.GetComponent<Image>().color = Color.clear;
 
         var viewportObject = new GameObject("Viewport", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(RectMask2D));
         viewportObject.transform.SetParent(scrollObject.transform, false);
         var viewport = viewportObject.GetComponent<RectTransform>();
-        Anchor(viewport, 0f, 0f, 0.945f, 1f);
-        // Artwork mới đã có vùng gỗ trống; chỉ giữ một graphic gần trong suốt cho RectMask2D.
-        viewportObject.GetComponent<Image>().color = new Color(1f, 1f, 1f, .001f);
+        Anchor(viewport, 0f, 0f, 0.915f, 1f);
+        // Artwork có sẵn khung gỗ rỗng; graphic gần trong suốt cho RectMask2D hoạt động mượt mà.
+        viewportObject.GetComponent<Image>().color = new Color(1f, 1f, 1f, 0.001f);
 
         var gridObject = new GameObject("Plant Flow", typeof(RectTransform), typeof(AdaptiveCardFlowLayout), typeof(ContentSizeFitter));
         gridObject.transform.SetParent(viewportObject.transform, false);
         var content = gridObject.GetComponent<RectTransform>();
         content.anchorMin = new Vector2(0f, 1f);
         content.anchorMax = new Vector2(1f, 1f);
-        content.pivot = new Vector2(.5f, 1f);
+        content.pivot = new Vector2(0.5f, 1f);
         content.anchoredPosition = Vector2.zero;
         content.sizeDelta = Vector2.zero;
         var flow = gridObject.GetComponent<AdaptiveCardFlowLayout>();
-        flow.padding = new RectOffset(18, 18, 18, 18);
-        flow.horizontalSpacing = 18f;
-        flow.verticalSpacing = 18f;
+        flow.padding = new RectOffset(16, 16, 16, 16);
+        flow.horizontalSpacing = 16f;
+        flow.verticalSpacing = 16f;
         gridObject.GetComponent<ContentSizeFitter>().verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
+        // Scrollbar ăn khớp hoàn hảo vào rãnh trượt bên phải của bảng gỗ artwork
         var scrollbarObject = new GameObject("Scrollbar", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Scrollbar));
         scrollbarObject.transform.SetParent(scrollObject.transform, false);
-        Anchor(scrollbarObject.GetComponent<RectTransform>(), .955f, .02f, .995f, .98f);
+        Anchor(scrollbarObject.GetComponent<RectTransform>(), 0.925f, 0.08f, 0.952f, 0.92f);
         scrollbarObject.GetComponent<Image>().color = Color.clear;
 
-        // Vùng tương tác vẫn rộng để dễ kéo, nhưng rãnh và tay kéo nhìn thấy chỉ rộng khoảng 9 px.
         var slidingArea = new GameObject("Sliding Area", typeof(RectTransform));
         slidingArea.transform.SetParent(scrollbarObject.transform, false);
-        Anchor(slidingArea.GetComponent<RectTransform>(), .39f, .02f, .61f, .98f);
+        Stretch(slidingArea.GetComponent<RectTransform>());
+
         Sprite roundedSprite = GetRoundedUiSprite();
-        var track = ImageObject("Thin Track", slidingArea.transform, roundedSprite,
-            new Color(.12f, .045f, .018f, .72f));
+        var track = ImageObject("Wood Groove Track", slidingArea.transform, roundedSprite,
+            new Color(0.18f, 0.08f, 0.03f, 0.55f));
         Stretch(track.rectTransform);
         track.type = Image.Type.Sliced;
         track.raycastTarget = false;
 
-        var handle = ImageObject("Rounded Handle", slidingArea.transform, roundedSprite,
-            new Color(.96f, .72f, .20f, .98f));
+        var handle = ImageObject("Wooden Handle", slidingArea.transform, roundedSprite,
+            new Color(0.96f, 0.74f, 0.22f, 0.95f));
         Stretch(handle.rectTransform);
         handle.type = Image.Type.Sliced;
+
         var scrollbar = scrollbarObject.GetComponent<Scrollbar>();
         scrollbar.handleRect = handle.rectTransform;
         scrollbar.targetGraphic = handle;
@@ -254,8 +305,8 @@ public sealed class PlantSelectionOverlay : MonoBehaviour
         scrollRect.vertical = true;
         scrollRect.movementType = ScrollRect.MovementType.Clamped;
         scrollRect.inertia = true;
-        scrollRect.decelerationRate = .12f;
-        scrollRect.scrollSensitivity = 32f;
+        scrollRect.decelerationRate = 0.12f;
+        scrollRect.scrollSensitivity = 36f;
         scrollRect.verticalScrollbar = scrollbar;
         scrollRect.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHide;
         scrollRect.verticalNormalizedPosition = 1f;
@@ -264,13 +315,26 @@ public sealed class PlantSelectionOverlay : MonoBehaviour
             if (PlantLoadoutCatalog.IsSelectionChoice(entry.Key))
                 CreateChoice(entry, gridObject.transform);
 
-        status = TextObject("Status", panel.transform, string.Empty, 23, TextAnchor.MiddleLeft, Color.white);
-        status.color = new Color(.28f, .12f, .035f, 1f);
-        status.alignment = TextAnchor.MiddleCenter;
-        Anchor(status.rectTransform, 0.07f, 0.03f, 0.26f, 0.12f);
+        // Bảng trạng thái góc dưới bên trái (khung giấy kem có đinh tán)
+        status = TextObject("Status", panel.transform, string.Empty, 24, TextAnchor.MiddleCenter,
+            new Color(0.24f, 0.10f, 0.02f, 1f));
+        status.fontStyle = FontStyle.Bold;
+        Anchor(status.rectTransform, 0.066f, 0.038f, 0.254f, 0.113f);
+
+        // Nút Xác nhận / Chơi góc dưới bên phải (nút bấm màu xanh viền gỗ)
         confirm = ButtonObject("Confirm", panel.transform, confirmLabel, Confirm).GetComponent<Button>();
         confirm.GetComponent<Image>().color = Color.clear;
-        Anchor(confirm.GetComponent<RectTransform>(), 0.745f, 0.025f, 0.96f, 0.155f);
+        var confirmMotion = confirm.gameObject.AddComponent<MenuButtonMotion>();
+        var confirmText = confirm.GetComponentInChildren<Text>();
+        if (confirmText != null)
+        {
+            confirmText.fontSize = 36;
+            confirmText.color = new Color(1f, 0.98f, 0.82f, 1f);
+            confirmText.fontStyle = FontStyle.Bold;
+            AddTextShadow(confirmText.gameObject, new Color(0.12f, 0.32f, 0.06f, 0.95f), new Vector2(2.2f, -2.2f));
+            confirmMotion.targetGraphic = confirmText;
+        }
+        Anchor(confirm.GetComponent<RectTransform>(), 0.745f, 0.028f, 0.960f, 0.155f);
 
         foreach (string key in GameSession.SelectedPlants)
             if (selected.Count < PlantLoadoutCatalog.MaxSelected && PlantLoadoutCatalog.IsSelectionChoice(key) &&
@@ -338,11 +402,21 @@ public sealed class PlantSelectionOverlay : MonoBehaviour
         foreach(string key in selected)
             if(PlantLoadoutCatalog.TryGet(key,out var entry)) SeedPacketFactory.CreateSelectionCard(entry,selectedBank,112f,()=>Toggle(key));
         status.text = "ĐÃ CHỌN  " + selected.Count + "/" + PlantLoadoutCatalog.MaxSelected;
-        confirm.interactable = selected.Count > 0;
+        confirm.interactable = onConfirmed == null || selected.Count > 0;
     }
 
     private void Confirm()
     {
+        if (onConfirmed == null)
+        {
+            if (selected.Count > 0)
+            {
+                GameSession.SelectedPlants.Clear();
+                GameSession.SelectedPlants.AddRange(selected);
+            }
+            Destroy(gameObject);
+            return;
+        }
         if (selected.Count == 0) return;
         GameSession.SelectedPlants.Clear();
         GameSession.SelectedPlants.AddRange(selected);
@@ -388,6 +462,13 @@ public sealed class PlantSelectionOverlay : MonoBehaviour
         text.alignment = alignment;
         text.color = color;
         return text;
+    }
+
+    private static void AddTextShadow(GameObject target, Color color, Vector2 dist)
+    {
+        var outline = target.AddComponent<Outline>();
+        outline.effectColor = color;
+        outline.effectDistance = dist;
     }
 
     private static void Stretch(RectTransform rect) => Anchor(rect, 0f, 0f, 1f, 1f);

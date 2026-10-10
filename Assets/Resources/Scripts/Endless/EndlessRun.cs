@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 /// </summary>
 public static class EndlessRun
 {
-    public const string EntrySceneName = "EndlessScene";
+    public const string EntrySceneName = "GameScene";
     public const string GameplaySceneName = "GameScene";
 
     public static bool Active { get; private set; }
@@ -234,12 +234,6 @@ public static class EndlessBootstrap
         }
 
         if (!EndlessRun.Active) return;
-
-        if (scene.name == EndlessRun.EntrySceneName)
-        {
-            new GameObject("Endless Scene Loader").AddComponent<EndlessEntryLoader>();
-            return;
-        }
 
         if (scene.name == EndlessRun.GameplaySceneName &&
             UnityEngine.Object.FindAnyObjectByType<EndlessGameController>() == null)

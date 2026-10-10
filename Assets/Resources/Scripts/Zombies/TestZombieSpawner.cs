@@ -102,25 +102,36 @@ public class TestZombieSpawner : MonoBehaviour
         scaler.referenceResolution = new Vector2(1000f, 750f);
         scaler.matchWidthOrHeight = 0.5f;
 
-        // Bảng chứa dưới cùng
+        // Bảng chứa nằm gọn ở góc trên bên phải để không chắn tầm nhìn cỏ và zombie tiến vào
         var panel = new GameObject("Test Panel", typeof(RectTransform), typeof(Image));
         panel.transform.SetParent(canvasObject.transform, false);
         var panelRect = panel.GetComponent<RectTransform>();
-        panelRect.anchorMin = new Vector2(0.01f, 0.01f);
-        panelRect.anchorMax = new Vector2(0.99f, 0.29f);
+        panelRect.anchorMin = new Vector2(0.40f, 0.81f);
+        panelRect.anchorMax = new Vector2(0.99f, 0.99f);
         panelRect.offsetMin = Vector2.zero;
         panelRect.offsetMax = Vector2.zero;
 
         var panelBg = panel.GetComponent<Image>();
-        panelBg.color = new Color(0.10f, 0.06f, 0.06f, 0.92f);
+        panelBg.color = new Color(0.12f, 0.08f, 0.08f, 0.88f);
         var border = panel.AddComponent<Outline>();
         border.effectColor = new Color(0.60f, 0.25f, 0.20f, 0.8f);
+
+        // Nút Thu gọn / Mở rộng bảng Test (đặt độc lập ở góc trên bên phải)
+        var toggleBtnGO = CreateButton(canvasObject.transform, "ToggleBtn", "▼ ẨN TEST", new Vector2(0.91f, 0.94f), new Vector2(0.99f, 0.99f), null);
+        toggleBtnGO.GetComponent<Image>().color = new Color(0.20f, 0.15f, 0.12f, 0.95f);
+        var toggleTxt = toggleBtnGO.GetComponentInChildren<Text>();
+        toggleBtnGO.GetComponent<Button>().onClick.AddListener(() =>
+        {
+            bool nextState = !panel.activeSelf;
+            panel.SetActive(nextState);
+            if (toggleTxt != null) toggleTxt.text = nextState ? "▲ ẨN TEST" : "▼ TEST ZOMBIE";
+        });
 
         // Thanh tiêu đề + nút Hàng + Nút xóa
         var topBar = new GameObject("TopBar", typeof(RectTransform));
         topBar.transform.SetParent(panel.transform, false);
         var topRect = topBar.GetComponent<RectTransform>();
-        topRect.anchorMin = new Vector2(0.01f, 0.72f);
+        topRect.anchorMin = new Vector2(0.01f, 0.65f);
         topRect.anchorMax = new Vector2(0.99f, 0.98f);
         topRect.offsetMin = Vector2.zero;
         topRect.offsetMax = Vector2.zero;
@@ -130,19 +141,19 @@ public class TestZombieSpawner : MonoBehaviour
         statusGO.transform.SetParent(topBar.transform, false);
         var statusRect = statusGO.GetComponent<RectTransform>();
         statusRect.anchorMin = new Vector2(0f, 0f);
-        statusRect.anchorMax = new Vector2(0.52f, 1f);
+        statusRect.anchorMax = new Vector2(0.46f, 1f);
         statusRect.offsetMin = Vector2.zero;
         statusRect.offsetMax = Vector2.zero;
 
         selectedStatusText = statusGO.GetComponent<Text>();
         selectedStatusText.font = Resources.Load<Font>("Fonts/Baloo2") ?? Resources.GetBuiltinResource<Font>("Arial.ttf");
-        selectedStatusText.fontSize = 15;
+        selectedStatusText.fontSize = 13;
         selectedStatusText.alignment = TextAnchor.MiddleLeft;
         selectedStatusText.color = new Color(1f, 0.90f, 0.50f);
 
         // Nút Hàng 1..5
-        float startX = 0.53f;
-        float btnWidth = 0.07f;
+        float startX = 0.47f;
+        float btnWidth = 0.08f;
         for (int r = 0; r < 5; r++)
         {
             int rowIdx = r;
@@ -151,15 +162,15 @@ public class TestZombieSpawner : MonoBehaviour
         }
 
         // Nút Xóa Hết Zombie
-        var clearBtn = CreateButton(topBar.transform, "Xóa Hết", "🧹 XÓA", new Vector2(0.91f, 0.05f), new Vector2(0.99f, 0.95f), ClearAllZombies);
+        var clearBtn = CreateButton(topBar.transform, "Xóa Hết", "🧹 XÓA", new Vector2(0.89f, 0.05f), new Vector2(0.99f, 0.95f), ClearAllZombies);
         clearBtn.GetComponent<Image>().color = new Color(0.55f, 0.18f, 0.16f, 0.95f);
 
         // Scroll View danh sách thẻ Zombie
         var scrollView = new GameObject("ScrollView", typeof(RectTransform));
         scrollView.transform.SetParent(panel.transform, false);
         var scrollRectTransform = scrollView.GetComponent<RectTransform>();
-        scrollRectTransform.anchorMin = new Vector2(0.01f, 0.03f);
-        scrollRectTransform.anchorMax = new Vector2(0.99f, 0.70f);
+        scrollRectTransform.anchorMin = new Vector2(0.01f, 0.04f);
+        scrollRectTransform.anchorMax = new Vector2(0.99f, 0.62f);
         scrollRectTransform.offsetMin = Vector2.zero;
         scrollRectTransform.offsetMax = Vector2.zero;
 
@@ -204,7 +215,7 @@ public class TestZombieSpawner : MonoBehaviour
             var card = new GameObject("Card_" + entry.name, typeof(RectTransform), typeof(Image), typeof(Button));
             card.transform.SetParent(content.transform, false);
             var cardRect = card.GetComponent<RectTransform>();
-            cardRect.sizeDelta = new Vector2(90f, 0f);
+            cardRect.sizeDelta = new Vector2(74f, 0f);
 
             var cardImg = card.GetComponent<Image>();
             cardImg.type = Image.Type.Sliced;
@@ -215,8 +226,8 @@ public class TestZombieSpawner : MonoBehaviour
             var iconGO = new GameObject("Icon", typeof(RectTransform), typeof(Image));
             iconGO.transform.SetParent(card.transform, false);
             var iconRect = iconGO.GetComponent<RectTransform>();
-            iconRect.anchorMin = new Vector2(0.08f, 0.28f);
-            iconRect.anchorMax = new Vector2(0.92f, 0.96f);
+            iconRect.anchorMin = new Vector2(0.12f, 0.28f);
+            iconRect.anchorMax = new Vector2(0.88f, 0.94f);
             iconRect.offsetMin = Vector2.zero;
             iconRect.offsetMax = Vector2.zero;
 

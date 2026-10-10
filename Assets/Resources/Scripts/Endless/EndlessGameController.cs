@@ -36,6 +36,16 @@ public sealed class EndlessGameController : MonoBehaviour
         new ZombieSpec("SnowZombie", 3, 260, 5),
         new ZombieSpec("BoneZombie", 3, 280, 7),
         new ZombieSpec("BucketZombie", 4, 380, 8),
+        new ZombieSpec("PoleVaultingZombie", 2, 220, 4),
+        new ZombieSpec("ScreenDoorZombie", 4, 350, 7),
+        new ZombieSpec("FootballZombie", 5, 520, 10),
+        new ZombieSpec("BalloonZombie", 3, 240, 5),
+        new ZombieSpec("JackinTheBoxZombie", 4, 320, 8),
+        new ZombieSpec("DancingZombie", 5, 450, 10),
+        new ZombieSpec("Zomboni", 6, 600, 12),
+        new ZombieSpec("FireImpZombie", 3, 200, 4),
+        new ZombieSpec("ConeBucketZombie", 6, 650, 13),
+        new ZombieSpec("GatlingZombie", 7, 750, 14),
         new ZombieSpec("YetiZombie", 7, 700, 12),
         new ZombieSpec("IceBlockZombie", 8, 850, 15)
     };
@@ -63,10 +73,13 @@ public sealed class EndlessGameController : MonoBehaviour
     private float stageElapsedSeconds;
     private bool running;
     private bool transitioning;
-    private bool doubleSpeed;
+    private int speedMultiplier = 1;
+    private DecreasingSlider flagMeter;
+    private int totalStageZombies;
+    private int spawnedStageZombies;
 
     public bool Running => running;
-    public float RequestedTimeScale => doubleSpeed ? 2f : 1f;
+    public float RequestedTimeScale => speedMultiplier;
 
     private void Awake()
     {
@@ -99,10 +112,34 @@ public sealed class EndlessGameController : MonoBehaviour
         }
 
         running = true;
+        InitFlagMeter();
         EndlessModifierSystem.ApplyToExistingCards();
         EndlessModifierSystem.ApplyToExistingPlants();
         UpdateHud();
         StartCoroutine(RunStages());
+    }
+
+    private void InitFlagMeter()
+    {
+        GameObject meterObj = GameObject.Find("FlagMeter-Slider");
+        if (meterObj != null)
+        {
+            flagMeter = meterObj.GetComponent<DecreasingSlider>();
+            if (flagMeter != null)
+            {
+                flagMeter.setValueInstant(1f);
+            }
+        }
+
+        GameObject bottomPanel = GameObject.Find("MotionPanel-Bottom");
+        if (bottomPanel != null)
+        {
+            RectTransform rect = bottomPanel.GetComponent<RectTransform>();
+            if (rect != null && rect.anchoredPosition.y < 0f)
+            {
+                rect.anchoredPosition = new Vector2(rect.anchoredPosition.x, 0f);
+            }
+        }
     }
 
     private void Update()
@@ -118,6 +155,11 @@ public sealed class EndlessGameController : MonoBehaviour
             ZombieSpec spec = ZombieRoster[index];
             GameObject prefab = Resources.Load<GameObject>("Prefabs/Zombies/" + spec.prefabName);
             if (prefab != null) prefabs[spec.prefabName] = prefab;
+            else if (ImportedZombieRuntime.Supports(spec.prefabName))
+            {
+                // Hỗ trợ trực tiếp Zombie nhập ngoài & Hybrid không cần prefab đĩa cứng
+                prefabs[spec.prefabName] = null;
+            }
             else Debug.LogWarning("Thiếu prefab Endless: " + spec.prefabName, this);
         }
     }
@@ -167,6 +209,11 @@ public sealed class EndlessGameController : MonoBehaviour
                 bossStage ? 2.2f : 1.35f);
 
             List<ZombieSpec> queue = BuildStageQueue(currentStage, bossStage);
+            totalStageZombies = queue.Count + (bossStage ? 1 : 0);
+            spawnedStageZombies = 0;
+            if (flagMeter != null) flagMeter.setValueInstant(1f);
+            UpdateStageProgress();
+
             statusText.text = bossStage ? "Đánh bại boss để hoàn thành chu kỳ" : "Giữ vững phòng tuyến";
             for (int index = 0; index < queue.Count; index++)
             {
@@ -174,7 +221,9 @@ public sealed class EndlessGameController : MonoBehaviour
                     yield return new WaitForSeconds(0.25f);
                 if (!running) yield break;
 
+                spawnedStageZombies++;
                 SpawnZombie(queue[index], -1, true, false, null);
+                UpdateStageProgress();
                 float interval = Mathf.Max(0.34f, 1.20f - currentStage * 0.018f);
                 yield return new WaitForSeconds(UnityEngine.Random.Range(interval * 0.76f, interval * 1.18f));
             }
@@ -182,13 +231,16 @@ public sealed class EndlessGameController : MonoBehaviour
             if (bossStage)
             {
                 yield return new WaitForSeconds(1f);
+                spawnedStageZombies++;
                 SpawnBoss();
+                UpdateStageProgress();
             }
 
             while (running && liveZombieCount > 0)
                 yield return new WaitForSeconds(0.25f);
             if (!running) yield break;
 
+            if (flagMeter != null) flagMeter.setValue(0f);
             int completionBonus = bossStage ? 1000 * currentCycle : 250 * currentStage;
             stageScore += completionBonus;
             float elapsed = Mathf.Max(0f, stageElapsedSeconds);
@@ -271,12 +323,23 @@ public sealed class EndlessGameController : MonoBehaviour
 
     private void SpawnZombie(ZombieSpec spec, int forcedRow, bool allowElite, bool boss, Vector3? forcedPosition)
     {
-        if (spec == null || !prefabs.TryGetValue(spec.prefabName, out GameObject prefab)) return;
+        if (spec == null || !prefabs.ContainsKey(spec.prefabName)) return;
         int row = forcedRow >= 0 ? forcedRow : ChooseRow();
         float y = GameManagement.levelData.zombieInitPosY[Mathf.Clamp(row, 0, GameManagement.levelData.zombieInitPosY.Count - 1)];
         Vector3 position = forcedPosition ?? new Vector3(6f, y, 0f);
         position.y = y;
-        GameObject created = Instantiate(prefab, position, Quaternion.identity, zombieParent);
+
+        GameObject created = null;
+        if (prefabs.TryGetValue(spec.prefabName, out GameObject prefab) && prefab != null)
+        {
+            created = Instantiate(prefab, position, Quaternion.identity, zombieParent);
+        }
+        else
+        {
+            created = ImportedZombieRuntime.Create(spec.prefabName, position, zombieParent);
+        }
+
+        if (created == null) return;
         Zombie zombie = created.GetComponent<Zombie>();
         if (zombie == null)
         {
@@ -356,7 +419,23 @@ public sealed class EndlessGameController : MonoBehaviour
             stageScore += earned;
         }
         if (boss && bossHealthText != null) bossHealthText.gameObject.SetActive(false);
+        UpdateStageProgress();
         UpdateHud();
+    }
+
+    private void UpdateStageProgress()
+    {
+        if (flagMeter == null)
+        {
+            GameObject meterObj = GameObject.Find("FlagMeter-Slider");
+            if (meterObj != null) flagMeter = meterObj.GetComponent<DecreasingSlider>();
+        }
+        if (flagMeter == null || totalStageZombies <= 0) return;
+
+        int remainingToSpawn = Mathf.Max(0, totalStageZombies - spawnedStageZombies);
+        int remainingTotal = remainingToSpawn + liveZombieCount;
+        float progress = Mathf.Clamp01((float)remainingTotal / totalStageZombies);
+        flagMeter.setValue(progress);
     }
 
     internal void UpdateBossHealth(Zombie bossZombie)
@@ -526,7 +605,9 @@ public sealed class EndlessGameController : MonoBehaviour
     private void ToggleSpeed()
     {
         if (!running || transitioning || Time.timeScale <= 0f) return;
-        doubleSpeed = !doubleSpeed;
+        if (speedMultiplier == 1) speedMultiplier = 2;
+        else if (speedMultiplier == 2) speedMultiplier = 5;
+        else speedMultiplier = 1;
         Time.timeScale = RequestedTimeScale;
         UpdateSpeedButton();
     }
@@ -534,7 +615,7 @@ public sealed class EndlessGameController : MonoBehaviour
     private void UpdateSpeedButton()
     {
         if (speedButtonText != null)
-            speedButtonText.text = doubleSpeed ? "TỐC ĐỘ  x2" : "TỐC ĐỘ  x1";
+            speedButtonText.text = "TỐC ĐỘ  x" + speedMultiplier;
     }
 
     public void EndRun()
@@ -602,18 +683,18 @@ public sealed class EndlessGameController : MonoBehaviour
         int stage = currentStage > 0 ? currentStage : (session != null ? session.CurrentStage : 1);
         int cycle = EndlessRules.CycleForStage(stage);
         int position = EndlessRules.PositionInCycle(stage);
-        stageText.text = "MÀN " + stage + "  •  CHU KỲ " + cycle + "  •  " + position + "/5" +
-            (EndlessRules.IsBossStage(stage) ? "  •  BOSS" : string.Empty);
+        stageText.text = "MÀN " + stage + "  •  CHU KỲ " + cycle + " (" + position + "/5)" +
+            (EndlessRules.IsBossStage(stage) ? "  ★ BOSS" : string.Empty);
         int totalScore = (session != null ? session.score : 0) + stageScore;
         int totalKills = (session != null ? session.kills : 0) + stageKills;
-        scoreText.text = "ĐIỂM " + totalScore.ToString("N0") + "  •  HẠ " + totalKills;
+        scoreText.text = "ĐIỂM: " + totalScore.ToString("N0") + "  •  HẠ: " + totalKills;
 
         string cycleName = session != null ? ChoiceName(session.activeCycleDebuffId) : string.Empty;
         string stageName = session != null ? ChoiceName(session.activeStageDebuffId) : string.Empty;
         modifierText.text = "CHU KỲ: " + (string.IsNullOrEmpty(cycleName) ? "—" : cycleName) +
             "\nMÀN: " + (string.IsNullOrEmpty(stageName) ? "—" : stageName) +
-            "\nBUILD: " + CountStacks(session != null ? session.buffs : null) + " buff • " +
-            CountStacks(session != null ? session.tradeoffDebuffs : null) + " debuff";
+            "\nBUFF: " + CountStacks(session != null ? session.buffs : null) + "  •  DEBUFF: " +
+            CountStacks(session != null ? session.tradeoffDebuffs : null);
     }
 
     private static int CountStacks(List<EndlessModifierStack> values)
@@ -642,96 +723,179 @@ public sealed class EndlessGameController : MonoBehaviour
         scaler.referenceResolution = new Vector2(1000f, 750f);
         scaler.matchWidthOrHeight = 0.5f;
 
-        Image hud = EndlessMenuOverlay.ImageObject("Garden HUD", canvasObject.transform, new Color(0.07f, 0.16f, 0.035f, 0.91f));
+        // 1. Garden HUD banner (Bảng gỗ chứa thông tin Màn & Điểm)
+        Sprite woodBanner = Resources.Load<Sprite>("GameUI/dialog_child") ?? Resources.Load<Sprite>("GameUI/button1");
+        Image hud = EndlessMenuOverlay.ImageObject("Garden HUD", canvasObject.transform, Color.white);
+        hud.sprite = woodBanner;
+        hud.type = woodBanner != null ? Image.Type.Sliced : Image.Type.Simple;
         hud.raycastTarget = false;
-        EndlessMenuOverlay.Anchor(hud.rectTransform, 0.50f, 0.875f, 0.985f, 0.985f);
-        stageText = EndlessMenuOverlay.TextObject("Stage", hud.transform, string.Empty, 22,
-            TextAnchor.MiddleLeft, new Color(0.72f, 1f, 0.32f));
-        EndlessMenuOverlay.Anchor(stageText.rectTransform, 0.04f, 0.52f, 0.96f, 0.96f);
+        AddSoftShadow(hud.gameObject, new Vector2(2f, -3f));
+        // Đặt ở góc trên bên phải, chừa chỗ cho Nút Cài đặt / Tạm dừng (x: 0.90 -> 1.0)
+        EndlessMenuOverlay.Anchor(hud.rectTransform, 0.60f, 0.895f, 0.895f, 0.985f);
+
+        stageText = EndlessMenuOverlay.TextObject("Stage", hud.transform, string.Empty, 20,
+            TextAnchor.MiddleCenter, new Color(1f, 0.94f, 0.65f));
+        stageText.fontStyle = FontStyle.Bold;
+        EndlessMenuOverlay.Anchor(stageText.rectTransform, 0.04f, 0.50f, 0.96f, 0.96f);
         stageText.raycastTarget = false;
-        scoreText = EndlessMenuOverlay.TextObject("Score", hud.transform, string.Empty, 19,
-            TextAnchor.MiddleLeft, Color.white);
-        EndlessMenuOverlay.Anchor(scoreText.rectTransform, 0.04f, 0.06f, 0.96f, 0.52f);
+        AddTextOutline(stageText.gameObject, new Color(0.20f, 0.10f, 0.02f, 0.95f), new Vector2(1.2f, -1.2f));
+
+        scoreText = EndlessMenuOverlay.TextObject("Score", hud.transform, string.Empty, 16,
+            TextAnchor.MiddleCenter, Color.white);
+        scoreText.fontStyle = FontStyle.Bold;
+        EndlessMenuOverlay.Anchor(scoreText.rectTransform, 0.04f, 0.06f, 0.96f, 0.50f);
         scoreText.raycastTarget = false;
+        AddTextOutline(scoreText.gameObject, new Color(0.20f, 0.10f, 0.02f, 0.95f), new Vector2(1f, -1f));
 
-        Image modifierPanel = EndlessMenuOverlay.ImageObject("Modifiers", canvasObject.transform,
-            new Color(0.23f, 0.12f, 0.25f, 0.90f));
+        // 2. Modifiers Panel (Bảng gỗ thông tin hiệu ứng bên dưới Shovel & Glove, góc trái)
+        Image modifierPanel = EndlessMenuOverlay.ImageObject("Modifiers", canvasObject.transform, new Color(1f, 1f, 1f, 0.94f));
+        modifierPanel.sprite = woodBanner;
+        modifierPanel.type = woodBanner != null ? Image.Type.Sliced : Image.Type.Simple;
         modifierPanel.raycastTarget = false;
-        EndlessMenuOverlay.Anchor(modifierPanel.rectTransform, 0.015f, 0.785f, 0.34f, 0.91f);
-        modifierText = EndlessMenuOverlay.TextObject("Modifier Text", modifierPanel.transform, string.Empty, 17,
-            TextAnchor.MiddleLeft, new Color(1f, 0.88f, 0.65f));
-        EndlessMenuOverlay.Anchor(modifierText.rectTransform, 0.05f, 0.08f, 0.95f, 0.92f);
-        modifierText.raycastTarget = false;
+        AddSoftShadow(modifierPanel.gameObject, new Vector2(2f, -3f));
+        // Đặt an toàn ở góc trái bên dưới thanh thẻ hạt giống
+        EndlessMenuOverlay.Anchor(modifierPanel.rectTransform, 0.015f, 0.730f, 0.260f, 0.875f);
 
-        GameObject speedButton = CreateButton(canvasObject.transform, "TỐC ĐỘ  x1",
-            new Color(0.46f, 0.58f, 0.16f), ToggleSpeed);
-        EndlessMenuOverlay.Anchor(speedButton.GetComponent<RectTransform>(), 0.35f, 0.91f, 0.48f, 0.975f);
+        modifierText = EndlessMenuOverlay.TextObject("Modifier Text", modifierPanel.transform, string.Empty, 14,
+            TextAnchor.MiddleLeft, new Color(1f, 0.96f, 0.82f));
+        modifierText.fontStyle = FontStyle.Bold;
+        EndlessMenuOverlay.Anchor(modifierText.rectTransform, 0.08f, 0.08f, 0.92f, 0.92f);
+        modifierText.raycastTarget = false;
+        AddTextOutline(modifierText.gameObject, new Color(0.18f, 0.08f, 0.02f, 0.92f), new Vector2(1f, -1f));
+
+        // 3. Nút Điều chỉnh Tốc độ (gỗ PvZ có biểu tượng tua nhanh/play)
+        Sprite btnSprite = Resources.Load<Sprite>("GameUI/button1");
+        GameObject speedButton = CreateThemedButton(canvasObject.transform, "TỐC ĐỘ  x1", btnSprite,
+            new Color(0.96f, 0.92f, 0.65f), ToggleSpeed);
+        EndlessMenuOverlay.Anchor(speedButton.GetComponent<RectTransform>(), 0.485f, 0.905f, 0.590f, 0.980f);
         speedButtonText = speedButton.GetComponentInChildren<Text>();
-        if (speedButtonText != null) speedButtonText.fontSize = 18;
+        if (speedButtonText != null)
+        {
+            speedButtonText.fontSize = 17;
+            speedButtonText.fontStyle = FontStyle.Bold;
+            AddTextOutline(speedButtonText.gameObject, new Color(0.22f, 0.10f, 0.02f, 0.95f), new Vector2(1.2f, -1.2f));
+        }
         UpdateSpeedButton();
 
-        statusText = EndlessMenuOverlay.TextObject("Status", canvasObject.transform, "Đang khởi tạo...", 20,
-            TextAnchor.MiddleCenter, new Color(1f, 0.88f, 0.42f));
-        EndlessMenuOverlay.Anchor(statusText.rectTransform, 0.34f, 0.82f, 0.77f, 0.87f);
+        // 4. Trạng thái vòng chơi (Status text & Boss health)
+        statusText = EndlessMenuOverlay.TextObject("Status", canvasObject.transform, "Đang chuẩn bị...", 19,
+            TextAnchor.MiddleCenter, new Color(1f, 0.92f, 0.45f));
+        statusText.fontStyle = FontStyle.Bold;
+        EndlessMenuOverlay.Anchor(statusText.rectTransform, 0.28f, 0.875f, 0.48f, 0.950f);
         statusText.raycastTarget = false;
-        announcementText = EndlessMenuOverlay.TextObject("Announcement", canvasObject.transform, string.Empty, 42,
-            TextAnchor.MiddleCenter, new Color(0.76f, 1f, 0.30f));
-        EndlessMenuOverlay.Anchor(announcementText.rectTransform, 0.13f, 0.42f, 0.87f, 0.58f);
-        announcementText.raycastTarget = false;
-        announcementText.gameObject.SetActive(false);
+        AddTextOutline(statusText.gameObject, new Color(0.15f, 0.06f, 0.01f, 0.95f), new Vector2(1.2f, -1.2f));
 
-        bossHealthText = EndlessMenuOverlay.TextObject("Boss Health", canvasObject.transform, string.Empty, 24,
-            TextAnchor.MiddleCenter, new Color(1f, 0.48f, 0.32f));
-        EndlessMenuOverlay.Anchor(bossHealthText.rectTransform, 0.34f, 0.755f, 0.72f, 0.81f);
+        // Thanh máu / Thông tin Boss (Nổi bật, rực lửa nhưng theo phong cách thảo mộc/nguy hiểm PvZ)
+        bossHealthText = EndlessMenuOverlay.TextObject("Boss Health", canvasObject.transform, string.Empty, 22,
+            TextAnchor.MiddleCenter, new Color(1f, 0.35f, 0.28f));
+        EndlessMenuOverlay.Anchor(bossHealthText.rectTransform, 0.25f, 0.810f, 0.75f, 0.875f);
         bossHealthText.fontStyle = FontStyle.Bold;
         bossHealthText.raycastTarget = false;
         bossHealthText.gameObject.SetActive(false);
+        AddTextOutline(bossHealthText.gameObject, new Color(0.25f, 0.03f, 0.01f, 0.98f), new Vector2(1.5f, -1.5f));
 
+        // 5. Thông báo giữa màn hình (Announcement Text)
+        announcementText = EndlessMenuOverlay.TextObject("Announcement", canvasObject.transform, string.Empty, 38,
+            TextAnchor.MiddleCenter, new Color(1f, 0.95f, 0.32f));
+        EndlessMenuOverlay.Anchor(announcementText.rectTransform, 0.10f, 0.42f, 0.90f, 0.58f);
+        announcementText.fontStyle = FontStyle.Bold;
+        announcementText.raycastTarget = false;
+        announcementText.gameObject.SetActive(false);
+        AddTextOutline(announcementText.gameObject, new Color(0.24f, 0.08f, 0.02f, 0.98f), new Vector2(2f, -2f));
+        AddSoftShadow(announcementText.gameObject, new Vector2(3f, -4f));
+
+        // 6. Overlay Kết quả Màn chơi (Bảng gỗ lớn PvZ với viền đá đất tự nhiên)
         resultOverlay = EndlessMenuOverlay.ImageObject("Endless Result", canvasObject.transform,
-            new Color(0f, 0f, 0f, 0.84f)).gameObject;
+            new Color(0f, 0f, 0f, 0.82f)).gameObject;
         EndlessMenuOverlay.Stretch(resultOverlay.GetComponent<RectTransform>());
         Canvas resultCanvas = resultOverlay.AddComponent<Canvas>();
         resultCanvas.overrideSorting = true;
         resultCanvas.sortingOrder = 1500;
         resultOverlay.AddComponent<GraphicRaycaster>();
-        Image panel = EndlessMenuOverlay.ImageObject("Soil Panel", resultOverlay.transform,
-            new Color(0.14f, 0.20f, 0.065f, 0.99f));
-        EndlessMenuOverlay.Anchor(panel.rectTransform, 0.22f, 0.10f, 0.78f, 0.90f);
-        Text title = EndlessMenuOverlay.TextObject("Title", panel.transform, "KẾT THÚC SINH TỒN", 38,
-            TextAnchor.MiddleCenter, new Color(0.68f, 1f, 0.28f));
+
+        Sprite mainBoard = Resources.Load<Sprite>("GameUI/dialog_main") ?? Resources.Load<Sprite>("GameUI/ui_notice_boxchat");
+        Image panel = EndlessMenuOverlay.ImageObject("Wood Board Panel", resultOverlay.transform, Color.white);
+        panel.sprite = mainBoard;
+        panel.type = mainBoard != null ? Image.Type.Sliced : Image.Type.Simple;
+        EndlessMenuOverlay.Anchor(panel.rectTransform, 0.20f, 0.10f, 0.80f, 0.90f);
+        AddSoftShadow(panel.gameObject, new Vector2(4f, -5f));
+
+        Text title = EndlessMenuOverlay.TextObject("Title", panel.transform, "KẾT THÚC SINH TỒN", 34,
+            TextAnchor.MiddleCenter, new Color(1f, 0.92f, 0.38f));
+        title.fontStyle = FontStyle.Bold;
         EndlessMenuOverlay.Anchor(title.rectTransform, 0.07f, 0.84f, 0.93f, 0.96f);
-        resultText = EndlessMenuOverlay.TextObject("Result", panel.transform, string.Empty, 24,
-            TextAnchor.MiddleCenter, Color.white);
-        EndlessMenuOverlay.Anchor(resultText.rectTransform, 0.08f, 0.64f, 0.92f, 0.84f);
-        Text boardTitle = EndlessMenuOverlay.TextObject("Board Title", panel.transform, "THÀNH TÍCH CỤC BỘ", 22,
-            TextAnchor.MiddleCenter, new Color(1f, 0.84f, 0.28f));
-        EndlessMenuOverlay.Anchor(boardTitle.rectTransform, 0.08f, 0.56f, 0.92f, 0.63f);
-        resultBoardText = EndlessMenuOverlay.TextObject("Board", panel.transform, string.Empty, 19,
+        AddTextOutline(title.gameObject, new Color(0.24f, 0.10f, 0.02f, 0.98f), new Vector2(1.5f, -1.5f));
+
+        resultText = EndlessMenuOverlay.TextObject("Result", panel.transform, string.Empty, 22,
+            TextAnchor.MiddleCenter, new Color(1f, 0.96f, 0.86f));
+        resultText.fontStyle = FontStyle.Bold;
+        EndlessMenuOverlay.Anchor(resultText.rectTransform, 0.08f, 0.63f, 0.92f, 0.83f);
+        AddTextOutline(resultText.gameObject, new Color(0.20f, 0.08f, 0.02f, 0.95f), new Vector2(1.2f, -1.2f));
+
+        Text boardTitle = EndlessMenuOverlay.TextObject("Board Title", panel.transform, "★ BẢNG XẾP HẠNG SINH TỒN ★", 20,
+            TextAnchor.MiddleCenter, new Color(0.68f, 1f, 0.35f));
+        boardTitle.fontStyle = FontStyle.Bold;
+        EndlessMenuOverlay.Anchor(boardTitle.rectTransform, 0.08f, 0.54f, 0.92f, 0.62f);
+        AddTextOutline(boardTitle.gameObject, new Color(0.12f, 0.20f, 0.04f, 0.95f), new Vector2(1.2f, -1.2f));
+
+        resultBoardText = EndlessMenuOverlay.TextObject("Board", panel.transform, string.Empty, 18,
             TextAnchor.UpperCenter, Color.white);
-        EndlessMenuOverlay.Anchor(resultBoardText.rectTransform, 0.07f, 0.27f, 0.93f, 0.56f);
-        GameObject retry = CreateButton(panel.transform, "CHƠI LẠI", new Color(0.45f, 0.70f, 0.14f), Restart);
-        EndlessMenuOverlay.Anchor(retry.GetComponent<RectTransform>(), 0.09f, 0.08f, 0.47f, 0.20f);
-        GameObject menu = CreateButton(panel.transform, "VỀ MENU", new Color(0.28f, 0.40f, 0.18f), ReturnToMenu);
-        EndlessMenuOverlay.Anchor(menu.GetComponent<RectTransform>(), 0.53f, 0.08f, 0.91f, 0.20f);
+        resultBoardText.fontStyle = FontStyle.Bold;
+        EndlessMenuOverlay.Anchor(resultBoardText.rectTransform, 0.07f, 0.25f, 0.93f, 0.54f);
+        AddTextOutline(resultBoardText.gameObject, new Color(0.18f, 0.08f, 0.02f, 0.95f), new Vector2(1f, -1f));
+
+        // Nút bấm Chơi Lại và Về Menu theo thanh gỗ PvZ
+        Sprite btnStyle1 = Resources.Load<Sprite>("GameUI/button1");
+        Sprite btnStyle2 = Resources.Load<Sprite>("GameUI/button2");
+        GameObject retry = CreateThemedButton(panel.transform, "CHƠI LẠI", btnStyle1, new Color(1f, 0.96f, 0.70f), Restart);
+        EndlessMenuOverlay.Anchor(retry.GetComponent<RectTransform>(), 0.12f, 0.08f, 0.46f, 0.20f);
+
+        GameObject menu = CreateThemedButton(panel.transform, "VỀ MENU", btnStyle2, new Color(0.95f, 0.95f, 0.95f), ReturnToMenu);
+        EndlessMenuOverlay.Anchor(menu.GetComponent<RectTransform>(), 0.54f, 0.08f, 0.88f, 0.20f);
+
         resultOverlay.SetActive(false);
     }
 
-    private static GameObject CreateButton(Transform parent, string label, Color color,
-        UnityEngine.Events.UnityAction action)
+    private static GameObject CreateThemedButton(Transform parent, string label, Sprite sprite,
+        Color textColor, UnityEngine.Events.UnityAction action)
     {
         var root = new GameObject(label, typeof(RectTransform), typeof(Image), typeof(Button));
         root.transform.SetParent(parent, false);
-        root.GetComponent<Image>().color = color;
+        Image image = root.GetComponent<Image>();
+        image.sprite = sprite;
+        image.type = sprite != null ? Image.Type.Sliced : Image.Type.Simple;
+        image.color = Color.white;
         Button button = root.GetComponent<Button>();
         button.onClick.AddListener(action);
         ColorBlock colors = button.colors;
-        colors.highlightedColor = Color.Lerp(color, Color.white, 0.18f);
-        colors.pressedColor = Color.Lerp(color, Color.black, 0.20f);
+        colors.normalColor = Color.white;
+        colors.highlightedColor = new Color(1f, 1f, 0.88f);
+        colors.pressedColor = new Color(0.80f, 0.80f, 0.80f);
         button.colors = colors;
-        Text text = EndlessMenuOverlay.TextObject("Label", root.transform, label, 24, TextAnchor.MiddleCenter, Color.white);
+        AddSoftShadow(root, new Vector2(2f, -3f));
+
+        Text text = EndlessMenuOverlay.TextObject("Label", root.transform, label, 21, TextAnchor.MiddleCenter, textColor);
+        text.fontStyle = FontStyle.Bold;
         EndlessMenuOverlay.Stretch(text.rectTransform);
         text.raycastTarget = false;
+        AddTextOutline(text.gameObject, new Color(0.20f, 0.08f, 0.02f, 0.95f), new Vector2(1.2f, -1.2f));
         return root;
+    }
+
+    private static void AddTextOutline(GameObject go, Color color, Vector2 dist)
+    {
+        Outline outline = go.GetComponent<Outline>();
+        if (outline == null) outline = go.AddComponent<Outline>();
+        outline.effectColor = color;
+        outline.effectDistance = dist;
+    }
+
+    private static void AddSoftShadow(GameObject go, Vector2 dist)
+    {
+        Shadow shadow = go.GetComponent<Shadow>();
+        if (shadow == null) shadow = go.AddComponent<Shadow>();
+        shadow.effectColor = new Color(0f, 0f, 0f, 0.55f);
+        shadow.effectDistance = dist;
     }
 
     private void RestoreTime()

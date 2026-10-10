@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,19 +12,29 @@ public class DecreasingSlider : MonoBehaviour
     void Start()
     {
         slider = transform.GetComponent<UnityEngine.UI.Slider>();
-        slider.value = 1;
-        targetValue = 1;
+        slider.value = 1f;
+        targetValue = 1f;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (targetValue < slider.value)
-            slider.value -= Time.deltaTime * slidingVelocity;
+        if (slider == null) return;
+        if (!Mathf.Approximately(slider.value, targetValue))
+        {
+            slider.value = Mathf.MoveTowards(slider.value, targetValue, Time.deltaTime * slidingVelocity);
+        }
     }
 
     public void setValue(float value)
     {
-        targetValue = value;
+        targetValue = Mathf.Clamp01(value);
+    }
+
+    public void setValueInstant(float value)
+    {
+        if (slider == null) slider = transform.GetComponent<UnityEngine.UI.Slider>();
+        targetValue = Mathf.Clamp01(value);
+        if (slider != null) slider.value = targetValue;
     }
 }

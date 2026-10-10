@@ -884,7 +884,10 @@ public static class ZombieRoster
         new Entry("DolphinRiderZombie", "Cưỡi cá heo",   150, 15f),
         new Entry("SnorkelZombie",      "Bơi lặn",       100, 10f),
         new Entry("Zomboni",            "Xe dọn băng",   225, 28f),
-        new Entry("Imp",                "Quỷ lùn Imp",   50,  4f)
+        new Entry("Imp",                "Quỷ lùn Imp",   50,  4f),
+        new Entry("GatlingZombie",      "Zombie Súng Đậu", 225, 24f),
+        new Entry("ConeBucketZombie",   "Mũ Xô Siêu Giáp", 200, 22f),
+        new Entry("FireImpZombie",      "Quỷ Lùn Lửa",   100, 8f)
     };
 
     public static int CostOf(string zombieName)

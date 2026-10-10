@@ -23,10 +23,10 @@ internal sealed class EndlessScoreFile
     public List<EndlessScoreRecord> records = new List<EndlessScoreRecord>();
 }
 
-/// <summary>Lưu top 10 cục bộ trong persistentDataPath, tách hoàn toàn khỏi điểm Arena.</summary>
+/// <summary>Lưu top 50 cục bộ trong persistentDataPath, tách hoàn toàn khỏi điểm Arena.</summary>
 public static class EndlessLeaderboard
 {
-    private const int MaximumRecords = 10;
+    private const int MaximumRecords = 50;
     private const string FileName = "endless_leaderboard.json";
 
     public static List<EndlessScoreRecord> Load()
@@ -68,6 +68,25 @@ public static class EndlessLeaderboard
         {
             Debug.LogWarning("Không lưu được bảng xếp hạng Endless: " + exception.Message);
         }
+    }
+
+    public static List<EndlessScoreRecord> GetPlayerTopRecords(string playerName, int maxCount = 3)
+    {
+        List<EndlessScoreRecord> all = Load();
+        if (all == null || all.Count == 0) return new List<EndlessScoreRecord>();
+
+        string target = string.IsNullOrWhiteSpace(playerName) ? "Người chơi" : playerName.Trim();
+        var userRecords = new List<EndlessScoreRecord>();
+        for (int i = 0; i < all.Count; i++)
+        {
+            string p = string.IsNullOrWhiteSpace(all[i].playerName) ? "Người chơi" : all[i].playerName.Trim();
+            if (string.Equals(p, target, StringComparison.OrdinalIgnoreCase))
+            {
+                userRecords.Add(all[i]);
+                if (userRecords.Count >= maxCount) break;
+            }
+        }
+        return userRecords;
     }
 
     public static string Format(int maximumRows = 10)

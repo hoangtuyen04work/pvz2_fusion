@@ -28,8 +28,8 @@ public class MainMenuController : MonoBehaviour
     private float menuHoverTarget;
     private float menuHoverAmount;
 
-    // Giữ nguyên id dữ liệu màn, trình bày các màn campaign trước rồi mới tới sandbox Map Test.
-    private static readonly int[] LevelOrder = { 0, 1, 2, 3, 4, 6, 7, 8, 5 };
+    // Danh sách 8 màn chơi chính (bỏ màn thử nghiệm Map Test id 5)
+    private static readonly int[] LevelOrder = { 0, 1, 2, 3, 4, 6, 7, 8 };
     private static readonly string[] LevelNames =
     {
         "Mèo Miu Xuất Trận",
@@ -114,12 +114,12 @@ public class MainMenuController : MonoBehaviour
 
         // Các hitbox bám theo đúng vị trí artwork menu_Main_final 1536x1024.
         CreateHotspot(menuFrame, "Phiêu lưu", 0.615f, 0.710f, 0.912f, 0.895f, new Vector4(0.655f, 0.755f, 0.885f, 0.855f), StartAdventure);
-        CreateHotspot(menuFrame, "Trò chơi nhỏ", 0.620f, 0.590f, 0.910f, 0.715f, new Vector4(0.650f, 0.615f, 0.880f, 0.690f), () => ShowNotice("Chế độ Trò chơi nhỏ sẽ sớm ra mắt!"));
+        CreateHotspot(menuFrame, "Đấu trường", 0.620f, 0.590f, 0.910f, 0.715f, new Vector4(0.650f, 0.615f, 0.880f, 0.690f), OpenNetLobby);
         CreateHotspot(menuFrame, "Giải đố", 0.632f, 0.475f, 0.902f, 0.595f, new Vector4(0.680f, 0.500f, 0.865f, 0.570f), () => ShowNotice("Chế độ Giải đố sẽ sớm ra mắt!"));
-        CreateHotspot(menuFrame, "Sinh tồn", 0.642f, 0.355f, 0.895f, 0.485f, new Vector4(0.685f, 0.385f, 0.860f, 0.455f), () => ShowNotice("Chế độ Sinh tồn sẽ sớm ra mắt!"));
-        CreateHotspot(menuFrame, "Cửa hàng", 0.130f, 0.085f, 0.345f, 0.245f, new Vector4(0.205f, 0.115f, 0.335f, 0.195f), () => ShowNotice("Cửa hàng hiện đang đóng cửa."));
-        CreateHotspot(menuFrame, "Tùy chọn", 0.555f, 0.105f, 0.685f, 0.235f, new Vector4(0.575f, 0.130f, 0.670f, 0.205f), ShowOptions);
-        CreateHotspot(menuFrame, "Trợ giúp", 0.690f, 0.100f, 0.820f, 0.235f, new Vector4(0.715f, 0.125f, 0.805f, 0.205f), ShowHelp);
+        CreateHotspot(menuFrame, "Sinh tồn", 0.642f, 0.355f, 0.895f, 0.485f, new Vector4(0.685f, 0.385f, 0.860f, 0.455f), StartSurvival);
+        CreateHotspot(menuFrame, "Bảng xếp hạng", 0.130f, 0.085f, 0.345f, 0.245f, new Vector4(0.205f, 0.115f, 0.335f, 0.195f), ShowLeaderboard);
+        CreateHotspot(menuFrame, "Zombie", 0.488f, 0.102f, 0.671f, 0.365f, new Vector4(0.488f, 0.200f, 0.676f, 0.355f), ShowZombieAlmanac);
+        CreateHotspot(menuFrame, "Cây trồng", 0.684f, 0.082f, 0.827f, 0.268f, new Vector4(0.690f, 0.102f, 0.833f, 0.228f), ShowPlantAlmanac);
         CreateHotspot(menuFrame, "Thoát", 0.830f, 0.090f, 0.978f, 0.235f, new Vector4(0.865f, 0.120f, 0.955f, 0.205f), QuitGame);
 
         noticeText = CreateText("Thông báo", menuFrame, string.Empty, 24, TextAnchor.MiddleCenter, new Color(0.28f, 0.12f, 0.035f));
@@ -130,10 +130,13 @@ public class MainMenuController : MonoBehaviour
         optionsPanel = BuildModal(menuFrame, "TÙY CHỌN", "Âm thanh và thiết lập nâng cao sẽ được bổ sung trong bản cập nhật tiếp theo.");
         helpPanel = BuildModal(menuFrame, "TRỢ GIÚP",
             "Chọn PHIÊU LƯU để chơi một mình: chọn thẻ cây rồi nhấn vào ô đất để trồng cây chống zombie.\n\n"
-            + "CHƠI MẠNG: vào PHIÊU LƯU rồi bấm nút CHƠI MẠNG ở góc trái trên bảng chọn màn. Một người bấm TẠO PHÒNG rồi đọc địa chỉ hiện trên màn hình, người kia bấm THAM GIA và gõ địa chỉ đó vào.\n\n"
+            + "ĐẤU TRƯỜNG (CHƠI MẠNG): nhấn trực tiếp vào nút ĐẤU TRƯỜNG ở menu chính (hoặc nút CHƠI MẠNG trong bảng chọn màn). Một người bấm TẠO PHÒNG rồi đọc địa chỉ hiện trên màn hình, người kia bấm THAM GIA và gõ địa chỉ đó vào.\n\n"
             + "Chế độ ĐỒNG ĐỘI: hai người cùng trồng cây, dùng chung kho nắng và dãy thẻ.\n"
             + "Chế độ ĐỐI KHÁNG: chủ phòng giữ phe Cây, người tham gia chỉ huy phe Zombie, tích não để thả quân theo từng hàng.\n\n"
             + "Hai máy phải cùng mạng nội bộ. Nếu chơi qua Internet thì cần mở cổng 7777 hoặc dùng phần mềm tạo mạng ảo.");
+
+        // Nút Tài Khoản / Đăng Nhập Cloud ở góc trên bên trái
+        CreateUserAccountBar(menuFrame);
 
         fadeImage = CreateImage("Chuyển cảnh", canvasObject.transform, null);
         Stretch(fadeImage.rectTransform);
@@ -141,6 +144,55 @@ public class MainMenuController : MonoBehaviour
         fadeImage.raycastTarget = true;
         fadeImage.canvasRenderer.SetAlpha(0f);
         fadeImage.gameObject.SetActive(false);
+    }
+
+    private Text userAccountText;
+
+    private void CreateUserAccountBar(Transform parent)
+    {
+        var barObj = new GameObject("UserAccountBar", typeof(RectTransform), typeof(Image), typeof(Button), typeof(MenuButtonMotion));
+        barObj.transform.SetParent(parent, false);
+        SetAnchors(barObj.GetComponent<RectTransform>(), 0.02f, 0.90f, 0.28f, 0.97f);
+
+        var bgImage = barObj.GetComponent<Image>();
+        bgImage.sprite = Resources.Load<Sprite>("GameUI/button1");
+        bgImage.type = Image.Type.Sliced;
+        bgImage.color = new Color(1f, 1f, 1f, 0.9f);
+
+        var btn = barObj.GetComponent<Button>();
+        btn.onClick.AddListener(() =>
+        {
+            PlayClick();
+            LoginOverlay.Show(UpdateAccountBarText);
+        });
+
+        barObj.GetComponent<MenuButtonMotion>().targetGraphic = bgImage;
+
+        userAccountText = CreateText("UserText", barObj.transform, "", 16, TextAnchor.MiddleCenter, new Color(1f, 0.95f, 0.7f));
+        Stretch(userAccountText.rectTransform);
+        userAccountText.fontStyle = FontStyle.Bold;
+        userAccountText.raycastTarget = false;
+        var outline = userAccountText.gameObject.AddComponent<Outline>();
+        outline.effectColor = new Color(0.12f, 0.05f, 0.02f);
+        outline.effectDistance = new Vector2(1f, -1f);
+
+        UpdateAccountBarText();
+    }
+
+    private void UpdateAccountBarText()
+    {
+        if (userAccountText == null) return;
+        if (FirebaseAuthService.IsLoggedIn)
+        {
+            string email = FirebaseAuthService.CurrentUserEmail;
+            if (email.Contains("@pvzgame.com"))
+                email = email.Replace("@pvzgame.com", "");
+            userAccountText.text = "TÀI KHOẢN: " + email;
+        }
+        else
+        {
+            userAccountText.text = "ĐĂNG NHẬP CLOUD";
+        }
     }
 
     private void CreateHotspot(Transform parent, string label, float xMin, float yMin, float xMax, float yMax, Vector4 textRect, UnityEngine.Events.UnityAction action)
@@ -162,7 +214,7 @@ public class MainMenuController : MonoBehaviour
         motion.hoverRect = textRect;
     }
 
-    // Mở sảnh chờ chơi mạng, mang theo màn đang chọn để chủ phòng khỏi phải chọn lại.
+    // Mở sảnh chờ chơi mạng, mang theo màn đang chọn (nếu có) để chủ phòng khỏi phải chọn lại.
     private void OpenNetLobby()
     {
         if (transitioning) return;
@@ -284,14 +336,14 @@ public class MainMenuController : MonoBehaviour
 
         var grid = contentObject.GetComponent<GridLayoutGroup>();
         grid.padding = new RectOffset(0, 0, 0, 0);
-        grid.spacing = new Vector2(8f, 12f);
+        grid.spacing = new Vector2(16f, 12f);
         // Khung Intro có tỉ lệ 270:236; giữ đúng tỉ lệ để artwork không bị ép ngang.
-        grid.cellSize = new Vector2(122f, 107f);
+        grid.cellSize = new Vector2(132f, 115f);
         grid.startCorner = GridLayoutGroup.Corner.UpperLeft;
         grid.startAxis = GridLayoutGroup.Axis.Horizontal;
         grid.childAlignment = TextAnchor.UpperCenter;
         grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-        grid.constraintCount = 5;
+        grid.constraintCount = 4;
 
         for (int cardIndex = 0; cardIndex < LevelOrder.Length; cardIndex++)
         {
@@ -321,7 +373,8 @@ public class MainMenuController : MonoBehaviour
 
     private static string DisplayLevelLabel(int levelId)
     {
-        return levelId == 5 ? "MAP TEST" : "MÀN " + (levelId + 1);
+        int index = System.Array.IndexOf(LevelOrder, levelId);
+        return index >= 0 ? "MÀN " + (index + 1) : "MÀN " + (levelId + 1);
     }
 
     private void CreateLevelCard(Transform parent, int levelIndex, string levelName,
@@ -428,8 +481,24 @@ public class MainMenuController : MonoBehaviour
         PlantSelectionOverlay.Show(selectedLevel, () => StartCoroutine(LoadSceneWithFade("GameScene")));
     }
 
-    private void ShowOptions() => OpenModal(optionsPanel);
-    private void ShowHelp() => OpenModal(helpPanel);
+    private void ShowZombieAlmanac()
+    {
+        if (transitioning) return;
+        ZombieListOverlay.Show();
+    }
+
+    private void ShowLeaderboard()
+    {
+        if (transitioning) return;
+        PlayClick();
+        EndlessLeaderboardOverlay.Show();
+    }
+
+    private void ShowPlantAlmanac()
+    {
+        if (transitioning) return;
+        PlantAlmanacOverlay.Show();
+    }
 
     private void OpenModal(GameObject panel)
     {
@@ -466,6 +535,13 @@ public class MainMenuController : MonoBehaviour
     {
         if (!transitioning)
             OpenModal(levelPanel);
+    }
+
+    private void StartSurvival()
+    {
+        if (transitioning) return;
+        PlayClick();
+        EndlessMenuOverlay.Show();
     }
 
     private IEnumerator LoadSceneWithFade(string sceneName)

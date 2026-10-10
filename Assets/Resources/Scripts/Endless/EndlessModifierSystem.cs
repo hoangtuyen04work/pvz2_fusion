@@ -80,6 +80,7 @@ public static class EndlessModifierSystem
         float bossHealthReduction = boss ? 1f - 0.15f * EndlessRun.GetBuffStacks("boss_hunter") : 1f;
         bossHealthReduction = Mathf.Clamp(bossHealthReduction, 0.55f, 1f);
         zombie.bloodVolume = Mathf.Max(1, Mathf.RoundToInt(zombie.bloodVolume * snapshot.ZombieHealth * bossHealthReduction));
+        zombie.SetBloodVolumeMaxForEndless(zombie.bloodVolume);
         zombie.attackPower = Mathf.Max(1, Mathf.RoundToInt(zombie.attackPower * snapshot.ZombieAttack));
         zombie.netSpeedScale = Mathf.Max(0.1f, stageSpeedScale * snapshot.ZombieSpeed);
     }

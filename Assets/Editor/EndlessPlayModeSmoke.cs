@@ -112,6 +112,9 @@ public static class EndlessPlayModeSmoke
         if (!Mathf.Approximately(Time.timeScale, 2f))
             throw new InvalidOperationException("Endless x2 speed did not activate.");
         Invoke(controller, "ToggleSpeed");
+        if (!Mathf.Approximately(Time.timeScale, 5f))
+            throw new InvalidOperationException("Endless x5 speed did not activate.");
+        Invoke(controller, "ToggleSpeed");
         if (!Mathf.Approximately(Time.timeScale, 1f))
             throw new InvalidOperationException("Endless speed did not return to x1.");
         ZombieManagement manager = UnityEngine.Object.FindAnyObjectByType<ZombieManagement>();

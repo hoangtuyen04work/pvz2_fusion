@@ -15,12 +15,14 @@ public static class ZombieIconHelper
         if (IconCache.TryGetValue(zombieName, out Sprite cached) && cached != null)
             return cached;
 
-        Sprite result = LoadIconInternal(zombieName);
-        if (result != null)
+        Sprite raw = LoadIconInternal(zombieName);
+        if (raw != null)
         {
-            IconCache[zombieName] = result;
+            Sprite normalized = TrimTransparentPaddingToFitCard(raw);
+            IconCache[zombieName] = normalized ?? raw;
+            return IconCache[zombieName];
         }
-        return result;
+        return null;
     }
 
     private static Sprite BaseZombieWithoutFlagCache = null;
@@ -270,6 +272,28 @@ public static class ZombieIconHelper
                     if (sprites != null && sprites.Length > 0) return sprites[0];
                     break;
                 }
+            case "GatlingZombie":
+                {
+                    var sp = Resources.Load<Sprite>("Sprites/Zombies/GatlingZombie/GatlingZombie");
+                    if (sp != null) return sp;
+                    var sprites = Resources.LoadAll<Sprite>("Sprites/Zombies/GatlingZombie/Walk");
+                    if (sprites != null && sprites.Length > 0) return sprites[0];
+                    break;
+                }
+            case "ConeBucketZombie":
+                {
+                    var sp = Resources.Load<Sprite>("Sprites/Zombies/ConeBucketZombie/ConeBucketZombie");
+                    if (sp != null) return sp;
+                    var sprites = Resources.LoadAll<Sprite>("Sprites/Zombies/ConeBucketZombie/Walk");
+                    if (sprites != null && sprites.Length > 0) return sprites[0];
+                    break;
+                }
+            case "FireImpZombie":
+                {
+                    var impSprites = Resources.LoadAll<Sprite>("Sprites/Imported/JiangNan/Zombies/Imp/Zombie");
+                    Sprite baseImp = (impSprites != null && impSprites.Length > 0) ? impSprites[0] : flaglessZombieSprite;
+                    return CreateTintedSprite(baseImp, new Color(1f, 0.45f, 0.25f, 1f));
+                }
         }
 
         // Quy trình Fallback chung
@@ -414,4 +438,114 @@ public static class ZombieIconHelper
             return baseSprite;
         }
     }
+
+    /// <summary>
+    /// Cắt bớt phần viền trong suốt thừa thãi (padding) của sprite nguồn,
+    /// giúp hiển thị icon zombie trên thẻ to rõ, đồng đều và cân đối như thẻ thực tế.
+    /// </summary>
+    private static Sprite TrimTransparentPaddingToFitCard(Sprite sprite)
+    {
+        if (sprite == null) return null;
+
+        try
+        {
+            Texture2D srcTex = sprite.texture;
+            Rect spriteRect = sprite.rect;
+            int xOffset = Mathf.RoundToInt(spriteRect.x);
+            int yOffset = Mathf.RoundToInt(spriteRect.y);
+            int origW = Mathf.RoundToInt(spriteRect.width);
+            int origH = Mathf.RoundToInt(spriteRect.height);
+
+            if (origW <= 4 || origH <= 4) return sprite;
+
+            // Đọc pixel an toàn qua RenderTexture
+            RenderTexture rt = RenderTexture.GetTemporary(srcTex.width, srcTex.height, 0, RenderTextureFormat.Default, RenderTextureReadWrite.Linear);
+            Graphics.Blit(srcTex, rt);
+            RenderTexture activeRt = RenderTexture.active;
+            RenderTexture.active = rt;
+
+            Texture2D readable = new Texture2D(origW, origH, TextureFormat.RGBA32, false);
+            readable.ReadPixels(new Rect(xOffset, yOffset, origW, origH), 0, 0);
+            readable.Apply();
+
+            RenderTexture.active = activeRt;
+            RenderTexture.ReleaseTemporary(rt);
+
+            Color[] pixels = readable.GetPixels();
+            int minX = origW, maxX = -1, minY = origH, maxY = -1;
+
+            for (int y = 0; y < origH; y++)
+            {
+                int rowOffset = y * origW;
+                for (int x = 0; x < origW; x++)
+                {
+                    if (pixels[rowOffset + x].a > 0.05f)
+                    {
+                        if (x < minX) minX = x;
+                        if (x > maxX) maxX = x;
+                        if (y < minY) minY = y;
+                        if (y > maxY) maxY = y;
+                    }
+                }
+            }
+
+            if (minX > maxX || minY > maxY)
+            {
+                Object.DestroyImmediate(readable);
+                return sprite; // Toàn bộ trong suốt
+            }
+
+            int visW = (maxX - minX) + 1;
+            int visH = (maxY - minY) + 1;
+
+            // Thêm viền đệm tự nhiên (padding 12%) để zombie không bị quá to hay sát mép thẻ
+            int padX = Mathf.Max(4, Mathf.RoundToInt(visW * 0.12f));
+            int padY = Mathf.Max(4, Mathf.RoundToInt(visH * 0.12f));
+
+            int cropMinX = Mathf.Max(0, minX - padX);
+            int cropMaxX = Mathf.Min(origW - 1, maxX + padX);
+            int cropMinY = Mathf.Max(0, minY - padY);
+            int cropMaxY = Mathf.Min(origH - 1, maxY + padY);
+
+            int targetW = (cropMaxX - cropMinX) + 1;
+            int targetH = (cropMaxY - cropMinY) + 1;
+
+            // Cân bằng tỉ lệ khung (aspect ratio mục tiêu khoảng 0.75 - 0.85 tương đương ô thẻ UI)
+            // để các zombie quá ốm hoặc quá béo không bị scale phóng đại bất thường
+            float currentAspect = (float)targetW / Mathf.Max(1, targetH);
+            const float targetAspect = 0.80f; // Tỉ lệ chuẩn của ô thẻ trên thanh điều khiển
+
+            int finalW = targetW;
+            int finalH = targetH;
+            if (currentAspect < targetAspect)
+            {
+                // Hình quá ốm dọc -> mở rộng thêm bề ngang canvas
+                finalW = Mathf.RoundToInt(targetH * targetAspect);
+            }
+            else if (currentAspect > 1.25f)
+            {
+                // Hình quá bè ngang -> mở rộng thêm chiều cao canvas để khi preserveAspect không bị chiếm trọn
+                finalH = Mathf.RoundToInt(targetW / 1.15f);
+            }
+
+            Texture2D trimmedTex = new Texture2D(finalW, finalH, TextureFormat.RGBA32, false);
+            Color[] clearFill = new Color[finalW * finalH];
+            trimmedTex.SetPixels(clearFill);
+
+            Color[] croppedPixels = readable.GetPixels(cropMinX, cropMinY, targetW, targetH);
+            int pasteX = (finalW - targetW) / 2;
+            int pasteY = (finalH - targetH) / 2;
+            trimmedTex.SetPixels(pasteX, pasteY, targetW, targetH, croppedPixels);
+            trimmedTex.Apply();
+
+            Object.DestroyImmediate(readable);
+
+            return Sprite.Create(trimmedTex, new Rect(0, 0, finalW, finalH), new Vector2(0.5f, 0.5f), 100f);
+        }
+        catch
+        {
+            return sprite;
+        }
+    }
 }
+

@@ -138,14 +138,20 @@ public static class EndlessRules
     public static int StageBudget(int stage, bool boss)
     {
         float budget = 5f + 1.8f * stage + 0.04f * stage * stage;
+        // Tăng độ khó và số lượng zombie từ màn 5 trở đi theo yêu cầu
+        if (stage >= 5)
+        {
+            int extraStages = stage - 4;
+            budget += extraStages * 3.5f + 0.12f * extraStages * extraStages;
+        }
         if (boss) budget *= 0.75f;
-        return Mathf.Clamp(Mathf.RoundToInt(budget), 6, 125);
+        return Mathf.Clamp(Mathf.RoundToInt(budget), 6, 250);
     }
 
     public static float BaseEliteChance(int cycle)
     {
         if (cycle < 2) return 0f;
-        return Mathf.Min(0.30f, 0.04f + (cycle - 2) * 0.025f);
+        return Mathf.Min(0.40f, 0.06f + (cycle - 2) * 0.035f);
     }
 }
 

@@ -34,7 +34,6 @@ public class Zombie : MonoBehaviour
     public bool IsBurning => burning;
     public bool IsSlowed => slowed;
     public bool IsFrozen => frozen;
-    public bool IsAlive => alive;
 
     //Liên quan tới tấn công
     public int attackPower;  //Sức tấn công
@@ -76,7 +75,8 @@ public class Zombie : MonoBehaviour
         speed *= increase;
         myAnimator.speed *= increase;
 
-        bloodVolumeMax = bloodVolume;
+        if (bloodVolumeMax <= 0 || bloodVolume > bloodVolumeMax)
+            bloodVolumeMax = bloodVolume;
     }
 
     // Update is called once per frame
@@ -141,15 +141,19 @@ public class Zombie : MonoBehaviour
         if (!NetSession.IsAuthority || hypnotized) return;
 
         //Cây bị tấn công
-        if (plant != null)
+        Plant target = plant;
+        if (target != null)
         {
-            ImportedPlant imported = plant.GetComponent<ImportedPlant>();
+            ImportedPlant imported = target.GetComponent<ImportedPlant>();
             if (imported != null && imported.OnBitten(this)) return;
-            plant.beAttacked(attackPower, "beEated");
-            FireWallNutFusion fusion = plant.GetComponent<FireWallNutFusion>();
-            if (fusion != null) fusion.OnBitten(this);
-            IceWallNut iceWallNut = plant.GetComponent<IceWallNut>();
-            if (iceWallNut != null) iceWallNut.OnBitten(this);
+            target.beAttacked(attackPower, "beEated");
+            if (target != null)
+            {
+                FireWallNutFusion fusion = target.GetComponent<FireWallNutFusion>();
+                if (fusion != null) fusion.OnBitten(this);
+                IceWallNut iceWallNut = target.GetComponent<IceWallNut>();
+                if (iceWallNut != null) iceWallNut.OnBitten(this);
+            }
         }
     }
 
@@ -194,6 +198,13 @@ public class Zombie : MonoBehaviour
     {
         EndlessEliteRuntime elite = GetComponent<EndlessEliteRuntime>();
         return elite != null ? elite.ModifyIncomingDamage(damage) : damage;
+    }
+
+    public void SetBloodVolumeMaxForEndless(int maxHealth)
+    {
+        if (!EndlessRun.Active) return;
+        bloodVolumeMax = Mathf.Max(1, maxHealth);
+        if (bloodVolume > bloodVolumeMax) bloodVolume = bloodVolumeMax;
     }
 
     public void Heal(int value)

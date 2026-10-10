@@ -27,6 +27,47 @@ public static class SeedPacketFactory
         SeedPacketView view=root.AddComponent<SeedPacketView>(); view.Configure(root.GetComponent<Image>(),mark.gameObject); return view;
     }
 
+    public static SeedPacketView CreateSelectionCard(PlantLoadoutEntry entry, Transform parent,
+        float targetHeight, UnityAction action)
+    {
+        Sprite artwork = LoadCardArtwork(entry);
+        if (artwork == null)
+            return CreateChoice(entry, parent, new Vector2(targetHeight * .72f, targetHeight), action);
+
+        float aspect = artwork.rect.height > 0f ? artwork.rect.width / artwork.rect.height : .72f;
+        Vector2 size = new Vector2(Mathf.Clamp(targetHeight * aspect, targetHeight * .62f,
+            targetHeight * .90f), targetHeight);
+        GameObject root = new GameObject(entry.Key + " Selection Card", typeof(RectTransform),
+            typeof(CanvasRenderer), typeof(Image), typeof(Button), typeof(LayoutElement));
+        root.transform.SetParent(parent, false);
+        root.GetComponent<RectTransform>().sizeDelta = size;
+
+        LayoutElement layout = root.GetComponent<LayoutElement>();
+        layout.minWidth = layout.preferredWidth = size.x;
+        layout.minHeight = layout.preferredHeight = size.y;
+        layout.flexibleWidth = layout.flexibleHeight = 0f;
+
+        Image image = root.GetComponent<Image>();
+        image.sprite = artwork;
+        image.color = Color.white;
+        image.preserveAspect = true;
+        Button button = root.GetComponent<Button>();
+        button.targetGraphic = image;
+        button.onClick.AddListener(action);
+
+        Image mark = ImageObject("Selected", root.transform, new Color(.28f, .90f, .16f, .30f));
+        Stretch(mark.rectTransform, .025f);
+        mark.raycastTarget = false;
+        Text tick = TextObject("Tick", mark.transform, "✓", Mathf.RoundToInt(targetHeight * .25f),
+            TextAnchor.UpperRight, Color.white);
+        Anchor(tick.rectTransform, .53f, .62f, .94f, .97f);
+        tick.raycastTarget = false;
+
+        SeedPacketView view = root.AddComponent<SeedPacketView>();
+        view.Configure(null, mark.gameObject);
+        return view;
+    }
+
     public static Card CreateGameplayCard(PlantLoadoutEntry entry, Transform parent)
     {
         GameObject root=CreateBase(entry,parent,GameplaySize,false); root.name=entry.Key+"Card";
@@ -96,6 +137,15 @@ public static class SeedPacketFactory
         if(sprite!=null) return sprite;
         return ImportedPlantRuntime.CardPreview(entry.Key)??ImportedPlantRuntime.Preview(entry.Key);
     }
+
+    public static Sprite LoadCardArtwork(PlantLoadoutEntry entry)
+    {
+        Sprite artwork = Resources.Load<Sprite>("Sprites/UI/Card/" + entry.Key + "Slot");
+        if (artwork != null) return artwork;
+        Sprite cardPreview = ImportedPlantRuntime.CardPreview(entry.Key);
+        return cardPreview;
+    }
+
     static Image ImageObject(string name,Transform parent,Color color) { GameObject go=new GameObject(name,typeof(RectTransform),typeof(CanvasRenderer),typeof(Image)); go.transform.SetParent(parent,false); Image image=go.GetComponent<Image>(); image.color=color; return image; }
     static Text TextObject(string name,Transform parent,string value,int size,TextAnchor alignment,Color color) { GameObject go=new GameObject(name,typeof(RectTransform),typeof(CanvasRenderer),typeof(Text)); go.transform.SetParent(parent,false); Text text=go.GetComponent<Text>(); text.font=Resources.Load<Font>("Fonts/Baloo2")??Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf"); text.text=value; text.fontSize=size; text.resizeTextForBestFit=true; text.resizeTextMinSize=Mathf.Min(7,size); text.resizeTextMaxSize=size; text.alignment=alignment; text.color=color; return text; }
     static void Stretch(RectTransform rect,float margin=0) { Anchor(rect,margin,margin,1-margin,1-margin); }

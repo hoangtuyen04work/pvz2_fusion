@@ -33,6 +33,8 @@ public sealed class EndlessEliteRuntime : MonoBehaviour
         else if (type == EndlessEliteType.Splitter) zombie.bloodVolume = Mathf.RoundToInt(zombie.bloodVolume * 1.10f);
         else if (type == EndlessEliteType.SunThief) sunBank = FindAnyObjectByType<SunNumber>();
 
+        zombie.SetBloodVolumeMaxForEndless(zombie.bloodVolume);
+
         ApplyVisualIdentity();
         CreateBadge(ShortLabel(type));
     }
@@ -103,6 +105,7 @@ public sealed class EndlessEliteRuntime : MonoBehaviour
         type = EndlessEliteType.None;
         transform.localScale *= 1.30f;
         zombie.bloodVolume = Mathf.RoundToInt(zombie.bloodVolume * (4f + cycle * 0.45f));
+        zombie.SetBloodVolumeMaxForEndless(zombie.bloodVolume);
         zombie.attackPower = Mathf.RoundToInt(zombie.attackPower * 1.5f);
         Tint(new Color(0.72f, 0.45f, 0.88f));
         CreateBadge("BOSS");

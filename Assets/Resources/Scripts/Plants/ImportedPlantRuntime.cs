@@ -37,6 +37,8 @@ public static class ImportedPlantRuntime
 
     public static Sprite CardPreview(string key)
     {
+        Sprite customSlot = Resources.Load<Sprite>("Sprites/UI/Card/" + key + "Slot");
+        if (customSlot != null) return customSlot;
         if (OriginalPvZPlantRuntime.Supports(key)) return OriginalPvZPlantRuntime.Preview(key);
         return Definitions.TryGetValue(key, out var definition)
             ? Resources.Load<Sprite>(definition.cardPath)
@@ -177,6 +179,7 @@ public sealed class ImportedPlant : Plant
     private float nextAction;
     private bool armed, grown, scared, resolvingSingleUse, chomping;
 
+    public ImportedPlantDefinition Definition => definition;
     public bool CanBeEaten => definition==null || definition.kind!=ImportedPlantKind.Spikeweed;
 
     public void Configure(ImportedPlantDefinition value, RuntimeFrameAnimator animator)
@@ -357,6 +360,7 @@ public sealed class ImportedPlant : Plant
             // match it and remain within the playable lawn edges.
             ImportedPlantVfx.CreateFireLane(transform.position.y, -5.3f, 5.3f);
             PlaySfx("Sounds/Plants/fire", 0.85f);
+            ZomboniIceRoad.ThawLane(row);
         }
         else if(definition.key=="CherryBomb")
         {
