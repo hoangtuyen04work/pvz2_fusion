@@ -114,7 +114,7 @@ public sealed class EndlessMenuOverlay : MonoBehaviour
 
         playerNameInput = InputObject(panel.transform);
         Anchor(playerNameInput.GetComponent<RectTransform>(), 0.38f, 0.710f, 0.88f, 0.780f);
-        playerNameInput.text = PlayerPrefs.GetString(PlayerNameKey, "Người chơi");
+        playerNameInput.text = FirebaseAuthService.GetCurrentPlayerName();
 
         // 5. Khung bảng thành tích Top 3 của người chơi (bảng gỗ phụ dialog_child)
         var boardChildObj = new GameObject("Board Container", typeof(RectTransform), typeof(Image));
@@ -153,11 +153,12 @@ public sealed class EndlessMenuOverlay : MonoBehaviour
         var rowsRect = rowsContainer.GetComponent<RectTransform>();
         Anchor(rowsRect, 0.03f, 0.04f, 0.97f, 0.71f);
 
-        string currentPlayer = PlayerPrefs.GetString(PlayerNameKey, "Người chơi");
+        string currentPlayer = playerNameInput.text;
         BuildTop3Rows(rowsContainer.transform, currentPlayer);
 
         playerNameInput.onEndEdit.AddListener(newName =>
         {
+            SavePlayerName();
             BuildTop3Rows(rowsContainer.transform, newName);
         });
 

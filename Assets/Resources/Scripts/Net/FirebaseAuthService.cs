@@ -54,13 +54,72 @@ public class FirebaseAuthService : MonoBehaviour
         public int highestMap;
         public int wins;
         public int losses;
+        public int endlessBestScore;
+        public int endlessBestWave;
+        public int endlessTotalKills;
         public string lastUpdated;
     }
 
-    public static string CurrentUserId { get; private set; } = string.Empty;
-    public static string CurrentUserEmail { get; private set; } = string.Empty;
-    public static string CurrentIdToken { get; private set; } = string.Empty;
+    public static string CurrentUserId
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(currentUserId))
+                currentUserId = PlayerPrefs.GetString(PrefSavedUserId, string.Empty);
+            return currentUserId;
+        }
+        private set => currentUserId = value;
+    }
+    private static string currentUserId = string.Empty;
+
+    public static string CurrentUserEmail
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(currentUserEmail))
+                currentUserEmail = PlayerPrefs.GetString(PrefSavedEmail, string.Empty);
+            return currentUserEmail;
+        }
+        private set => currentUserEmail = value;
+    }
+    private static string currentUserEmail = string.Empty;
+
+    public static string CurrentIdToken
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(currentIdToken))
+                currentIdToken = PlayerPrefs.GetString(PrefSavedToken, string.Empty);
+            return currentIdToken;
+        }
+        private set => currentIdToken = value;
+    }
+    private static string currentIdToken = string.Empty;
+
     public static bool IsLoggedIn => !string.IsNullOrEmpty(CurrentUserId);
+
+    /// <summary>
+    /// Trả về tên hiển thị chuẩn nhất của người chơi hiện tại:
+    /// Nếu đã đăng nhập thì lấy username (bỏ đuôi @pvzgame.com), nếu chưa thì lấy tên cục bộ đã lưu.
+    /// </summary>
+    public static string GetCurrentPlayerName()
+    {
+        if (IsLoggedIn && !string.IsNullOrEmpty(CurrentUserEmail))
+        {
+            string name = CurrentUserEmail;
+            if (name.Contains("@pvzgame.com"))
+                name = name.Replace("@pvzgame.com", "");
+            else if (name.Contains("@"))
+                name = name.Substring(0, name.IndexOf('@'));
+            return string.IsNullOrWhiteSpace(name) ? "Người chơi" : name.Trim();
+        }
+
+        string localName = PlayerPrefs.GetString("Endless.PlayerName", string.Empty);
+        if (!string.IsNullOrWhiteSpace(localName))
+            return localName.Trim();
+
+        return !string.IsNullOrWhiteSpace(NetSession.LocalName) ? NetSession.LocalName.Trim() : "Người chơi";
+    }
 
     private const string PrefSavedEmail = "PvZ_Cloud_SavedEmail";
     private const string PrefSavedToken = "PvZ_Cloud_SavedToken";
@@ -80,6 +139,14 @@ public class FirebaseAuthService : MonoBehaviour
         CurrentUserId = PlayerPrefs.GetString(PrefSavedUserId, string.Empty);
         CurrentUserEmail = PlayerPrefs.GetString(PrefSavedEmail, string.Empty);
         CurrentIdToken = PlayerPrefs.GetString(PrefSavedToken, string.Empty);
+
+        // Đồng bộ tên người chơi với NetSession
+        if (IsLoggedIn)
+        {
+            string disp = GetCurrentPlayerName();
+            NetSession.LocalName = disp;
+            PlayerPrefs.SetString("Endless.PlayerName", disp);
+        }
     }
 
     /// <summary>
@@ -163,6 +230,9 @@ public class FirebaseAuthService : MonoBehaviour
         PlayerPrefs.DeleteKey(PrefSavedEmail);
         PlayerPrefs.DeleteKey(PrefSavedToken);
         PlayerPrefs.DeleteKey(PrefSavedUserId);
+
+        NetSession.LocalName = "Người chơi";
+        PlayerPrefs.SetString("Endless.PlayerName", "Người chơi");
         PlayerPrefs.Save();
     }
 
@@ -191,6 +261,37 @@ public class FirebaseAuthService : MonoBehaviour
 
         string dbUrl = FirebaseConfig.DatabaseUrl.TrimEnd('/') + $"/users/{CurrentUserId}.json?auth={CurrentIdToken}";
         StartCoroutine(PutDatabaseRoutine(dbUrl, json, onComplete));
+    }
+
+    /// <summary>
+    /// Tự động cập nhật kết quả màn chơi Sinh tồn của người chơi lên Cloud
+    /// </summary>
+    public void RecordEndlessResult(int score, int wave, int kills)
+    {
+        if (!IsLoggedIn) return;
+
+        LoadPlayerDataFromCloud((ok, profile, msg) =>
+        {
+            if (profile == null)
+            {
+                profile = new PlayerProfileData
+                {
+                    username = GetCurrentPlayerName(),
+                    email = CurrentUserEmail,
+                    bestScore = CampaignProgress.BestScore,
+                    highestMap = CampaignProgress.HighestMap,
+                    wins = CampaignProgress.Wins,
+                    losses = CampaignProgress.Losses
+                };
+            }
+
+            profile.username = GetCurrentPlayerName();
+            if (score > profile.endlessBestScore) profile.endlessBestScore = score;
+            if (wave > profile.endlessBestWave) profile.endlessBestWave = wave;
+            profile.endlessTotalKills += kills;
+
+            SavePlayerDataToCloud(profile, null);
+        });
     }
 
     /// <summary>
@@ -381,6 +482,11 @@ public class FirebaseAuthService : MonoBehaviour
         PlayerPrefs.SetString(PrefSavedUserId, CurrentUserId);
         PlayerPrefs.SetString(PrefSavedEmail, CurrentUserEmail);
         PlayerPrefs.SetString(PrefSavedToken, CurrentIdToken);
+
+        string playerName = GetCurrentPlayerName();
+        NetSession.LocalName = playerName;
+        PlayerPrefs.SetString("Endless.PlayerName", playerName);
+
         PlayerPrefs.Save();
     }
 

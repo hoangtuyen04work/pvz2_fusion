@@ -260,20 +260,52 @@ public class ZombieCommanderUI : MonoBehaviour
 
     private void BuildCards(Transform parent)
     {
+
         ZombieManagement management = null;
         GameObject holder = GameObject.Find("Zombie Management");
         if (holder != null) management = holder.GetComponent<ZombieManagement>();
 
         List<ZombieRoster.Entry> usable = new List<ZombieRoster.Entry>();
-        foreach (ZombieRoster.Entry entry in ZombieRoster.All)
+
+        // Chỉ lấy các zombie đã được chọn (tối đa 6 con)
+        if (NetSession.SelectedZombies != null && NetSession.SelectedZombies.Count > 0)
         {
-            if (IsAvailable(management, entry.name)) usable.Add(entry);
+            foreach (string name in NetSession.SelectedZombies)
+            {
+                if (usable.Count >= 6) break;
+                ZombieRoster.Entry entry = ZombieRoster.Find(name);
+                if (entry != null && IsAvailable(management, entry.name))
+                    usable.Add(entry);
+            }
+        }
+
+        // Nếu danh sách người chơi chọn chưa có hoặc rỗng, lấy 6 con cơ bản mặc định
+        if (usable.Count == 0)
+        {
+            string[] defaultNames = { "ZombieNormal", "ConeZombie", "ChineseZombie", "BucketZombie", "PoleVaultingZombie", "FootballZombie" };
+            foreach (string name in defaultNames)
+            {
+                if (usable.Count >= 6) break;
+                ZombieRoster.Entry entry = ZombieRoster.Find(name);
+                if (entry != null && IsAvailable(management, entry.name))
+                    usable.Add(entry);
+            }
+        }
+
+        // Dự phòng nếu các con trên không có trong level: lấy 6 con đầu tiên khả dụng
+        if (usable.Count == 0)
+        {
+            foreach (ZombieRoster.Entry entry in ZombieRoster.All)
+            {
+                if (usable.Count >= 6) break;
+                if (IsAvailable(management, entry.name)) usable.Add(entry);
+            }
         }
 
         if (usable.Count == 0) return;
 
         const float left = 0.125f;
-        const float right = 0.995f;
+        const float right = 0.995f; // Trải đều thẻ dọc theo toàn bộ thanh chỉ huy
         float width = (right - left) / usable.Count;
 
         for (int i = 0; i < usable.Count; i++)
@@ -375,6 +407,27 @@ public class ZombieCommanderUI : MonoBehaviour
         text.horizontalOverflow = HorizontalWrapMode.Wrap;
         text.verticalOverflow = VerticalWrapMode.Overflow;
         return text;
+    }
+
+    private GameObject CreateButton(string name, Transform parent, string label, int size,
+        float xMin, float yMin, float xMax, float yMax, UnityEngine.Events.UnityAction action)
+    {
+        GameObject go = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(Button));
+        go.transform.SetParent(parent, false);
+        SetAnchors(go.GetComponent<RectTransform>(), xMin, yMin, xMax, yMax);
+
+        Image img = go.GetComponent<Image>();
+        img.sprite = buttonSprite;
+        img.type = Image.Type.Sliced;
+        img.color = new Color(0.85f, 0.40f, 0.35f, 1f);
+
+        Button btn = go.GetComponent<Button>();
+        btn.onClick.AddListener(action);
+
+        Text txt = CreateText("Label", go.transform, label, size, TextAnchor.MiddleCenter, Color.white);
+        SetAnchors(txt.rectTransform, 0.05f, 0.05f, 0.95f, 0.95f);
+        txt.raycastTarget = false;
+        return go;
     }
 
     private static void SetAnchors(RectTransform rect, float xMin, float yMin, float xMax, float yMax)

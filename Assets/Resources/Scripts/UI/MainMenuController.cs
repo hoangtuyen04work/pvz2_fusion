@@ -27,6 +27,7 @@ public class MainMenuController : MonoBehaviour
     private Material menuHoverMaterial;
     private float menuHoverTarget;
     private float menuHoverAmount;
+    private Text adventureProgressText;
 
     // Danh sách 8 màn chơi chính (bỏ màn thử nghiệm Map Test id 5)
     private static readonly int[] LevelOrder = { 0, 1, 2, 3, 4, 6, 7, 8 };
@@ -63,6 +64,7 @@ public class MainMenuController : MonoBehaviour
         {
             CampaignProgress.UnlockAllLevels();
             RefreshLevelCardsLockState();
+            UpdateAdventureProgressText();
             ShowNotice("ĐÃ MỞ KHÓA TẤT CẢ CÁC MÀN CHƠI (F12)!");
         }
 #endif
@@ -144,6 +146,16 @@ public class MainMenuController : MonoBehaviour
             + "Chế độ ĐỐI KHÁNG: chủ phòng giữ phe Cây, người tham gia chỉ huy phe Zombie, tích não để thả quân theo từng hàng.\n\n"
             + "Hai máy phải cùng mạng nội bộ. Nếu chơi qua Internet thì cần mở cổng 7777 hoặc dùng phần mềm tạo mạng ảo.");
 
+        // Hiển thị tiến trình chơi dưới chữ "Phiêu lưu" trên tấm biển kim loại (ví dụ: MÀN 1.2)
+        adventureProgressText = CreateText("Tiến trình Phiêu lưu", menuFrame, string.Empty, 14, TextAnchor.MiddleCenter, new Color(0.92f, 0.92f, 0.88f));
+        SetAnchors(adventureProgressText.rectTransform, 0.680f, 0.724f, 0.850f, 0.766f);
+        adventureProgressText.fontStyle = FontStyle.Bold;
+        adventureProgressText.raycastTarget = false;
+        var advOutline = adventureProgressText.gameObject.AddComponent<Outline>();
+        advOutline.effectColor = new Color(0.12f, 0.08f, 0.05f, 0.95f);
+        advOutline.effectDistance = new Vector2(1f, -1f);
+        UpdateAdventureProgressText();
+
         // Nút Tài Khoản / Tên người chơi ở góc trên bên trái
         CreateUserAccountBar(menuFrame);
 
@@ -153,6 +165,12 @@ public class MainMenuController : MonoBehaviour
         fadeImage.raycastTarget = true;
         fadeImage.canvasRenderer.SetAlpha(0f);
         fadeImage.gameObject.SetActive(false);
+    }
+
+    private void UpdateAdventureProgressText()
+    {
+        if (adventureProgressText == null) return;
+        adventureProgressText.text = "MÀN 1." + CampaignProgress.UnlockedLevelsCount;
     }
 
     private GameObject userAccountBarObj;
@@ -192,18 +210,20 @@ public class MainMenuController : MonoBehaviour
     private void UpdateAccountBarText()
     {
         if (userAccountBarObj == null || userAccountText == null) return;
+        userAccountBarObj.SetActive(true);
+
         if (FirebaseAuthService.IsLoggedIn)
         {
-            userAccountBarObj.SetActive(true);
             string email = FirebaseAuthService.CurrentUserEmail;
             if (email.Contains("@pvzgame.com"))
                 email = email.Replace("@pvzgame.com", "");
             userAccountText.text = email;
+            userAccountText.color = new Color(1f, 0.95f, 0.7f);
         }
         else
         {
-            userAccountText.text = string.Empty;
-            userAccountBarObj.SetActive(false);
+            userAccountText.text = "ĐĂNG NHẬP";
+            userAccountText.color = new Color(1f, 1f, 1f);
         }
     }
 
@@ -323,9 +343,9 @@ public class MainMenuController : MonoBehaviour
         mainFrame.preserveAspect = true;
         mainFrame.raycastTarget = false;
 
-        var title = CreateText("Tiêu đề", panel.transform, "CHỌN MÀN CHƠI", 34,
+        var title = CreateText("Tiêu đề", panel.transform, "CHỌN MÀN CHƠI", 30,
             TextAnchor.MiddleCenter, new Color(.23f, .085f, .025f, 1f));
-        CenterRect(title.rectTransform, new Vector2(320f, 54f), new Vector2(0f, 204f));
+        CenterRect(title.rectTransform, new Vector2(360f, 48f), new Vector2(0f, 178f));
         title.fontStyle = FontStyle.Bold;
         title.raycastTarget = false;
 
@@ -344,7 +364,7 @@ public class MainMenuController : MonoBehaviour
         var contentObject = new GameObject("Danh sách màn", typeof(RectTransform), typeof(GridLayoutGroup));
         contentObject.transform.SetParent(panel.transform, false);
         RectTransform contentRect = contentObject.GetComponent<RectTransform>();
-        CenterRect(contentRect, new Vector2(642f, 226f), new Vector2(0f, 24f));
+        CenterRect(contentRect, new Vector2(642f, 226f), new Vector2(0f, 22f));
 
         var grid = contentObject.GetComponent<GridLayoutGroup>();
         grid.padding = new RectOffset(0, 0, 0, 0);
@@ -364,9 +384,9 @@ public class MainMenuController : MonoBehaviour
                 LevelThumbnails[levelId], DisplayLevelLabel(levelId));
         }
 
-        selectedLevelText = CreateText("Màn đã chọn", panel.transform, "HÃY CHỌN MỘT MÀN CHƠI", 21,
+        selectedLevelText = CreateText("Màn đã chọn", panel.transform, "HÃY CHỌN MỘT MÀN CHƠI", 20,
             TextAnchor.MiddleCenter, new Color(.29f, .12f, .035f, 1f));
-        CenterRect(selectedLevelText.rectTransform, new Vector2(520f, 42f), new Vector2(0f, -128f));
+        CenterRect(selectedLevelText.rectTransform, new Vector2(520f, 36f), new Vector2(0f, -132f));
         selectedLevelText.fontStyle = FontStyle.Bold;
         selectedLevelText.raycastTarget = false;
 
@@ -432,13 +452,16 @@ public class MainMenuController : MonoBehaviour
 
         var label = CreateText("Tên màn", card.transform, displayLabel + " • " + levelName, 12,
             TextAnchor.MiddleCenter, new Color(.92f, .94f, 1f, 1f));
-        // Bảng kim loại phía dưới khung: vùng an toàn x 34..236, y 173..220.
-        SetAnchors(label.rectTransform, .13f, .065f, .87f, .275f);
+        // Bảng kim loại phía dưới khung: x 34..236 (0.125f..0.875f), y 165..218 từ trên xuống (0.076f..0.300f từ đáy).
+        SetAnchors(label.rectTransform, .11f, .075f, .89f, .285f);
         label.fontStyle = FontStyle.Bold;
         label.resizeTextMinSize = 8;
         label.resizeTextMaxSize = 12;
         label.horizontalOverflow = HorizontalWrapMode.Wrap;
         label.raycastTarget = false;
+        var cardLabelOutline = label.gameObject.AddComponent<Outline>();
+        cardLabelOutline.effectColor = new Color(0.10f, 0.08f, 0.06f, 0.95f);
+        cardLabelOutline.effectDistance = new Vector2(1f, -1f);
 
         // Lớp khóa màn chơi (Lock Overlay)
         var lockOverlay = new GameObject("LockOverlay", typeof(RectTransform), typeof(Image));

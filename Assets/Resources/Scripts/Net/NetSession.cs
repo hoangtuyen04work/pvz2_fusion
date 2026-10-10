@@ -35,6 +35,7 @@ public static class NetSession
     public static int Level = -1;              //Màn chơi do host chọn
     public static string LocalName = "Người chơi";
     public static string PeerName = "Đối phương";
+    public static readonly System.Collections.Generic.List<string> SelectedZombies = new System.Collections.Generic.List<string>();
 
     /// <summary>Có đang trong một phiên chơi mạng không.</summary>
     public static bool IsOnline { get { return Role != NetRole.Offline; } }
@@ -96,5 +97,6 @@ public static class NetSession
         Role = NetRole.Offline;
         Level = -1;
         PeerName = "Đối phương";
+        SelectedZombies.Clear();
     }
 }

@@ -190,10 +190,16 @@ public class LoginOverlay : MonoBehaviour
         if (loggedIn)
         {
             titleText.text = "HỒ SƠ CLOUD";
-            string user = FirebaseAuthService.CurrentUserEmail;
+            string user = FirebaseAuthService.GetCurrentPlayerName();
+
+            // Lấy kỷ lục Sinh tồn từ bảng thành tích
+            var topEndless = EndlessLeaderboard.GetPlayerTopRecords(user, 1);
+            int endlessScore = topEndless.Count > 0 ? topEndless[0].score : 0;
+            int endlessWave = topEndless.Count > 0 ? topEndless[0].wave : 0;
+
             profileInfoText.text = $"Xin chào:\n<color=#FFFF66>{user}</color>\n\n"
-                                 + $"Điểm kỷ lục: <color=#66FF66>{CampaignProgress.BestScore}</color>\n"
-                                 + $"Màn cao nhất: <color=#66FF66>Màn {CampaignProgress.HighestMap}</color> | Thắng: {CampaignProgress.Wins} | Thua: {CampaignProgress.Losses}";
+                                 + $"Chiến dịch: <color=#66FF66>{CampaignProgress.BestScore}</color> điểm (Màn {CampaignProgress.HighestMap})\n"
+                                 + $"Sinh tồn: <color=#FFD700>{endlessScore:N0}</color> điểm (Màn {endlessWave}) | Thắng: {CampaignProgress.Wins}";
         }
         else
         {
@@ -232,6 +238,26 @@ public class LoginOverlay : MonoBehaviour
                         if (profile.highestMap > CampaignProgress.HighestMap)
                             PlayerPrefs.SetInt("ThreeWorlds.HighestMap", profile.highestMap);
                         PlayerPrefs.Save();
+
+                        // Đồng bộ kỷ lục Sinh tồn từ Cloud về Leaderboard cục bộ
+                        if (profile.endlessBestScore > 0 || profile.endlessBestWave > 0)
+                        {
+                            var existing = EndlessLeaderboard.GetPlayerTopRecords(FirebaseAuthService.GetCurrentPlayerName(), 1);
+                            if (existing.Count == 0 || profile.endlessBestScore > existing[0].score)
+                            {
+                                EndlessLeaderboard.Add(new EndlessScoreRecord
+                                {
+                                    playerName = FirebaseAuthService.GetCurrentPlayerName(),
+                                    score = profile.endlessBestScore,
+                                    wave = profile.endlessBestWave,
+                                    kills = profile.endlessTotalKills,
+                                    durationSeconds = 0f,
+                                    seed = 0,
+                                    playedAtUtc = DateTime.UtcNow.ToString("o"),
+                                    gameVersion = Application.version
+                                });
+                            }
+                        }
                     }
                     RefreshView();
                     onLoginSuccessCallback?.Invoke();
@@ -281,14 +307,23 @@ public class LoginOverlay : MonoBehaviour
         messageText.color = new Color(1f, 0.9f, 0.4f);
         messageText.text = "Đang đồng bộ dữ liệu...";
 
+        string playerName = FirebaseAuthService.GetCurrentPlayerName();
+        var topEndless = EndlessLeaderboard.GetPlayerTopRecords(playerName, 1);
+        int endlessScore = topEndless.Count > 0 ? topEndless[0].score : 0;
+        int endlessWave = topEndless.Count > 0 ? topEndless[0].wave : 0;
+        int endlessKills = topEndless.Count > 0 ? topEndless[0].kills : 0;
+
         var profile = new FirebaseAuthService.PlayerProfileData
         {
-            username = FirebaseAuthService.CurrentUserEmail,
+            username = playerName,
             email = FirebaseAuthService.CurrentUserEmail,
             bestScore = CampaignProgress.BestScore,
             highestMap = CampaignProgress.HighestMap,
             wins = CampaignProgress.Wins,
-            losses = CampaignProgress.Losses
+            losses = CampaignProgress.Losses,
+            endlessBestScore = endlessScore,
+            endlessBestWave = endlessWave,
+            endlessTotalKills = endlessKills
         };
 
         FirebaseAuthService.Instance.SavePlayerDataToCloud(profile, (success, msg) =>

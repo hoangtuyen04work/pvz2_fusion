@@ -890,6 +890,16 @@ public static class ZombieRoster
         new Entry("FireImpZombie",      "Quỷ Lùn Lửa",   100, 8f)
     };
 
+    public static Entry Find(string zombieName)
+    {
+        if (string.IsNullOrEmpty(zombieName)) return null;
+        foreach (Entry entry in All)
+        {
+            if (entry.name.Equals(zombieName, System.StringComparison.OrdinalIgnoreCase)) return entry;
+        }
+        return null;
+    }
+
     public static int CostOf(string zombieName)
     {
         foreach (Entry entry in All)

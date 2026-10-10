@@ -70,6 +70,7 @@ public class NetLobbyUI : MonoBehaviour
     private Image pvpFrame;
 
     private InputField ipInput;
+    private GameObject chooseZombieButton;
 
     private NetGameMode chosenMode = NetGameMode.Coop;
     private int chosenLevel = 1;
@@ -390,6 +391,16 @@ public class NetLobbyUI : MonoBehaviour
         joinStatusText.text = "Đã vào phòng của " + NetSession.PeerName + ".\n"
             + "Chế độ: " + (chosenMode == NetGameMode.Pvp ? "Đối kháng" : "Đồng đội") + " — " + role + "\n"
             + LevelDisplay(chosenLevel) + "\nĐang chờ chủ phòng bắt đầu...";
+
+        // Nếu là đối kháng (PvP) và người chơi chưa chọn đủ 6 zombie, mở bảng chọn 6 zombie
+        if (chosenMode == NetGameMode.Pvp)
+        {
+            if (chooseZombieButton != null) chooseZombieButton.SetActive(true);
+            if (NetSession.SelectedZombies == null || NetSession.SelectedZombies.Count == 0)
+            {
+                ZombieSelectionOverlay.Show(null, allowCancel: true, title: "CHỌN 6 ZOMBIE VÀO TRẬN", confirmText: "SẴN SÀNG");
+            }
+        }
     }
 
     private void HandleStart(NetMessage message)
@@ -402,6 +413,13 @@ public class NetLobbyUI : MonoBehaviour
         GameSession.SelectedLevel = NetSession.Level;
 
         Unsubscribe();
+
+        // Nếu là đối kháng và chưa từng chọn zombie nào, đảm bảo có 6 zombie mặc định
+        if (NetSession.Mode == NetGameMode.Pvp && (NetSession.SelectedZombies == null || NetSession.SelectedZombies.Count == 0))
+        {
+            NetSession.SelectedZombies.AddRange(new[] { "ZombieNormal", "ConeZombie", "ChineseZombie", "BucketZombie", "PoleVaultingZombie", "FootballZombie" });
+        }
+
         SceneManager.LoadScene("GameScene");
     }
 
@@ -617,12 +635,19 @@ public class NetLobbyUI : MonoBehaviour
             0.20f, 0.575f, 0.80f, 0.685f, "192.168.1.10");
 
         GameObject connect = CreateButton("Kết nối", joinPage.transform, "KẾT NỐI", 27,
-            0.32f, 0.43f, 0.68f, 0.55f, JoinRoom);
+            0.32f, 0.44f, 0.68f, 0.55f, JoinRoom);
         connectButton = connect.GetComponent<Button>();
+
+        chooseZombieButton = CreateButton("Chọn Zombie", joinPage.transform, "CHỌN 6 ZOMBIE", 22,
+            0.20f, 0.33f, 0.80f, 0.41f, delegate
+            {
+                ZombieSelectionOverlay.Show(null, allowCancel: true, title: "CHỌN 6 ZOMBIE VÀO TRẬN", confirmText: "XÁC NHẬN");
+            });
+        chooseZombieButton.SetActive(false);
 
         joinStatusText = CreateText("Trạng thái", joinPage.transform, "", 21,
             TextAnchor.UpperCenter, new Color(0.85f, 0.90f, 0.80f));
-        SetAnchors(joinStatusText.rectTransform, 0.06f, 0.16f, 0.94f, 0.41f);
+        SetAnchors(joinStatusText.rectTransform, 0.06f, 0.16f, 0.94f, 0.31f);
 
         CreateButton("Quay lại", joinPage.transform, "QUAY LẠI", 22,
             0.36f, 0.07f, 0.64f, 0.15f, BackToHome);

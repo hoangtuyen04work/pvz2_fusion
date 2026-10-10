@@ -630,9 +630,10 @@ public sealed class EndlessGameController : MonoBehaviour
         int finalKills = (session != null ? session.kills : 0) + stageKills;
         int completedStages = session != null ? session.completedStages : 0;
         float duration = (session != null ? session.durationSeconds : 0f) + currentElapsed;
-        EndlessLeaderboard.Add(new EndlessScoreRecord
+        string finalPlayerName = FirebaseAuthService.GetCurrentPlayerName();
+        var record = new EndlessScoreRecord
         {
-            playerName = string.IsNullOrWhiteSpace(NetSession.LocalName) ? "Người chơi" : NetSession.LocalName,
+            playerName = finalPlayerName,
             score = finalScore,
             wave = completedStages,
             kills = finalKills,
@@ -640,7 +641,9 @@ public sealed class EndlessGameController : MonoBehaviour
             seed = EndlessRun.Seed,
             playedAtUtc = DateTime.UtcNow.ToString("o"),
             gameVersion = Application.version
-        });
+        };
+        EndlessLeaderboard.Add(record);
+        FirebaseAuthService.Instance.RecordEndlessResult(finalScore, completedStages, finalKills);
         EndlessRun.DeleteProgress();
 
         int minutes = Mathf.FloorToInt(duration / 60f);
