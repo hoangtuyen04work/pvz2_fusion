@@ -153,7 +153,10 @@ public sealed class PlantSelectionOverlay : MonoBehaviour
         var root = new GameObject("Plant Selection", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster), typeof(PlantSelectionOverlay));
         var canvas = root.GetComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvas.sortingOrder = 300;
+        // This overlay can also be opened from NetLobbyUI (sorting order 400).
+        // Keep the loadout picker above the lobby so its cards remain visible
+        // and receive pointer events while the player is preparing a team.
+        canvas.sortingOrder = 500;
         var scaler = root.GetComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1672f, 941f);

@@ -60,6 +60,8 @@ public class NetGameplay : MonoBehaviour
     public int PvpSecondsLeft { get; private set; }
 
     private Text hudText;
+    private Text pvpTimerText;
+    private GameObject pvpTimerPanel;
     private Text alertText;
     private float alertUntil;
 
@@ -294,7 +296,7 @@ public class NetGameplay : MonoBehaviour
             .Flt(position.x, position.y, sun.netParam));
     }
 
-    /// <summary>Người chơi bấm vào một mặt trời.</summary>
+    /// <summary>Người chơi bấm vào một mặt trời hoặc mặt trăng.</summary>
     public static void RequestSunPickup(SunBase sun)
     {
         if (sun == null) return;
@@ -305,16 +307,25 @@ public class NetGameplay : MonoBehaviour
             return;
         }
 
-        if (!NetSession.ControlsPlants) return;
+        // Kiểm tra quyền nhặt: Phe Zombie chỉ được nhặt Mặt Trăng
+        bool isMoon = sun.name.Contains("Moon") || sun.gameObject.name.Contains("Moon");
+        if (NetSession.ControlsZombies && !isMoon) return;
+        if (!NetSession.ControlsPlants && !NetSession.ControlsZombies) return;
+
+        bool byZombie = NetSession.ControlsZombies;
 
         if (NetSession.IsAuthority)
         {
-            sun.bePickedUp();
-            NetManager.Broadcast(NetMessage.Of(NetMsg.SunPicked).Int(sun.netId));
+            sun.bePickedUp(byZombie);
+            if (byZombie && instance != null)
+            {
+                instance.AddBrains(sun.sunNumber);
+            }
+            NetManager.Broadcast(NetMessage.Of(NetMsg.SunPicked).Int(sun.netId, byZombie ? 1 : 0));
         }
         else
         {
-            NetManager.Broadcast(NetMessage.Of(NetMsg.SunPickReq).Int(sun.netId));
+            NetManager.Broadcast(NetMessage.Of(NetMsg.SunPickReq).Int(sun.netId, byZombie ? 1 : 0));
         }
     }
 
@@ -559,11 +570,11 @@ public class NetGameplay : MonoBehaviour
                 break;
 
             case NetMsg.SunPickReq:
-                if (NetSession.IsAuthority) ApplySunPickRequest(message.i);
+                if (NetSession.IsAuthority) ApplySunPickRequest(message.i, message.j == 1);
                 break;
 
             case NetMsg.SunPicked:
-                ApplySunPicked(message.i);
+                ApplySunPicked(message.i, message.j == 1);
                 break;
 
             case NetMsg.SunSet:
@@ -654,20 +665,32 @@ public class NetGameplay : MonoBehaviour
         suns[sun.netId] = sun;
     }
 
-    private void ApplySunPickRequest(int netId)
+    public void AddBrains(int amount)
+    {
+        Brains = Mathf.Clamp(Brains + amount, 0, BrainMax);
+        NetManager.Broadcast(NetMessage.Of(NetMsg.BrainSet).Int(Brains, PvpSecondsLeft));
+    }
+
+    private void ApplySunPickRequest(int netId, bool byZombie)
     {
         SunBase sun;
         if (!suns.TryGetValue(netId, out sun) || sun == null) return;
-        sun.bePickedUp();
-        NetManager.Broadcast(NetMessage.Of(NetMsg.SunPicked).Int(netId));
+        sun.bePickedUp(byZombie);
+
+        if (byZombie && NetSession.Mode == NetGameMode.Pvp)
+        {
+            AddBrains(sun.sunNumber);
+        }
+
+        NetManager.Broadcast(NetMessage.Of(NetMsg.SunPicked).Int(netId, byZombie ? 1 : 0));
     }
 
-    private void ApplySunPicked(int netId)
+    private void ApplySunPicked(int netId, bool byZombie)
     {
         if (NetSession.IsAuthority) return;
         SunBase sun;
         if (!suns.TryGetValue(netId, out sun) || sun == null) return;
-        sun.bePickedUp();
+        sun.bePickedUp(byZombie);
     }
 
     private void ApplyZombieSpawn(NetMessage message)
@@ -779,13 +802,32 @@ public class NetGameplay : MonoBehaviour
 
         Font font = Resources.Load<Font>("Fonts/Baloo2");
 
-        hudText = CreateHudText(canvasObject.transform, font, "", 18,
-            TextAnchor.UpperRight, new Color(0.85f, 1f, 0.7f, 0.9f),
-            0.60f, 0.925f, 0.995f, 0.995f);
+        // Thông tin kết nối mạng (ping, chế độ): đặt ở góc trên bên phải nhưng thụt xuống dưới nút Pause để không bị che
+        hudText = CreateHudText(canvasObject.transform, font, "", 16,
+            TextAnchor.UpperRight, new Color(0.85f, 1f, 0.7f, 0.85f),
+            0.60f, 0.85f, 0.985f, 0.91f);
+
+        // Khung hiển thị đếm thời gian PvP riêng biệt:
+        // Đặt ở vị trí trung tâm phía trên màn hình (0.41f đến 0.59f, 0.925f đến 0.99f), không che bãi cỏ và không vướng Pause
+        pvpTimerPanel = new GameObject("PvPTimerPanel", typeof(RectTransform), typeof(Image));
+        pvpTimerPanel.transform.SetParent(canvasObject.transform, false);
+        RectTransform timerPanelRect = pvpTimerPanel.GetComponent<RectTransform>();
+        timerPanelRect.anchorMin = new Vector2(0.42f, 0.925f);
+        timerPanelRect.anchorMax = new Vector2(0.58f, 0.988f);
+        timerPanelRect.offsetMin = Vector2.zero;
+        timerPanelRect.offsetMax = Vector2.zero;
+        Image panelImg = pvpTimerPanel.GetComponent<Image>();
+        panelImg.color = new Color(0.12f, 0.08f, 0.05f, 0.85f);
+
+        pvpTimerText = CreateHudText(pvpTimerPanel.transform, font, "", 22,
+            TextAnchor.MiddleCenter, new Color(1f, 0.88f, 0.35f, 1f),
+            0.05f, 0.05f, 0.95f, 0.95f);
+
+        pvpTimerPanel.SetActive(NetSession.Mode == NetGameMode.Pvp);
 
         alertText = CreateHudText(canvasObject.transform, font, "", 22,
             TextAnchor.UpperCenter, new Color(1f, 0.6f, 0.35f),
-            0.15f, 0.845f, 0.85f, 0.925f);
+            0.15f, 0.82f, 0.85f, 0.90f);
     }
 
     private Text CreateHudText(Transform parent, Font font, string value, int size,
@@ -815,15 +857,29 @@ public class NetGameplay : MonoBehaviour
 
     private void UpdateHud()
     {
-        if (hudText == null) return;
+        if (hudText != null)
+        {
+            string ping = NetManager.Exists ? NetManager.Instance.PingMs + " ms" : "-";
+            hudText.text = NetSession.ModeLabel + " · " + NetSession.RoleLabel + " · " + ping;
+        }
 
-        string ping = NetManager.Exists ? NetManager.Instance.PingMs + " ms" : "-";
-        string line = NetSession.ModeLabel + " · " + NetSession.RoleLabel + " · " + ping;
-
-        if (NetSession.Mode == NetGameMode.Pvp)
-            line += "\nCòn lại " + (PvpSecondsLeft / 60) + ":" + (PvpSecondsLeft % 60).ToString("00");
-
-        hudText.text = line;
+        if (pvpTimerPanel != null)
+        {
+            if (NetSession.Mode == NetGameMode.Pvp)
+            {
+                if (!pvpTimerPanel.activeSelf) pvpTimerPanel.SetActive(true);
+                if (pvpTimerText != null)
+                {
+                    int minutes = PvpSecondsLeft / 60;
+                    int seconds = PvpSecondsLeft % 60;
+                    pvpTimerText.text = "⏱ " + minutes + ":" + seconds.ToString("00");
+                }
+            }
+            else if (pvpTimerPanel.activeSelf)
+            {
+                pvpTimerPanel.SetActive(false);
+            }
+        }
 
         if (alertText != null && alertText.text.Length > 0 && Time.unscaledTime > alertUntil)
             alertText.text = "";

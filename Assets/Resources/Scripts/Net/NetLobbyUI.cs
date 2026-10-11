@@ -71,6 +71,7 @@ public class NetLobbyUI : MonoBehaviour
 
     private InputField ipInput;
     private GameObject chooseZombieButton;
+    private GameObject choosePlantButton;
 
     private NetGameMode chosenMode = NetGameMode.Coop;
     private int chosenLevel = 1;
@@ -162,6 +163,7 @@ public class NetLobbyUI : MonoBehaviour
     private void LeaveRoom()
     {
         Unsubscribe();
+        NetDiscovery.StopHostBeacon();
         if (NetManager.Exists) NetManager.Instance.Leave("Đối phương đã đóng phòng");
         peerReady = false;
         listening = false;
@@ -195,28 +197,17 @@ public class NetLobbyUI : MonoBehaviour
         hostPage.SetActive(true);
         joinPage.SetActive(false);
 
-        hostAddressText.text = BuildAddressText();
+        string mainIp = NetTransport.GetLocalIPv4();
+        string roomCode = NetDiscovery.IpToRoomCode(mainIp);
+        NetDiscovery.StartHostBeacon(mainIp, roomCode);
+
+        hostAddressText.text = "MÃ PHÒNG: " + roomCode + "\n<size=17><color=#A6C882>(Báo mã 6 số này cho người chơi khác để vào phòng)</color></size>";
         hostStatusText.text = "Đang chờ người chơi thứ hai...";
         startButton.interactable = false;
         UpdateHostLevelText();
-    }
 
-    //Máy hay có nhiều card mạng, nên hiện thêm các địa chỉ dự phòng để người chơi thử lần lượt
-    private string BuildAddressText()
-    {
-        string main = NetTransport.GetLocalIPv4();
-        string text = "Địa chỉ phòng:  " + main + "  ·  cổng " + NetSession.DefaultPort;
-
-        List<string> others = new List<string>();
-        foreach (string address in NetTransport.GetAllLocalIPv4())
-        {
-            if (address != main) others.Add(address);
-        }
-
-        if (others.Count > 0)
-            text += "\nNếu không vào được, thử: " + string.Join("  |  ", others.ToArray());
-
-        return text;
+        if (choosePlantButton != null)
+            choosePlantButton.SetActive(chosenMode == NetGameMode.Pvp);
     }
 
     private void ChangeLevel(int delta)
@@ -252,10 +243,18 @@ public class NetLobbyUI : MonoBehaviour
         NetSession.Level = chosenLevel;
         GameSession.SelectedLevel = chosenLevel;
 
+        // Nếu là đối kháng và phe cây chưa chọn cây nào, gán 6 cây mặc định
+        if (chosenMode == NetGameMode.Pvp && (GameSession.SelectedPlants == null || GameSession.SelectedPlants.Count == 0))
+        {
+            GameSession.SelectedPlants.Clear();
+            GameSession.SelectedPlants.AddRange(new[] { "SunFlower", "PeaShooter", "WallNut", "Squash", "TorchWood", "MiaoMiao" });
+        }
+
         NetManager.Instance.Send(
             NetMessage.Of(NetMsg.Start).Int(chosenLevel, (int)chosenMode));
 
         Unsubscribe();
+        NetDiscovery.StopHostBeacon();
         SceneManager.LoadScene("GameScene");
     }
 
@@ -269,19 +268,49 @@ public class NetLobbyUI : MonoBehaviour
         homePage.SetActive(false);
         hostPage.SetActive(false);
         joinPage.SetActive(true);
-        joinStatusText.text = "Nhập địa chỉ phòng do người chơi kia đọc cho bạn.";
+        joinStatusText.text = "Nhập mã phòng 6 số do chủ phòng đọc cho bạn.";
         connectButton.interactable = true;
     }
 
     private void JoinRoom()
     {
-        Subscribe();
-        string ip = ipInput != null ? ipInput.text : string.Empty;
-        if (string.IsNullOrEmpty(ip)) ip = "127.0.0.1";
+        string raw = ipInput != null ? ipInput.text.Trim() : string.Empty;
+        if (string.IsNullOrEmpty(raw))
+        {
+            joinStatusText.text = "Vui lòng nhập mã phòng 6 số!";
+            return;
+        }
 
         connectButton.interactable = false;
-        joinStatusText.text = "Đang kết nối tới " + ip + "...";
-        NetManager.Instance.StartClient(ip, NetSession.DefaultPort);
+
+        // Nếu nhập dạng 6 chữ số: dò tìm IP thật qua NetDiscovery broadcast
+        if (raw.Length == 6 && int.TryParse(raw, out _))
+        {
+            joinStatusText.text = "Đang tìm phòng mã " + raw + "...";
+            NetDiscovery.ResolveRoomCodeAsync(raw, (resolvedIp) =>
+            {
+                if (string.IsNullOrEmpty(resolvedIp))
+                {
+                    joinStatusText.text = "Không tìm thấy phòng có mã " + raw + " trong mạng LAN!\nBạn cũng có thể nhập trực tiếp IP của chủ phòng.";
+                    connectButton.interactable = true;
+                    return;
+                }
+
+                ConnectToIp(resolvedIp);
+            });
+        }
+        else
+        {
+            // Fallback: nếu nhập IP trực tiếp
+            ConnectToIp(raw);
+        }
+    }
+
+    private void ConnectToIp(string targetIp)
+    {
+        Subscribe();
+        joinStatusText.text = "Đang kết nối vào phòng...";
+        NetManager.Instance.StartClient(targetIp, NetSession.DefaultPort);
     }
 
     #endregion
@@ -427,6 +456,7 @@ public class NetLobbyUI : MonoBehaviour
 
     private void Update()
     {
+        NetDiscovery.Update();
         if (root == null || !root.activeSelf) return;
 
         if (page == Page.Host && listening && !peerReady && NetManager.Exists)
@@ -577,6 +607,9 @@ public class NetLobbyUI : MonoBehaviour
             modeDescriptionText.text = chosenMode == NetGameMode.Pvp
                 ? "Chủ phòng cầm phe Cây, người tham gia cầm phe Zombie."
                 : "Cả hai cùng trồng cây, thắng thua chia đều.";
+
+        if (choosePlantButton != null)
+            choosePlantButton.SetActive(chosenMode == NetGameMode.Pvp);
     }
 
     private void BuildHostPage(Transform parent)
@@ -609,13 +642,20 @@ public class NetLobbyUI : MonoBehaviour
         CreateButton("Màn sau", hostPage.transform, ">", 28,
             0.80f, 0.30f, 0.90f, 0.41f, delegate { ChangeLevel(1); });
 
+        choosePlantButton = CreateButton("Chọn Cây", hostPage.transform, "CHỌN 6 CÂY", 22,
+            0.28f, 0.20f, 0.72f, 0.28f, delegate
+            {
+                PlantSelectionOverlay.Show(chosenLevel, null, allowCancel: true, title: "CHỌN 6 CÂY VÀO TRẬN", confirmText: "XÁC NHẬN");
+            });
+        choosePlantButton.SetActive(chosenMode == NetGameMode.Pvp);
+
         GameObject start = CreateButton("Bắt đầu", hostPage.transform, "BẮT ĐẦU", 28,
-            0.30f, 0.155f, 0.70f, 0.275f, StartMatch);
+            0.30f, 0.095f, 0.70f, 0.195f, StartMatch);
         startButton = start.GetComponent<Button>();
         startButton.interactable = false;
 
         CreateButton("Huỷ phòng", hostPage.transform, "QUAY LẠI", 22,
-            0.36f, 0.07f, 0.64f, 0.145f, BackToHome);
+            0.36f, 0.02f, 0.64f, 0.085f, BackToHome);
     }
 
     private void BuildJoinPage(Transform parent)
@@ -626,13 +666,13 @@ public class NetLobbyUI : MonoBehaviour
             TextAnchor.MiddleCenter, new Color(0.62f, 1f, 0.25f));
         SetAnchors(head.rectTransform, 0.06f, 0.79f, 0.94f, 0.87f);
 
-        Text label = CreateText("Nhãn IP", joinPage.transform,
-            "Địa chỉ phòng (ví dụ 192.168.1.12)", 21,
+        Text label = CreateText("Nhãn Mã Phòng", joinPage.transform,
+            "Mã phòng (gồm 6 chữ số do chủ phòng đọc)", 21,
             TextAnchor.MiddleCenter, new Color(0.85f, 0.88f, 0.80f));
         SetAnchors(label.rectTransform, 0.06f, 0.70f, 0.94f, 0.77f);
 
-        ipInput = CreateInputField("Ô nhập IP", joinPage.transform,
-            0.20f, 0.575f, 0.80f, 0.685f, "192.168.1.10");
+        ipInput = CreateInputField("Ô nhập Mã Phòng", joinPage.transform,
+            0.25f, 0.575f, 0.75f, 0.685f, "000000");
 
         GameObject connect = CreateButton("Kết nối", joinPage.transform, "KẾT NỐI", 27,
             0.32f, 0.44f, 0.68f, 0.55f, JoinRoom);

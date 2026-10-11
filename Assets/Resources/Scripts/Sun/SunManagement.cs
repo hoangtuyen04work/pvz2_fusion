@@ -89,16 +89,28 @@ public class SunManagement : MonoBehaviour
 
     private void clickSun()
     {
-        //Phe zombie trong chế độ đối kháng không nhặt được nắng
-        if (NetSession.IsOnline && !NetSession.ControlsPlants) return;
-
         Vector2 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         Collider2D[] allSun = Physics2D.OverlapPointAll(mouseWorldPos, LayerMask.GetMask("Sun"));
         if (allSun.Length > 0)
         {
-            //Chơi mạng thì máy chủ mới quyết định mặt trời có được nhặt hay không
-            NetGameplay.RequestSunPickup(
-                allSun[allSun.Length - 1].gameObject.GetComponent<SunBase>());
+            SunBase sun = allSun[allSun.Length - 1].gameObject.GetComponent<SunBase>();
+            if (sun == null) return;
+
+            // Kiểm tra quyền nhặt trong chế độ chơi mạng:
+            // Phe cây nhặt được mọi loại nắng/mặt trăng.
+            // Phe zombie trong đối kháng chỉ được nhặt Mặt Trăng (FullMoon / CrescentMoon).
+            if (NetSession.IsOnline)
+            {
+                bool isMoon = sun.name.Contains("Moon") || sun.gameObject.name.Contains("Moon");
+                if (NetSession.ControlsZombies && !isMoon) return;
+                if (!NetSession.ControlsPlants && !NetSession.ControlsZombies) return;
+
+                NetGameplay.RequestSunPickup(sun);
+            }
+            else
+            {
+                sun.bePickedUp();
+            }
         }
     }
 }
