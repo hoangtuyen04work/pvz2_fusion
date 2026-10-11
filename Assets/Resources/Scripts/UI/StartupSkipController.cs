@@ -100,7 +100,20 @@ public class StartupSkipController : MonoBehaviour, IPointerEnterHandler, IPoint
 
     private void SkipToMenu()
     {
-        if (!leaving) StartCoroutine(LoadMenu());
+        if (leaving) return;
+
+        // The main menu forces first-time players into level 0 while this flag is unset.
+        // Mark the tutorial as handled when its opening is skipped, otherwise pressing
+        // Adventure after returning to the menu sends the player straight back here.
+        GameManagement gameManagement = FindAnyObjectByType<GameManagement>();
+        if (gameManagement != null && gameManagement.level == 0 &&
+            !EndlessRun.Active && !NetSession.IsOnline)
+        {
+            PlayerPrefs.SetInt(DialogLevel0.FirstTimeTutorialKey, 1);
+            PlayerPrefs.Save();
+        }
+
+        StartCoroutine(LoadMenu());
     }
 
     private IEnumerator LoadMenu()
