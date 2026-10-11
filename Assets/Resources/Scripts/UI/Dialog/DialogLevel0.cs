@@ -128,7 +128,10 @@ public class DialogLevel0 : MonoBehaviour, IStartupDialogSkippable
         frameRect.anchorMin = new Vector2(0.5f, 0.5f);
         frameRect.anchorMax = new Vector2(0.5f, 0.5f);
         frameRect.pivot = new Vector2(0.5f, 0.5f);
-        frameRect.sizeDelta = new Vector2(880f, 540f);
+        // TopCanvas scales by width (800x600 reference), so a 16:9 game view
+        // exposes only about 400 virtual pixels of height. Keep the complete
+        // dialog inside that safe area instead of clipping a 540px panel.
+        frameRect.sizeDelta = new Vector2(760f, 380f);
 
         Image frameImg = woodFrame.GetComponent<Image>();
         frameImg.sprite = Resources.Load<Sprite>("GameUI/dialog_main");
@@ -141,8 +144,8 @@ public class DialogLevel0 : MonoBehaviour, IStartupDialogSkippable
         GameObject contentBackdrop = new GameObject("Nền Giấy Nội Dung", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         contentBackdrop.transform.SetParent(woodFrame.transform, false);
         RectTransform backdropRect = contentBackdrop.GetComponent<RectTransform>();
-        backdropRect.anchorMin = new Vector2(0.045f, 0.17f);
-        backdropRect.anchorMax = new Vector2(0.955f, 0.855f);
+        backdropRect.anchorMin = new Vector2(0.035f, 0.19f);
+        backdropRect.anchorMax = new Vector2(0.965f, 0.82f);
         backdropRect.offsetMin = Vector2.zero;
         backdropRect.offsetMax = Vector2.zero;
         Image backdropImage = contentBackdrop.GetComponent<Image>();
@@ -158,16 +161,19 @@ public class DialogLevel0 : MonoBehaviour, IStartupDialogSkippable
         titleRect.anchorMin = new Vector2(0.5f, 1f);
         titleRect.anchorMax = new Vector2(0.5f, 1f);
         titleRect.pivot = new Vector2(0.5f, 1f);
-        titleRect.anchoredPosition = new Vector2(0f, -28f);
-        titleRect.sizeDelta = new Vector2(620f, 48f);
+        titleRect.anchoredPosition = new Vector2(0f, -32f);
+        titleRect.sizeDelta = new Vector2(430f, 24f);
 
         Text titleText = titleObj.GetComponent<Text>();
         titleText.font = font;
-        titleText.fontSize = 28;
+        titleText.fontSize = 18;
+        titleText.resizeTextForBestFit = true;
+        titleText.resizeTextMinSize = 14;
+        titleText.resizeTextMaxSize = 18;
         titleText.fontStyle = FontStyle.Bold;
         titleText.alignment = TextAnchor.MiddleCenter;
         titleText.color = new Color(0.24f, 0.09f, 0.02f, 1f);
-        titleText.text = "HƯỚNG DẪN LOGIC GHÉP CÂY (PLANT FUSION)";
+        titleText.text = "HƯỚNG DẪN GHÉP CÂY";
         Outline titleOutline = titleObj.GetComponent<Outline>();
         titleOutline.effectColor = new Color(1f, 0.88f, 0.55f, 0.9f);
         titleOutline.effectDistance = new Vector2(1.2f, -1.2f);
@@ -179,26 +185,29 @@ public class DialogLevel0 : MonoBehaviour, IStartupDialogSkippable
         pageIndRect.anchorMin = new Vector2(0.5f, 1f);
         pageIndRect.anchorMax = new Vector2(0.5f, 1f);
         pageIndRect.pivot = new Vector2(0.5f, 1f);
-        pageIndRect.anchoredPosition = new Vector2(0f, -72f);
-        pageIndRect.sizeDelta = new Vector2(400f, 28f);
+        pageIndRect.anchoredPosition = new Vector2(0f, -53f);
+        pageIndRect.sizeDelta = new Vector2(280f, 15f);
 
         pageIndicatorText = pageIndObj.GetComponent<Text>();
         pageIndicatorText.font = font;
-        pageIndicatorText.fontSize = 17;
+        pageIndicatorText.fontSize = 10;
+        pageIndicatorText.resizeTextForBestFit = true;
+        pageIndicatorText.resizeTextMinSize = 8;
+        pageIndicatorText.resizeTextMaxSize = 10;
         pageIndicatorText.fontStyle = FontStyle.Bold;
         pageIndicatorText.alignment = TextAnchor.MiddleCenter;
         pageIndicatorText.color = new Color(0.38f, 0.18f, 0.05f, 1f);
-        pageIndicatorText.text = "Trang 1 / 2: Cách thức Thao Tác & Quy Tắc Ghép";
+        pageIndicatorText.text = "TRANG 1 / 2  •  CÁCH GHÉP";
 
-        pageDot1 = CreatePageDot("Trang 1", woodFrame.transform, new Vector2(-220f, -86f));
-        pageDot2 = CreatePageDot("Trang 2", woodFrame.transform, new Vector2(220f, -86f));
+        pageDot1 = CreatePageDot("Trang 1", woodFrame.transform, new Vector2(-185f, -58f));
+        pageDot2 = CreatePageDot("Trang 2", woodFrame.transform, new Vector2(185f, -58f));
 
         // Vùng cuộn nội dung (Scroll View)
         GameObject scrollObj = new GameObject("Scroll View", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(ScrollRect));
         scrollObj.transform.SetParent(woodFrame.transform, false);
         RectTransform scrollRectTransform = scrollObj.GetComponent<RectTransform>();
-        scrollRectTransform.anchorMin = new Vector2(0.06f, 0.19f);
-        scrollRectTransform.anchorMax = new Vector2(0.94f, 0.84f);
+        scrollRectTransform.anchorMin = new Vector2(0.05f, 0.20f);
+        scrollRectTransform.anchorMax = new Vector2(0.95f, 0.81f);
         scrollRectTransform.offsetMin = Vector2.zero;
         scrollRectTransform.offsetMax = Vector2.zero;
         scrollObj.GetComponent<Image>().color = Color.clear;
@@ -223,7 +232,7 @@ public class DialogLevel0 : MonoBehaviour, IStartupDialogSkippable
         contentRect.anchorMax = new Vector2(1f, 1f);
         contentRect.pivot = new Vector2(0.5f, 1f);
         contentRect.anchoredPosition = Vector2.zero;
-        contentRect.sizeDelta = new Vector2(0f, 390f);
+        contentRect.sizeDelta = new Vector2(0f, 230f);
 
         // Thanh cuộn (Scrollbar) chuẩn phong cách gỗ PvZ
         GameObject scrollbarObj = new GameObject("Scrollbar Dọc", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(Scrollbar));
@@ -294,17 +303,17 @@ public class DialogLevel0 : MonoBehaviour, IStartupDialogSkippable
         BuildPage2_FormulasAndEvolution(contentArea.transform, font);
 
         // Nút CHUYỂN TRANG / TIẾP THEO
-        GameObject nextPageButton = CreateActionButton("Nút Chuyển Trang", woodFrame.transform, new Vector2(-155f, 48f), new Vector2(170f, 52f),
-            "TRANG SAU", font, 20, OnNextPageClicked);
+        GameObject nextPageButton = CreateActionButton("Nút Chuyển Trang", woodFrame.transform, new Vector2(-165f, 15f), new Vector2(145f, 42f),
+            "TRANG SAU", font, 17, OnNextPageClicked);
         nextPageButtonText = nextPageButton.GetComponentInChildren<Text>();
 
         // Nút VÀO TRẬN / BẮT ĐẦU CHƠI
-        CreateActionButton("Nút Bắt Đầu", woodFrame.transform, new Vector2(40f, 48f), new Vector2(170f, 52f),
-            "VÀO TRẬN", font, 20, OnStartGameClicked);
+        CreateActionButton("Nút Bắt Đầu", woodFrame.transform, new Vector2(0f, 15f), new Vector2(145f, 42f),
+            "VÀO TRẬN", font, 17, OnStartGameClicked);
 
         // NÚT BỎ QUA / SKIP (To rõ, nổi bật để người dùng có thể skip bất cứ lúc nào)
-        CreateSkipButton("Nút Bỏ Qua", woodFrame.transform, new Vector2(235f, 48f), new Vector2(170f, 52f),
-            "BỎ QUA >>", font, 20, OnSkipClicked);
+        CreateSkipButton("Nút Bỏ Qua", woodFrame.transform, new Vector2(165f, 15f), new Vector2(145f, 42f),
+            "BỎ QUA", font, 17, OnSkipClicked);
 
         UpdatePageVisibility();
         StartCoroutine(AnimateTutorialEntrance(woodFrame.transform, fusionTutorialPanel.GetComponent<CanvasGroup>()));
@@ -347,17 +356,14 @@ public class DialogLevel0 : MonoBehaviour, IStartupDialogSkippable
 
     private void BuildPage1_CoreLogic(Transform parent, Font font)
     {
-        page1Container = new GameObject("Page1_CoreLogic", typeof(RectTransform), typeof(ContentSizeFitter));
+        page1Container = new GameObject("Page1_CoreLogic", typeof(RectTransform));
         page1Container.transform.SetParent(parent, false);
         RectTransform rect = page1Container.GetComponent<RectTransform>();
         rect.anchorMin = new Vector2(0f, 1f);
         rect.anchorMax = new Vector2(1f, 1f);
         rect.pivot = new Vector2(0.5f, 1f);
         rect.anchoredPosition = Vector2.zero;
-        rect.sizeDelta = new Vector2(0f, 390f);
-
-        ContentSizeFitter csf = page1Container.GetComponent<ContentSizeFitter>();
-        csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+        rect.sizeDelta = new Vector2(0f, 230f);
 
         // Banner mô tả logic
         GameObject descCard = new GameObject("Banner Mô Tả", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
@@ -366,8 +372,8 @@ public class DialogLevel0 : MonoBehaviour, IStartupDialogSkippable
         descCardRect.anchorMin = new Vector2(0.5f, 1f);
         descCardRect.anchorMax = new Vector2(0.5f, 1f);
         descCardRect.pivot = new Vector2(0.5f, 1f);
-        descCardRect.anchoredPosition = new Vector2(0f, -6f);
-        descCardRect.sizeDelta = new Vector2(705f, 64f);
+        descCardRect.anchoredPosition = new Vector2(0f, -2f);
+        descCardRect.sizeDelta = new Vector2(620f, 42f);
 
         Image descBg = descCard.GetComponent<Image>();
         descBg.sprite = Resources.Load<Sprite>("GameUI/dialog_child");
@@ -379,18 +385,22 @@ public class DialogLevel0 : MonoBehaviour, IStartupDialogSkippable
         RectTransform descRect = descObj.GetComponent<RectTransform>();
         descRect.anchorMin = Vector2.zero;
         descRect.anchorMax = Vector2.one;
-        descRect.offsetMin = new Vector2(14f, 4f);
-        descRect.offsetMax = new Vector2(-14f, -4f);
+        descRect.offsetMin = new Vector2(24f, 4f);
+        descRect.offsetMax = new Vector2(-24f, -4f);
 
         Text descText = descObj.GetComponent<Text>();
         descText.font = font;
-        descText.fontSize = 15;
+        descText.fontSize = 9;
+        descText.resizeTextForBestFit = true;
+        descText.resizeTextMinSize = 8;
+        descText.resizeTextMaxSize = 9;
+        descText.lineSpacing = 0.82f;
         descText.alignment = TextAnchor.MiddleCenter;
         descText.color = new Color(0.24f, 0.08f, 0.02f, 1f);
         descText.lineSpacing = 1.15f;
         descText.horizontalOverflow = HorizontalWrapMode.Wrap;
         descText.verticalOverflow = VerticalWrapMode.Truncate;
-        descText.text = "★ QUY TẮC CƠ BẢN: Đặt trước 1 cây nền lên ô đất → Chọn thẻ cây thứ 2 → Nhấp đè trực tiếp lên cây vừa trồng để kích hoạt hợp thể đột biến!";
+        descText.text = "TRỒNG CÂY NỀN  →  CHỌN CÂY GHÉP  →  NHẤN LÊN CÂY NỀN\nĐỂ TẠO CÂY ĐỘT BIẾN";
 
         // Khung chứa 3 thẻ bước thao tác
         GameObject cardsHolder = new GameObject("Cards_Holder", typeof(RectTransform));
@@ -399,41 +409,38 @@ public class DialogLevel0 : MonoBehaviour, IStartupDialogSkippable
         chRect.anchorMin = new Vector2(0.5f, 1f);
         chRect.anchorMax = new Vector2(0.5f, 1f);
         chRect.pivot = new Vector2(0.5f, 1f);
-        chRect.anchoredPosition = new Vector2(0f, -80f);
-        chRect.sizeDelta = new Vector2(710f, 290f);
+        chRect.anchoredPosition = new Vector2(0f, -50f);
+        chRect.sizeDelta = new Vector2(660f, 178f);
 
-        CreateLogicStepCard(cardsHolder.transform, font, new Vector2(-236f, 0f),
-            "Bước 1: Trồng Cây Nền",
+        CreateLogicStepCard(cardsHolder.transform, font, new Vector2(-220f, 0f),
+            "BƯỚC 1: CÂY NỀN",
             "Sprites/Plants/PeaShooterSingle",
             "ĐẬU BẮN / HƯỚNG DƯƠNG",
-            "Trồng 1 cây xuống bãi cỏ như bình thường để làm gốc cây nền.");
+            "Trồng một cây nền\nlên ô đất trống.");
 
         CreateLogicStepCard(cardsHolder.transform, font, new Vector2(0f, 0f),
-            "Bước 2: Chọn Cây Ghép",
+            "BƯỚC 2: CÂY GHÉP",
             "Sprites/Plants/Torchwood",
             "ĐUỐC / ÓC CHÓ / NẤM",
-            "Nhấp chọn thẻ cây tương thích và nhấn đè vào đúng ô cây nền.");
+            "Chọn cây tương thích,\nnhấn lên cây nền.");
 
-        CreateLogicStepCard(cardsHolder.transform, font, new Vector2(236f, 0f),
-            "Bước 3: Đột Biến Siêu Cấp",
+        CreateLogicStepCard(cardsHolder.transform, font, new Vector2(220f, 0f),
+            "BƯỚC 3: ĐỘT BIẾN",
             "Sprites/Plants/Hybrids/PeaTorch/Preview",
-            "PEATORCH BẮN ĐẠN LỬA!",
-            "Hai cây hợp nhất thành loài mới với hỏa lực và năng lực vượt trội!");
+            "PEATORCH BẮN ĐẠN LỬA",
+            "Hai cây hợp nhất thành\ncây đột biến mạnh hơn.");
     }
 
     private void BuildPage2_FormulasAndEvolution(Transform parent, Font font)
     {
-        page2Container = new GameObject("Page2_FormulasAndEvolution", typeof(RectTransform), typeof(ContentSizeFitter));
+        page2Container = new GameObject("Page2_FormulasAndEvolution", typeof(RectTransform));
         page2Container.transform.SetParent(parent, false);
         RectTransform rect = page2Container.GetComponent<RectTransform>();
         rect.anchorMin = new Vector2(0f, 1f);
         rect.anchorMax = new Vector2(1f, 1f);
         rect.pivot = new Vector2(0.5f, 1f);
         rect.anchoredPosition = Vector2.zero;
-        rect.sizeDelta = new Vector2(0f, 390f);
-
-        ContentSizeFitter csf = page2Container.GetComponent<ContentSizeFitter>();
-        csf.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+        rect.sizeDelta = new Vector2(0f, 230f);
 
         // Banner mô tả công thức
         GameObject descCard = new GameObject("Banner Mô Tả", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
@@ -442,8 +449,8 @@ public class DialogLevel0 : MonoBehaviour, IStartupDialogSkippable
         descCardRect.anchorMin = new Vector2(0.5f, 1f);
         descCardRect.anchorMax = new Vector2(0.5f, 1f);
         descCardRect.pivot = new Vector2(0.5f, 1f);
-        descCardRect.anchoredPosition = new Vector2(0f, -6f);
-        descCardRect.sizeDelta = new Vector2(705f, 64f);
+        descCardRect.anchoredPosition = new Vector2(0f, -2f);
+        descCardRect.sizeDelta = new Vector2(620f, 42f);
 
         Image descBg = descCard.GetComponent<Image>();
         descBg.sprite = Resources.Load<Sprite>("GameUI/dialog_child");
@@ -455,18 +462,22 @@ public class DialogLevel0 : MonoBehaviour, IStartupDialogSkippable
         RectTransform descRect = descObj.GetComponent<RectTransform>();
         descRect.anchorMin = Vector2.zero;
         descRect.anchorMax = Vector2.one;
-        descRect.offsetMin = new Vector2(14f, 4f);
-        descRect.offsetMax = new Vector2(-14f, -4f);
+        descRect.offsetMin = new Vector2(24f, 4f);
+        descRect.offsetMax = new Vector2(-24f, -4f);
 
         Text descText = descObj.GetComponent<Text>();
         descText.font = font;
-        descText.fontSize = 15;
+        descText.fontSize = 9;
+        descText.resizeTextForBestFit = true;
+        descText.resizeTextMinSize = 8;
+        descText.resizeTextMaxSize = 9;
+        descText.lineSpacing = 0.82f;
         descText.alignment = TextAnchor.MiddleCenter;
         descText.color = new Color(0.24f, 0.08f, 0.02f, 1f);
         descText.lineSpacing = 1.15f;
         descText.horizontalOverflow = HorizontalWrapMode.Wrap;
         descText.verticalOverflow = VerticalWrapMode.Truncate;
-        descText.text = "★ CÔNG THỨC MẪU NỔI BẬT: Khám phá hàng chục kiểu lai tạo độc đáo để phòng thủ trước những đợt tấn công nguy hiểm nhất!";
+        descText.text = "GHÉP ĐÚNG CÂY ĐỂ MỞ KHÓA DẠNG TIẾN HÓA MỚI\nVÀ XÂY DỰNG ĐỘI HÌNH MẠNH HƠN";
 
         // Khung chứa 3 thẻ công thức
         GameObject cardsHolder = new GameObject("Cards_Holder", typeof(RectTransform));
@@ -475,26 +486,26 @@ public class DialogLevel0 : MonoBehaviour, IStartupDialogSkippable
         chRect.anchorMin = new Vector2(0.5f, 1f);
         chRect.anchorMax = new Vector2(0.5f, 1f);
         chRect.pivot = new Vector2(0.5f, 1f);
-        chRect.anchoredPosition = new Vector2(0f, -80f);
-        chRect.sizeDelta = new Vector2(710f, 290f);
+        chRect.anchoredPosition = new Vector2(0f, -50f);
+        chRect.sizeDelta = new Vector2(660f, 178f);
 
-        CreateFormulaCard(cardsHolder.transform, font, new Vector2(-236f, 0f),
-            "SunPea (Kinh Tế + Bắn)",
+        CreateFormulaCard(cardsHolder.transform, font, new Vector2(-220f, 0f),
+            "SUNPEA",
             "Sprites/Plants/Hybrids/SunPea/Preview",
-            "Đậu Bắn + Hướng Dương",
-            "Vừa bắn đậu phòng ngự, vừa liên tục tự sản sinh mặt trời giúp mở rộng đội hình thần tốc!");
+            "ĐẬU BẮN + HƯỚNG DƯƠNG",
+            "Vừa bắn đậu, vừa tạo nắng\nđể mở rộng đội hình.");
 
         CreateFormulaCard(cardsHolder.transform, font, new Vector2(0f, 0f),
-            "FireWallNut (Tường Lửa)",
+            "FIRE WALL-NUT",
             "Sprites/Plants/FireWallNut/FireWallNutV2",
-            "Óc Chó + Cây Đuốc",
-            "Tường thành phòng ngự bọc lửa kiên cố, vừa chặn đường vừa thiêu rụi zombie khi bị cắn!");
+            "ÓC CHÓ + CÂY ĐUỐC",
+            "Chặn đường và gây bỏng\ncho zombie tấn công.");
 
-        CreateFormulaCard(cardsHolder.transform, font, new Vector2(236f, 0f),
-            "Nữ Hoàng Hướng Dương",
+        CreateFormulaCard(cardsHolder.transform, font, new Vector2(220f, 0f),
+            "NỮ HOÀNG HOA NẮNG",
             "Sprites/Plants/Hybrids/SunflowerQueen/Preview",
-            "Tiến Hóa Cấp 3 Huyền Thoại",
-            "Kết hợp cả Đậu + Đuốc + Hướng Dương! Phóng cầu lửa rực cháy hủy diệt toàn bộ chiến tuyến!");
+            "TIẾN HÓA CẤP 3",
+            "Phóng cầu lửa mạnh\ntrên toàn chiến tuyến.");
     }
 
     private void CreateLogicStepCard(Transform parent, Font font, Vector2 position, string stepTitle, string iconPath, string subTitle, string detail)
@@ -506,7 +517,7 @@ public class DialogLevel0 : MonoBehaviour, IStartupDialogSkippable
         r.anchorMax = new Vector2(0.5f, 1f);
         r.pivot = new Vector2(0.5f, 1f);
         r.anchoredPosition = position;
-        r.sizeDelta = new Vector2(226f, 275f);
+        r.sizeDelta = new Vector2(210f, 176f);
 
         Image bg = card.GetComponent<Image>();
         bg.sprite = Resources.Load<Sprite>("GameUI/dialog_child");
@@ -523,11 +534,14 @@ public class DialogLevel0 : MonoBehaviour, IStartupDialogSkippable
         stepRect.anchorMin = new Vector2(0.5f, 1f);
         stepRect.anchorMax = new Vector2(0.5f, 1f);
         stepRect.pivot = new Vector2(0.5f, 1f);
-        stepRect.anchoredPosition = new Vector2(0f, -8f);
-        stepRect.sizeDelta = new Vector2(212f, 24f);
+        stepRect.anchoredPosition = new Vector2(0f, -18f);
+        stepRect.sizeDelta = new Vector2(174f, 18f);
         Text stepText = stepObj.GetComponent<Text>();
         stepText.font = font;
-        stepText.fontSize = 14;
+        stepText.fontSize = 11;
+        stepText.resizeTextForBestFit = true;
+        stepText.resizeTextMinSize = 9;
+        stepText.resizeTextMaxSize = 11;
         stepText.fontStyle = FontStyle.Bold;
         stepText.alignment = TextAnchor.MiddleCenter;
         stepText.color = new Color(0.12f, 0.50f, 0.08f, 1f);
@@ -541,8 +555,8 @@ public class DialogLevel0 : MonoBehaviour, IStartupDialogSkippable
         iconRect.anchorMin = new Vector2(0.5f, 1f);
         iconRect.anchorMax = new Vector2(0.5f, 1f);
         iconRect.pivot = new Vector2(0.5f, 1f);
-        iconRect.anchoredPosition = new Vector2(0f, -36f);
-        iconRect.sizeDelta = new Vector2(74f, 74f);
+        iconRect.anchoredPosition = new Vector2(0f, -39f);
+        iconRect.sizeDelta = new Vector2(50f, 50f);
 
         Image iconImg = iconObj.GetComponent<Image>();
         Sprite sp = Resources.Load<Sprite>(iconPath);
@@ -560,40 +574,44 @@ public class DialogLevel0 : MonoBehaviour, IStartupDialogSkippable
         subRect.anchorMin = new Vector2(0.5f, 1f);
         subRect.anchorMax = new Vector2(0.5f, 1f);
         subRect.pivot = new Vector2(0.5f, 1f);
-        subRect.anchoredPosition = new Vector2(0f, -114f);
-        subRect.sizeDelta = new Vector2(212f, 26f);
+        subRect.anchoredPosition = new Vector2(0f, -92f);
+        subRect.sizeDelta = new Vector2(174f, 18f);
         Text subText = subObj.GetComponent<Text>();
         subText.font = font;
-        subText.fontSize = 13;
+        subText.fontSize = 10;
+        subText.resizeTextForBestFit = true;
+        subText.resizeTextMinSize = 8;
+        subText.resizeTextMaxSize = 10;
         subText.fontStyle = FontStyle.Bold;
         subText.alignment = TextAnchor.MiddleCenter;
         subText.color = new Color(0.85f, 0.35f, 0.05f, 1f);
         subText.horizontalOverflow = HorizontalWrapMode.Wrap;
         subText.text = subTitle;
 
-        // Vùng chứa nội dung chi tiết dạng thẻ giấy
-        GameObject textBgObj = new GameObject("TextBg", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        // Nội dung đặt trực tiếp trên thẻ; không phủ thêm lớp bán trong suốt
+        // khiến phần thông tin cây bị bạc/mờ.
+        GameObject textBgObj = new GameObject("TextArea", typeof(RectTransform));
         textBgObj.transform.SetParent(card.transform, false);
         RectTransform textBgRect = textBgObj.GetComponent<RectTransform>();
-        textBgRect.anchorMin = new Vector2(0.05f, 0.04f);
-        textBgRect.anchorMax = new Vector2(0.95f, 0.55f);
+        textBgRect.anchorMin = new Vector2(0.12f, 0.18f);
+        textBgRect.anchorMax = new Vector2(0.88f, 0.38f);
         textBgRect.offsetMin = Vector2.zero;
         textBgRect.offsetMax = Vector2.zero;
-
-        Image textBgImg = textBgObj.GetComponent<Image>();
-        textBgImg.color = new Color(0.92f, 0.88f, 0.78f, 0.65f);
 
         GameObject descObj = new GameObject("Nội Dung", typeof(RectTransform), typeof(CanvasRenderer), typeof(Text));
         descObj.transform.SetParent(textBgObj.transform, false);
         RectTransform descRect = descObj.GetComponent<RectTransform>();
         descRect.anchorMin = Vector2.zero;
         descRect.anchorMax = Vector2.one;
-        descRect.offsetMin = new Vector2(8f, 6f);
-        descRect.offsetMax = new Vector2(-8f, -6f);
+        descRect.offsetMin = new Vector2(4f, 1f);
+        descRect.offsetMax = new Vector2(-4f, -1f);
 
         Text dText = descObj.GetComponent<Text>();
         dText.font = font;
-        dText.fontSize = 12;
+        dText.fontSize = 9;
+        dText.resizeTextForBestFit = true;
+        dText.resizeTextMinSize = 8;
+        dText.resizeTextMaxSize = 9;
         dText.alignment = TextAnchor.MiddleCenter;
         dText.color = new Color(0.24f, 0.09f, 0.03f, 1f);
         dText.lineSpacing = 1.15f;
@@ -611,7 +629,7 @@ public class DialogLevel0 : MonoBehaviour, IStartupDialogSkippable
         r.anchorMax = new Vector2(0.5f, 1f);
         r.pivot = new Vector2(0.5f, 1f);
         r.anchoredPosition = position;
-        r.sizeDelta = new Vector2(226f, 275f);
+        r.sizeDelta = new Vector2(210f, 176f);
 
         Image bg = card.GetComponent<Image>();
         bg.sprite = Resources.Load<Sprite>("GameUI/dialog_child");
@@ -628,11 +646,14 @@ public class DialogLevel0 : MonoBehaviour, IStartupDialogSkippable
         nameRect.anchorMin = new Vector2(0.5f, 1f);
         nameRect.anchorMax = new Vector2(0.5f, 1f);
         nameRect.pivot = new Vector2(0.5f, 1f);
-        nameRect.anchoredPosition = new Vector2(0f, -8f);
-        nameRect.sizeDelta = new Vector2(212f, 24f);
+        nameRect.anchoredPosition = new Vector2(0f, -18f);
+        nameRect.sizeDelta = new Vector2(174f, 18f);
         Text nameText = nameObj.GetComponent<Text>();
         nameText.font = font;
-        nameText.fontSize = 14;
+        nameText.fontSize = 11;
+        nameText.resizeTextForBestFit = true;
+        nameText.resizeTextMinSize = 9;
+        nameText.resizeTextMaxSize = 11;
         nameText.fontStyle = FontStyle.Bold;
         nameText.alignment = TextAnchor.MiddleCenter;
         nameText.color = new Color(0.12f, 0.52f, 0.08f, 1f);
@@ -646,8 +667,8 @@ public class DialogLevel0 : MonoBehaviour, IStartupDialogSkippable
         iconRect.anchorMin = new Vector2(0.5f, 1f);
         iconRect.anchorMax = new Vector2(0.5f, 1f);
         iconRect.pivot = new Vector2(0.5f, 1f);
-        iconRect.anchoredPosition = new Vector2(0f, -36f);
-        iconRect.sizeDelta = new Vector2(74f, 74f);
+        iconRect.anchoredPosition = new Vector2(0f, -39f);
+        iconRect.sizeDelta = new Vector2(50f, 50f);
 
         Image iconImg = iconObj.GetComponent<Image>();
         Sprite sp = Resources.Load<Sprite>(iconPath);
@@ -665,40 +686,43 @@ public class DialogLevel0 : MonoBehaviour, IStartupDialogSkippable
         recipeRect.anchorMin = new Vector2(0.5f, 1f);
         recipeRect.anchorMax = new Vector2(0.5f, 1f);
         recipeRect.pivot = new Vector2(0.5f, 1f);
-        recipeRect.anchoredPosition = new Vector2(0f, -114f);
-        recipeRect.sizeDelta = new Vector2(212f, 26f);
+        recipeRect.anchoredPosition = new Vector2(0f, -92f);
+        recipeRect.sizeDelta = new Vector2(174f, 18f);
         Text recipeText = recipeObj.GetComponent<Text>();
         recipeText.font = font;
-        recipeText.fontSize = 13;
+        recipeText.fontSize = 10;
+        recipeText.resizeTextForBestFit = true;
+        recipeText.resizeTextMinSize = 8;
+        recipeText.resizeTextMaxSize = 10;
         recipeText.fontStyle = FontStyle.Bold;
         recipeText.alignment = TextAnchor.MiddleCenter;
         recipeText.color = new Color(0.85f, 0.35f, 0.05f, 1f);
         recipeText.horizontalOverflow = HorizontalWrapMode.Wrap;
         recipeText.text = recipe;
 
-        // Vùng chứa nội dung chi tiết dạng thẻ giấy
-        GameObject textBgObj = new GameObject("TextBg", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        // Nội dung đặt trực tiếp trên thẻ, không có lớp nền mờ riêng.
+        GameObject textBgObj = new GameObject("TextArea", typeof(RectTransform));
         textBgObj.transform.SetParent(card.transform, false);
         RectTransform textBgRect = textBgObj.GetComponent<RectTransform>();
-        textBgRect.anchorMin = new Vector2(0.05f, 0.04f);
-        textBgRect.anchorMax = new Vector2(0.95f, 0.55f);
+        textBgRect.anchorMin = new Vector2(0.12f, 0.18f);
+        textBgRect.anchorMax = new Vector2(0.88f, 0.38f);
         textBgRect.offsetMin = Vector2.zero;
         textBgRect.offsetMax = Vector2.zero;
-
-        Image textBgImg = textBgObj.GetComponent<Image>();
-        textBgImg.color = new Color(0.92f, 0.88f, 0.78f, 0.65f);
 
         GameObject descObj = new GameObject("Nội Dung", typeof(RectTransform), typeof(CanvasRenderer), typeof(Text));
         descObj.transform.SetParent(textBgObj.transform, false);
         RectTransform descRect = descObj.GetComponent<RectTransform>();
         descRect.anchorMin = Vector2.zero;
         descRect.anchorMax = Vector2.one;
-        descRect.offsetMin = new Vector2(8f, 6f);
-        descRect.offsetMax = new Vector2(-8f, -6f);
+        descRect.offsetMin = new Vector2(4f, 1f);
+        descRect.offsetMax = new Vector2(-4f, -1f);
 
         Text dText = descObj.GetComponent<Text>();
         dText.font = font;
-        dText.fontSize = 12;
+        dText.fontSize = 9;
+        dText.resizeTextForBestFit = true;
+        dText.resizeTextMinSize = 8;
+        dText.resizeTextMaxSize = 9;
         dText.alignment = TextAnchor.MiddleCenter;
         dText.color = new Color(0.24f, 0.09f, 0.03f, 1f);
         dText.lineSpacing = 1.15f;
@@ -834,9 +858,9 @@ public class DialogLevel0 : MonoBehaviour, IStartupDialogSkippable
         if (pageIndicatorText != null)
         {
             if (currentTutorialPage == 0)
-                pageIndicatorText.text = "Trang 1 / 2: Cách thức Thao Tác & Quy Tắc Ghép";
+                pageIndicatorText.text = "TRANG 1 / 2  •  CÁCH GHÉP";
             else
-                pageIndicatorText.text = "Trang 2 / 2: Công Thức Ghép Mẫu & Tiến Hóa Cấp Cao";
+                pageIndicatorText.text = "TRANG 2 / 2  •  CÔNG THỨC MẪU";
         }
     }
 

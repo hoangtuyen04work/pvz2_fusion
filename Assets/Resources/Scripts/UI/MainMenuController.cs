@@ -708,7 +708,7 @@ public class MainMenuController : MonoBehaviour
         if (transitioning) return;
 
         // Nếu người chơi mới tải game về (chưa hoàn thành/xem hướng dẫn), đưa ngay vào Màn 1 đơn giản hướng dẫn Ghép Cây & Zombie Fusion
-        if (PlayerPrefs.GetInt(DialogLevel0.FirstTimeTutorialKey, 0) == 0)
+        if (CampaignProgress.NeedsFirstTimeTutorial())
         {
             selectedLevel = 0;
             GameSession.SelectedLevel = 0;

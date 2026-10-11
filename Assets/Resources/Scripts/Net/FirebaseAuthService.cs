@@ -319,6 +319,16 @@ public class FirebaseAuthService : MonoBehaviour
     {
         if (data == null) return;
 
+        bool cloudHasAdventureProgress = data.highestMap > 0 || data.bestScore > 0 ||
+            data.wins > 0 || data.unlockedLevelsCount > 2 || data.campaignCheckpoint > 0;
+        if (!cloudHasAdventureProgress && data.mapClears != null)
+            foreach (int clears in data.mapClears)
+                if (clears > 0)
+                {
+                    cloudHasAdventureProgress = true;
+                    break;
+                }
+
         PlayerPrefs.SetInt("ThreeWorlds.BestScore", Mathf.Max(CampaignProgress.BestScore, data.bestScore));
         PlayerPrefs.SetInt("ThreeWorlds.HighestMap", Mathf.Max(CampaignProgress.HighestMap, data.highestMap));
         PlayerPrefs.SetInt("ThreeWorlds.Wins", Mathf.Max(CampaignProgress.Wins, data.wins));
@@ -357,6 +367,12 @@ public class FirebaseAuthService : MonoBehaviour
                 }
             }
         }
+
+
+        // Tutorial completion was not part of older cloud profiles. A profile
+        // that already owns Adventure progress must never be forced through it.
+        if (cloudHasAdventureProgress)
+            PlayerPrefs.SetInt(DialogLevel0.FirstTimeTutorialKey, 1);
 
         PlayerPrefs.Save();
     }

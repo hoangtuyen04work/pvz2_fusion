@@ -137,6 +137,14 @@ public class StartupSkipController : MonoBehaviour, IPointerEnterHandler, IPoint
         while (FindDialog() == null)
             yield return null;
 
+        // Level 0 already has its own page navigation and Skip button. The
+        // global skip_next artwork only adds a duplicate "NEXT" label there.
+        if (FindAnyObjectByType<DialogLevel0>(FindObjectsInactive.Include) != null)
+        {
+            Destroy(gameObject);
+            yield break;
+        }
+
         yield return new WaitForSecondsRealtime(0.35f);
         group.interactable = true;
         group.blocksRaycasts = true;

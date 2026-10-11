@@ -73,6 +73,33 @@ public static class CampaignProgress
         return cardIndex < UnlockedLevelsCount;
     }
 
+    public static bool HasEstablishedAdventureProgress()
+    {
+        if (UnlockedLevelsCount > 2 || HighestMap > 0 || BestScore > 0 || Wins > 0)
+            return true;
+
+        for (int map = 1; map <= 3; map++)
+            if (MapClears(map) > 0)
+                return true;
+        return false;
+    }
+
+    public static bool NeedsFirstTimeTutorial()
+    {
+        if (PlayerPrefs.GetInt(DialogLevel0.FirstTimeTutorialKey, 0) != 0)
+            return false;
+
+        // Older/cloud profiles did not store the tutorial flag. Any real
+        // Adventure progress proves that this is not a first-time player.
+        if (HasEstablishedAdventureProgress())
+        {
+            PlayerPrefs.SetInt(DialogLevel0.FirstTimeTutorialKey, 1);
+            PlayerPrefs.Save();
+            return false;
+        }
+        return true;
+    }
+
     public static void UnlockNextLevel(int completedLevelIndex)
     {
         // completedLevelIndex là levelId (0, 1, 2, 3, 4, 6, 7, 8)
