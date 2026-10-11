@@ -327,9 +327,10 @@ public class FirebaseAuthService : MonoBehaviour
         // progressVersion giữ tương thích với hồ sơ Cloud cũ, nơi các trường mới mặc định bằng 0.
         if (data.progressVersion >= 2)
         {
+            // Account progress is authoritative after login. Do not let a higher
+            // guest/local save unlock levels beyond what this account has earned.
             PlayerPrefs.SetInt(CampaignProgress.PrefUnlockedLevels,
-                Mathf.Max(CampaignProgress.UnlockedLevelsCount,
-                    Mathf.Clamp(data.unlockedLevelsCount, 2, 8)));
+                Mathf.Clamp(data.unlockedLevelsCount, 2, 8));
 
             int localCheckpoint = CampaignProgress.Checkpoint;
             int localCheckpointScore = CampaignProgress.CheckpointScore;

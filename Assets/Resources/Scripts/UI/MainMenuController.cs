@@ -20,6 +20,7 @@ public class MainMenuController : MonoBehaviour
     private Text noticeText;
     private bool transitioning;
     private GameObject optionsPanel;
+    private GameObject almanacQAPanel;
     private int selectedLevel = -1;
     private Button playLevelButton;
     private Text selectedLevelText;
@@ -137,6 +138,22 @@ public class MainMenuController : MonoBehaviour
         networkPlayButton = CreateHotspot(menuFrame, "Kết hợp", 0.620f, 0.590f, 0.910f, 0.715f, new Vector4(0.679f, 0.592f, 0.850f, 0.676f), OpenNetLobby);
         CreateHotspot(menuFrame, "Sinh tồn", 0.632f, 0.470f, 0.902f, 0.595f, new Vector4(0.680f, 0.500f, 0.865f, 0.570f), StartSurvival);
         CreateHotspot(menuFrame, "Bảng xếp hạng", 0.130f, 0.085f, 0.345f, 0.245f, new Vector4(0.205f, 0.115f, 0.335f, 0.195f), ShowLeaderboard);
+
+        // Bấm trực tiếp vào cuốn sách The Suburban Almanac để mở Bách khoa Hỏi Đáp AI
+        CreateHotspot(menuFrame, "Bách khoa", 0.355f, 0.090f, 0.480f, 0.270f, new Vector4(0.370f, 0.100f, 0.470f, 0.260f), ShowAlmanacQA);
+
+        // Kẹp sách Dave mini nhô lên tự nhiên từ mép trên cuốn sách Almanac
+        var bookBadgeObj = new GameObject("Almanac_Dave_Badge", typeof(RectTransform), typeof(Image));
+        bookBadgeObj.transform.SetParent(menuFrame, false);
+        var rtBadge = bookBadgeObj.GetComponent<RectTransform>();
+        SetAnchors(rtBadge, 0.435f, 0.225f, 0.485f, 0.295f);
+        var badgeImg = bookBadgeObj.GetComponent<Image>();
+        badgeImg.sprite = Resources.Load<Sprite>("Sprites/CrazyDave/Dave_Head_Transparent");
+        if (badgeImg.sprite == null)
+            badgeImg.sprite = Resources.Load<Sprite>("Sprites/CrazyDave/Enter/CrazyDave_Enter0018");
+        badgeImg.preserveAspect = true;
+        badgeImg.raycastTarget = false;
+
         CreateHotspot(menuFrame, "Zombie", 0.488f, 0.102f, 0.671f, 0.365f, new Vector4(0.488f, 0.200f, 0.676f, 0.355f), ShowZombieAlmanac);
         CreateHotspot(menuFrame, "Cây trồng", 0.684f, 0.082f, 0.827f, 0.268f, new Vector4(0.690f, 0.102f, 0.833f, 0.228f), ShowPlantAlmanac);
         CreateHotspot(menuFrame, "Thoát", 0.830f, 0.090f, 0.978f, 0.235f, new Vector4(0.865f, 0.120f, 0.955f, 0.205f), QuitGame);
@@ -153,6 +170,11 @@ public class MainMenuController : MonoBehaviour
             + "Chế độ ĐỒNG ĐỘI: hai người cùng trồng cây, dùng chung kho nắng và dãy thẻ.\n"
             + "Chế độ ĐỐI KHÁNG: chủ phòng giữ phe Cây, người tham gia chỉ huy phe Zombie, tích não để thả quân theo từng hàng.\n\n"
             + "Hai máy phải cùng mạng nội bộ. Nếu chơi qua Internet thì cần mở cổng 7777 hoặc dùng phần mềm tạo mạng ảo.");
+
+        // Bách Khoa Toàn Thư / Hỏi Đáp AI Popup gắn vào canvasObject để phủ kín toàn màn hình với nền mờ
+        var qaPopup = AIQAPopup.Create(canvasObject.transform, menuFont, stoneButtonNormal, () => CloseModal(almanacQAPanel));
+        almanacQAPanel = qaPopup.gameObject;
+        almanacQAPanel.SetActive(false);
 
         // Hiển thị tiến trình chơi dưới chữ "Phiêu lưu" trên tấm biển kim loại (ví dụ: MÀN 1.2)
         adventureProgressText = CreateText("Tiến trình Phiêu lưu", menuFrame, string.Empty, 14, TextAnchor.MiddleCenter, new Color(0.92f, 0.92f, 0.88f));
@@ -234,6 +256,11 @@ public class MainMenuController : MonoBehaviour
             userAccountText.text = "ĐĂNG NHẬP";
             userAccountText.color = new Color(1f, 1f, 1f);
         }
+
+        // Cloud login can lower the local unlock count to the account's progress.
+        // Refresh immediately so stale guest-level access is not left on screen.
+        RefreshLevelCardsLockState();
+        UpdateAdventureProgressText();
     }
 
     private Button CreateHotspot(Transform parent, string label, float xMin, float yMin, float xMax, float yMax, Vector4 textRect, UnityEngine.Events.UnityAction action)
@@ -434,6 +461,24 @@ public class MainMenuController : MonoBehaviour
             if (cardIndex < levelCardButtons.Count && levelCardButtons[cardIndex] != null)
                 levelCardButtons[cardIndex].interactable = true; // vẫn cho click để phát âm thanh hoặc thông báo nếu khóa
         }
+
+        int selectedCardIndex = System.Array.IndexOf(LevelOrder, selectedLevel);
+        if (selectedCardIndex >= 0 && !CampaignProgress.IsLevelUnlocked(selectedCardIndex))
+        {
+            selectedLevel = -1;
+            GameSession.SelectedLevel = -1;
+            for (int i = 0; i < levelCardFrames.Count; i++)
+                levelCardFrames[i].color = Color.white;
+
+            if (selectedLevelText != null)
+                selectedLevelText.text = "HÃY CHỌN MỘT MÀN CHƠI";
+            if (playLevelButton != null)
+            {
+                playLevelButton.interactable = false;
+                if (playLevelButton.targetGraphic != null)
+                    playLevelButton.targetGraphic.color = new Color(.55f, .55f, .55f, .85f);
+            }
+        }
     }
 
     private static string DisplayLevelLabel(int levelId)
@@ -576,6 +621,14 @@ public class MainMenuController : MonoBehaviour
     {
         if (selectedLevel < 0 || transitioning) return;
 
+        int selectedCardIndex = System.Array.IndexOf(LevelOrder, selectedLevel);
+        if (selectedCardIndex < 0 || !CampaignProgress.IsLevelUnlocked(selectedCardIndex))
+        {
+            RefreshLevelCardsLockState();
+            ShowNotice("Màn này chưa được tài khoản hiện tại mở khóa!");
+            return;
+        }
+
         GameSession.SelectedLevel = selectedLevel;
 
         // Nếu là Màn 1 (Hướng Dẫn Tân Thủ), đưa thẳng vào trận với bộ cây mặc định để hiện bảng hướng dẫn giống như vừa tải game
@@ -588,6 +641,14 @@ public class MainMenuController : MonoBehaviour
         }
 
         PlantSelectionOverlay.Show(selectedLevel, () => StartCoroutine(LoadSceneWithFade("GameScene")));
+    }
+
+    private void ShowOptions() => OpenModal(optionsPanel);
+    private void ShowHelp() => OpenModal(helpPanel);
+    private void ShowAlmanacQA()
+    {
+        PlayClick();
+        OpenModal(almanacQAPanel);
     }
 
     private void ShowZombieAlmanac()
