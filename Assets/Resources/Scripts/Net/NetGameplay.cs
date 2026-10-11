@@ -765,7 +765,12 @@ public class NetGameplay : MonoBehaviour
 
     private void HandlePeerLost(string reason)
     {
-        ShowAlert(string.IsNullOrEmpty(reason) ? "Mất kết nối với đối phương" : reason, 600f);
+        // Network/transport details belong in the Console, not on the player's HUD.
+        // This avoids exposing socket errors, addresses, or exception text in-game.
+        if (string.IsNullOrEmpty(reason))
+            Debug.LogWarning("Kết nối với người chơi còn lại đã đóng.");
+        else
+            Debug.LogWarning("Kết nối với người chơi còn lại đã đóng: " + reason);
     }
 
     #endregion

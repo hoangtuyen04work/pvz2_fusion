@@ -233,11 +233,7 @@ public class LoginOverlay : MonoBehaviour
                 {
                     if (loadOk && profile != null)
                     {
-                        if (profile.bestScore > CampaignProgress.BestScore)
-                            PlayerPrefs.SetInt("ThreeWorlds.BestScore", profile.bestScore);
-                        if (profile.highestMap > CampaignProgress.HighestMap)
-                            PlayerPrefs.SetInt("ThreeWorlds.HighestMap", profile.highestMap);
-                        PlayerPrefs.Save();
+                        FirebaseAuthService.ApplyCloudProgress(profile);
 
                         // Đồng bộ kỷ lục Sinh tồn từ Cloud về Leaderboard cục bộ
                         if (profile.endlessBestScore > 0 || profile.endlessBestWave > 0)
@@ -325,6 +321,8 @@ public class LoginOverlay : MonoBehaviour
             endlessBestWave = endlessWave,
             endlessTotalKills = endlessKills
         };
+
+        FirebaseAuthService.MergeLocalProgress(profile);
 
         FirebaseAuthService.Instance.SavePlayerDataToCloud(profile, (success, msg) =>
         {

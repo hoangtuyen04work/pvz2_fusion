@@ -186,7 +186,8 @@ public class NetLobbyUI : MonoBehaviour
 
         if (!NetManager.Instance.StartHost(NetSession.DefaultPort))
         {
-            ShowNotice(NetManager.Instance.LastError);
+            LogNetworkIssue("Không thể tạo phòng", NetManager.Instance.LastError);
+            ShowNotice("Không thể tạo phòng lúc này. Vui lòng thử lại.");
             Unsubscribe();
             return;
         }
@@ -332,19 +333,18 @@ public class NetLobbyUI : MonoBehaviour
 
     private void HandlePeerLost(string reason)
     {
+        LogNetworkIssue("Kết nối phòng đã đóng", reason);
         if (page == Page.Host)
         {
             peerReady = false;
             startButton.interactable = false;
-            hostStatusText.text = string.IsNullOrEmpty(reason)
-                ? "Đối phương đã rời phòng."
-                : reason + "\nHãy mở lại phòng.";
+            hostStatusText.text = "Đối phương đã rời phòng.\nHãy mở lại phòng.";
             listening = false;
         }
         else if (page == Page.Join)
         {
             connectButton.interactable = true;
-            joinStatusText.text = string.IsNullOrEmpty(reason) ? "Mất kết nối." : reason;
+            joinStatusText.text = "Đã ngắt kết nối với phòng.";
         }
     }
 
@@ -464,7 +464,8 @@ public class NetLobbyUI : MonoBehaviour
             NetStatus status = NetManager.Instance.Status;
             if (status == NetStatus.Failed)
             {
-                hostStatusText.text = NetManager.Instance.LastError;
+                LogNetworkIssue("Phòng không thể tiếp tục lắng nghe", NetManager.Instance.LastError);
+                hostStatusText.text = "Không thể mở phòng lúc này. Vui lòng thử lại.";
                 listening = false;
             }
         }
@@ -473,10 +474,19 @@ public class NetLobbyUI : MonoBehaviour
             NetStatus status = NetManager.Instance.Status;
             if (status == NetStatus.Failed && connectButton.interactable == false)
             {
-                joinStatusText.text = NetManager.Instance.LastError;
+                LogNetworkIssue("Không thể kết nối vào phòng", NetManager.Instance.LastError);
+                joinStatusText.text = "Không thể vào phòng. Vui lòng kiểm tra mã phòng và thử lại.";
                 connectButton.interactable = true;
             }
         }
+    }
+
+    private static void LogNetworkIssue(string context, string details)
+    {
+        if (string.IsNullOrEmpty(details))
+            Debug.LogWarning(context);
+        else
+            Debug.LogWarning(context + ": " + details);
     }
 
     #region Dựng giao diện

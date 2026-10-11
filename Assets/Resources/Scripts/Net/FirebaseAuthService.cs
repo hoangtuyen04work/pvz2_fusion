@@ -48,12 +48,19 @@ public class FirebaseAuthService : MonoBehaviour
     [Serializable]
     public class PlayerProfileData
     {
+        public int progressVersion;
         public string username;
         public string email;
         public int bestScore;
         public int highestMap;
         public int wins;
         public int losses;
+        public int unlockedLevelsCount;
+        public int campaignCheckpoint;
+        public int campaignCheckpointHealth;
+        public int campaignCheckpointScore;
+        public int[] mapClears;
+        public string[] mapLastClears;
         public int endlessBestScore;
         public int endlessBestWave;
         public int endlessTotalKills;
@@ -263,6 +270,93 @@ public class FirebaseAuthService : MonoBehaviour
         StartCoroutine(PutDatabaseRoutine(dbUrl, json, onComplete));
     }
 
+    /// <summary>Gộp tiến trình cục bộ vào hồ sơ trước khi tải lên Cloud.</summary>
+    public static void MergeLocalProgress(PlayerProfileData data)
+    {
+        if (data == null) return;
+
+        bool upgradingOldProfile = data.progressVersion < 2;
+        data.progressVersion = 2;
+        data.bestScore = Mathf.Max(data.bestScore, CampaignProgress.BestScore);
+        data.highestMap = Mathf.Max(data.highestMap, CampaignProgress.HighestMap);
+        data.wins = Mathf.Max(data.wins, CampaignProgress.Wins);
+        data.losses = Mathf.Max(data.losses, CampaignProgress.Losses);
+        data.unlockedLevelsCount = Mathf.Max(data.unlockedLevelsCount, CampaignProgress.UnlockedLevelsCount);
+
+        int localCheckpoint = CampaignProgress.Checkpoint;
+        int localCheckpointScore = CampaignProgress.CheckpointScore;
+        if (upgradingOldProfile || localCheckpoint > data.campaignCheckpoint ||
+            (localCheckpoint == data.campaignCheckpoint && localCheckpointScore > data.campaignCheckpointScore))
+        {
+            data.campaignCheckpoint = localCheckpoint;
+            data.campaignCheckpointScore = localCheckpointScore;
+            data.campaignCheckpointHealth = CampaignProgress.CheckpointHealth();
+        }
+
+        const int campaignMapCount = 3;
+        if (data.mapClears == null || data.mapClears.Length != campaignMapCount)
+            data.mapClears = new int[campaignMapCount];
+        if (data.mapLastClears == null || data.mapLastClears.Length != campaignMapCount)
+            data.mapLastClears = new string[campaignMapCount];
+
+        for (int index = 0; index < campaignMapCount; index++)
+        {
+            int map = index + 1;
+            int localClears = CampaignProgress.MapClears(map);
+            if (localClears >= data.mapClears[index])
+            {
+                data.mapClears[index] = localClears;
+                data.mapLastClears[index] = CampaignProgress.MapLastClear(map);
+            }
+        }
+    }
+
+    /// <summary>Gộp tiến trình Cloud về máy, không hạ thấp dữ liệu hiện có.</summary>
+    public static void ApplyCloudProgress(PlayerProfileData data)
+    {
+        if (data == null) return;
+
+        PlayerPrefs.SetInt("ThreeWorlds.BestScore", Mathf.Max(CampaignProgress.BestScore, data.bestScore));
+        PlayerPrefs.SetInt("ThreeWorlds.HighestMap", Mathf.Max(CampaignProgress.HighestMap, data.highestMap));
+        PlayerPrefs.SetInt("ThreeWorlds.Wins", Mathf.Max(CampaignProgress.Wins, data.wins));
+        PlayerPrefs.SetInt("ThreeWorlds.Losses", Mathf.Max(CampaignProgress.Losses, data.losses));
+
+        // progressVersion giữ tương thích với hồ sơ Cloud cũ, nơi các trường mới mặc định bằng 0.
+        if (data.progressVersion >= 2)
+        {
+            PlayerPrefs.SetInt(CampaignProgress.PrefUnlockedLevels,
+                Mathf.Max(CampaignProgress.UnlockedLevelsCount,
+                    Mathf.Clamp(data.unlockedLevelsCount, 2, 8)));
+
+            int localCheckpoint = CampaignProgress.Checkpoint;
+            int localCheckpointScore = CampaignProgress.CheckpointScore;
+            if (data.campaignCheckpoint > localCheckpoint ||
+                (data.campaignCheckpoint == localCheckpoint && data.campaignCheckpointScore > localCheckpointScore))
+            {
+                PlayerPrefs.SetInt("ThreeWorlds.Checkpoint", Mathf.Clamp(data.campaignCheckpoint, 0, 2));
+                PlayerPrefs.SetInt("ThreeWorlds.CheckpointScore", Mathf.Max(0, data.campaignCheckpointScore));
+                PlayerPrefs.SetInt("ThreeWorlds.CheckpointHealth",
+                    Mathf.Clamp(data.campaignCheckpointHealth, 25, 100));
+            }
+
+            int mapCount = Mathf.Min(3, data.mapClears != null ? data.mapClears.Length : 0);
+            for (int index = 0; index < mapCount; index++)
+            {
+                int map = index + 1;
+                int cloudClears = Mathf.Max(0, data.mapClears[index]);
+                if (cloudClears > CampaignProgress.MapClears(map))
+                {
+                    PlayerPrefs.SetInt("ThreeWorlds.Map" + map + "Clears", cloudClears);
+                    if (data.mapLastClears != null && index < data.mapLastClears.Length &&
+                        !string.IsNullOrEmpty(data.mapLastClears[index]))
+                        PlayerPrefs.SetString("ThreeWorlds.Map" + map + "Last", data.mapLastClears[index]);
+                }
+            }
+        }
+
+        PlayerPrefs.Save();
+    }
+
     /// <summary>
     /// Tự động cập nhật kết quả màn chơi Sinh tồn của người chơi lên Cloud
     /// </summary>
@@ -286,6 +380,7 @@ public class FirebaseAuthService : MonoBehaviour
             }
 
             profile.username = GetCurrentPlayerName();
+            MergeLocalProgress(profile);
             if (score > profile.endlessBestScore) profile.endlessBestScore = score;
             if (wave > profile.endlessBestWave) profile.endlessBestWave = wave;
             profile.endlessTotalKills += kills;
