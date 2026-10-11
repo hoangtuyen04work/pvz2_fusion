@@ -11,6 +11,9 @@ using UnityEngine.Networking;
 /// </summary>
 public class FirebaseAuthService : MonoBehaviour
 {
+    public static bool HasNetworkConnection =>
+        Application.internetReachability != NetworkReachability.NotReachable;
+
     private static FirebaseAuthService instance;
     public static FirebaseAuthService Instance
     {

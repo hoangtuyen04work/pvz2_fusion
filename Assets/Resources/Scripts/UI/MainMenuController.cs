@@ -28,6 +28,8 @@ public class MainMenuController : MonoBehaviour
     private float menuHoverTarget;
     private float menuHoverAmount;
     private Text adventureProgressText;
+    private Button networkPlayButton;
+    private float nextNetworkCheck;
 
     // Danh sách 8 màn chơi chính (bỏ màn thử nghiệm Map Test id 5)
     private static readonly int[] LevelOrder = { 0, 1, 2, 3, 4, 6, 7, 8 };
@@ -68,6 +70,12 @@ public class MainMenuController : MonoBehaviour
             ShowNotice("ĐÃ MỞ KHÓA TẤT CẢ CÁC MÀN CHƠI (F12)!");
         }
 #endif
+
+        if (Time.unscaledTime >= nextNetworkCheck)
+        {
+            nextNetworkCheck = Time.unscaledTime + 1f;
+            RefreshNetworkFeatures();
+        }
 
         if (menuHoverMaterial == null) return;
         menuHoverAmount = Mathf.Lerp(menuHoverAmount, menuHoverTarget, 18f * Time.unscaledDeltaTime);
@@ -126,7 +134,7 @@ public class MainMenuController : MonoBehaviour
 
         // Các hitbox bám theo đúng vị trí artwork menu_Main_final 1536x1024 (3 chế độ trên bia đá).
         CreateHotspot(menuFrame, "Phiêu lưu", 0.615f, 0.710f, 0.912f, 0.895f, new Vector4(0.655f, 0.755f, 0.885f, 0.855f), StartAdventure);
-        CreateHotspot(menuFrame, "Kết hợp", 0.620f, 0.590f, 0.910f, 0.715f, new Vector4(0.679f, 0.592f, 0.850f, 0.676f), OpenNetLobby);
+        networkPlayButton = CreateHotspot(menuFrame, "Kết hợp", 0.620f, 0.590f, 0.910f, 0.715f, new Vector4(0.679f, 0.592f, 0.850f, 0.676f), OpenNetLobby);
         CreateHotspot(menuFrame, "Sinh tồn", 0.632f, 0.470f, 0.902f, 0.595f, new Vector4(0.680f, 0.500f, 0.865f, 0.570f), StartSurvival);
         CreateHotspot(menuFrame, "Bảng xếp hạng", 0.130f, 0.085f, 0.345f, 0.245f, new Vector4(0.205f, 0.115f, 0.335f, 0.195f), ShowLeaderboard);
         CreateHotspot(menuFrame, "Zombie", 0.488f, 0.102f, 0.671f, 0.365f, new Vector4(0.488f, 0.200f, 0.676f, 0.355f), ShowZombieAlmanac);
@@ -158,6 +166,7 @@ public class MainMenuController : MonoBehaviour
 
         // Nút Tài Khoản / Tên người chơi ở góc trên bên trái
         CreateUserAccountBar(menuFrame);
+        RefreshNetworkFeatures();
 
         fadeImage = CreateImage("Chuyển cảnh", canvasObject.transform, null);
         Stretch(fadeImage.rectTransform);
@@ -227,7 +236,7 @@ public class MainMenuController : MonoBehaviour
         }
     }
 
-    private void CreateHotspot(Transform parent, string label, float xMin, float yMin, float xMax, float yMax, Vector4 textRect, UnityEngine.Events.UnityAction action)
+    private Button CreateHotspot(Transform parent, string label, float xMin, float yMin, float xMax, float yMax, Vector4 textRect, UnityEngine.Events.UnityAction action)
     {
         var go = new GameObject("Nút " + label, typeof(RectTransform), typeof(Image), typeof(Button), typeof(MenuButtonMotion));
         go.transform.SetParent(parent, false);
@@ -244,12 +253,20 @@ public class MainMenuController : MonoBehaviour
         motion.highlightMenuText = true;
         motion.menuController = this;
         motion.hoverRect = textRect;
+        return button;
+    }
+
+    private void RefreshNetworkFeatures()
+    {
+        bool available = FirebaseAuthService.HasNetworkConnection;
+        if (networkPlayButton != null) networkPlayButton.interactable = available;
     }
 
     // Mở sảnh chờ chơi mạng, mang theo màn đang chọn (nếu có) để chủ phòng khỏi phải chọn lại.
     private void OpenNetLobby()
     {
         if (transitioning) return;
+        if (!FirebaseAuthService.HasNetworkConnection) return;
         PlayClick();
         if (selectedLevel == 7)
         {

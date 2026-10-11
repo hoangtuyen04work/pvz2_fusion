@@ -28,6 +28,8 @@ public class LoginOverlay : MonoBehaviour
     private Text profileInfoText;
 
     private Action onLoginSuccessCallback;
+    private bool requestInProgress;
+    private bool lastNetworkAvailable;
 
     public static void Show(Action onLoginSuccess = null)
     {
@@ -207,12 +209,39 @@ public class LoginOverlay : MonoBehaviour
             accountInput.text = "";
             passwordInput.text = "";
         }
+
+        RefreshNetworkState();
+    }
+
+    private void Update()
+    {
+        bool available = FirebaseAuthService.HasNetworkConnection;
+        if (available != lastNetworkAvailable) RefreshNetworkState();
+    }
+
+    private void RefreshNetworkState()
+    {
+        lastNetworkAvailable = FirebaseAuthService.HasNetworkConnection;
+        bool cloudEnabled = lastNetworkAvailable && !requestInProgress;
+        if (loginBtn != null) loginBtn.interactable = cloudEnabled;
+        if (registerBtn != null) registerBtn.interactable = cloudEnabled;
+        if (syncBtn != null) syncBtn.interactable = cloudEnabled;
+        if (guestBtn != null) guestBtn.interactable = !requestInProgress;
+        if (accountInput != null) accountInput.interactable = cloudEnabled;
+        if (passwordInput != null) passwordInput.interactable = cloudEnabled;
+
+        if (!lastNetworkAvailable && messageText != null)
+        {
+            messageText.color = new Color(1f, 0.82f, 0.35f);
+            messageText.text = "Không có kết nối mạng. Bạn vẫn có thể chơi với tài khoản Khách.";
+        }
     }
 
     // ================= Xử lý Sự kiện nút =================
 
     private void OnClickSignIn()
     {
+        if (!FirebaseAuthService.HasNetworkConnection) return;
         string acc = accountInput.text.Trim();
         string pass = passwordInput.text.Trim();
 
@@ -264,6 +293,7 @@ public class LoginOverlay : MonoBehaviour
 
     private void OnClickSignUp()
     {
+        if (!FirebaseAuthService.HasNetworkConnection) return;
         string acc = accountInput.text.Trim();
         string pass = passwordInput.text.Trim();
 
@@ -300,6 +330,7 @@ public class LoginOverlay : MonoBehaviour
 
     private void OnClickSyncCloud()
     {
+        if (!FirebaseAuthService.HasNetworkConnection) return;
         messageText.color = new Color(1f, 0.9f, 0.4f);
         messageText.text = "Đang đồng bộ dữ liệu...";
 
@@ -343,11 +374,8 @@ public class LoginOverlay : MonoBehaviour
 
     private void SetInteractable(bool interactable)
     {
-        loginBtn.interactable = interactable;
-        registerBtn.interactable = interactable;
-        guestBtn.interactable = interactable;
-        accountInput.interactable = interactable;
-        passwordInput.interactable = interactable;
+        requestInProgress = !interactable;
+        RefreshNetworkState();
     }
 
     // ================= Helper Dựng UI =================
