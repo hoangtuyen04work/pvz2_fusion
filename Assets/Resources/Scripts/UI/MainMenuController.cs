@@ -22,6 +22,7 @@ public class MainMenuController : MonoBehaviour
     private Text noticeText;
     private bool transitioning;
     private GameObject optionsPanel;
+    private GameObject almanacQAPanel;
     private int selectedLevel = -1;
     private Button playLevelButton;
     private Text selectedLevelText;
@@ -93,6 +94,21 @@ public class MainMenuController : MonoBehaviour
         CreateHotspot(menuFrame, "Giải đố", 0.512f, 0.385f, 0.862f, 0.548f, new Vector4(0.545f, 0.420f, 0.835f, 0.515f), () => ShowNotice("Chế độ Giải đố sẽ sớm ra mắt!"));
         CreateHotspot(menuFrame, "Sinh tồn", 0.514f, 0.287f, 0.839f, 0.435f, new Vector4(0.540f, 0.310f, 0.805f, 0.405f), () => ShowNotice("Chế độ Sinh tồn sẽ sớm ra mắt!"));
         CreateHotspot(menuFrame, "Cửa hàng", 0.341f, 0.059f, 0.445f, 0.144f, new Vector4(0.350f, 0.075f, 0.435f, 0.130f), () => ShowNotice("Cửa hàng hiện đang đóng cửa."));
+        // Bấm trực tiếp vào cuốn sách The Suburban Almanac để mở Bách khoa Hỏi Đáp AI
+        CreateHotspot(menuFrame, "Bách khoa", 0.405f, 0.112f, 0.530f, 0.282f, new Vector4(0.415f, 0.120f, 0.520f, 0.275f), ShowAlmanacQA);
+
+        // Kẹp sách Dave mini nhô lên tự nhiên từ mép trên cuốn sách Almanac
+        var bookBadgeObj = new GameObject("Almanac_Dave_Badge", typeof(RectTransform), typeof(Image));
+        bookBadgeObj.transform.SetParent(menuFrame, false);
+        var rtBadge = bookBadgeObj.GetComponent<RectTransform>();
+        SetAnchors(rtBadge, 0.475f, 0.225f, 0.530f, 0.295f);
+        var badgeImg = bookBadgeObj.GetComponent<Image>();
+        badgeImg.sprite = Resources.Load<Sprite>("Sprites/CrazyDave/Dave_Head_Transparent");
+        if (badgeImg.sprite == null)
+            badgeImg.sprite = Resources.Load<Sprite>("Sprites/CrazyDave/Enter/CrazyDave_Enter0018");
+        badgeImg.preserveAspect = true;
+        badgeImg.raycastTarget = false;
+
         CreateHotspot(menuFrame, "Tùy chọn", 0.683f, 0.109f, 0.784f, 0.227f, new Vector4(0.690f, 0.130f, 0.770f, 0.200f), ShowOptions);
         CreateHotspot(menuFrame, "Trợ giúp", 0.775f, 0.069f, 0.871f, 0.218f, new Vector4(0.790f, 0.085f, 0.855f, 0.165f), ShowHelp);
         CreateHotspot(menuFrame, "Thoát", 0.864f, 0.084f, 0.965f, 0.229f, new Vector4(0.880f, 0.110f, 0.950f, 0.190f), QuitGame);
@@ -109,6 +125,11 @@ public class MainMenuController : MonoBehaviour
             + "Chế độ ĐỒNG ĐỘI: hai người cùng trồng cây, dùng chung kho nắng và dãy thẻ.\n"
             + "Chế độ ĐỐI KHÁNG: chủ phòng giữ phe Cây, người tham gia chỉ huy phe Zombie, tích não để thả quân theo từng hàng.\n\n"
             + "Hai máy phải cùng mạng nội bộ. Nếu chơi qua Internet thì cần mở cổng 7777 hoặc dùng phần mềm tạo mạng ảo.");
+
+        // Bách Khoa Toàn Thư / Hỏi Đáp AI Popup gắn vào canvasObject để phủ kín toàn màn hình với nền mờ
+        var qaPopup = AIQAPopup.Create(canvasObject.transform, menuFont, stoneButtonNormal, () => CloseModal(almanacQAPanel));
+        almanacQAPanel = qaPopup.gameObject;
+        almanacQAPanel.SetActive(false);
 
         fadeImage = CreateImage("Chuyển cảnh", canvasObject.transform, null);
         Stretch(fadeImage.rectTransform);
@@ -345,6 +366,11 @@ public class MainMenuController : MonoBehaviour
 
     private void ShowOptions() => OpenModal(optionsPanel);
     private void ShowHelp() => OpenModal(helpPanel);
+    private void ShowAlmanacQA()
+    {
+        PlayClick();
+        OpenModal(almanacQAPanel);
+    }
 
     private void OpenModal(GameObject panel)
     {
