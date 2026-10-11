@@ -231,24 +231,24 @@ public class ZombieCommanderUI : MonoBehaviour
         if (EventSystem.current == null)
             new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
 
-        //Thanh nền phía dưới màn hình
+        //Thanh nền phía dưới màn hình (gọn gàng, tránh che khuất hàng cỏ dưới cùng)
         GameObject bar = new GameObject("Thanh chỉ huy", typeof(RectTransform), typeof(Image));
         bar.transform.SetParent(canvasObject.transform, false);
-        SetAnchors(bar.GetComponent<RectTransform>(), 0.015f, 0.005f, 0.985f, 0.155f);
+        SetAnchors(bar.GetComponent<RectTransform>(), 0.04f, 0.002f, 0.96f, 0.125f);
         bar.GetComponent<Image>().color = new Color(0.10f, 0.05f, 0.06f, 0.92f);
 
-        brainText = CreateText("Não", bar.transform, "NÃO", 22,
+        brainText = CreateText("Não", bar.transform, "NÃO", 20,
             TextAnchor.MiddleCenter, new Color(0.95f, 0.55f, 0.62f));
-        SetAnchors(brainText.rectTransform, 0.006f, 0.10f, 0.115f, 0.90f);
+        SetAnchors(brainText.rectTransform, 0.005f, 0.10f, 0.115f, 0.90f);
 
         BuildCards(bar.transform);
 
-        hintText = CreateText("Gợi ý", canvasObject.transform, DefaultHint(), 20,
+        hintText = CreateText("Gợi ý", canvasObject.transform, DefaultHint(), 18,
             TextAnchor.MiddleCenter, new Color(0.95f, 0.85f, 0.70f));
-        SetAnchors(hintText.rectTransform, 0.10f, 0.160f, 0.90f, 0.205f);
+        SetAnchors(hintText.rectTransform, 0.10f, 0.130f, 0.90f, 0.165f);
 
         //Nhãn bám theo con trỏ khi đã chọn zombie
-        followText = CreateText("Đang chọn", canvasObject.transform, "", 20,
+        followText = CreateText("Đang chọn", canvasObject.transform, "", 18,
             TextAnchor.MiddleCenter, new Color(1f, 0.75f, 0.45f));
         followRect = followText.rectTransform;
         followRect.anchorMin = new Vector2(0.5f, 0.5f);
@@ -260,20 +260,52 @@ public class ZombieCommanderUI : MonoBehaviour
 
     private void BuildCards(Transform parent)
     {
+
         ZombieManagement management = null;
         GameObject holder = GameObject.Find("Zombie Management");
         if (holder != null) management = holder.GetComponent<ZombieManagement>();
 
         List<ZombieRoster.Entry> usable = new List<ZombieRoster.Entry>();
-        foreach (ZombieRoster.Entry entry in ZombieRoster.All)
+
+        // Chỉ lấy các zombie đã được chọn (tối đa 6 con)
+        if (NetSession.SelectedZombies != null && NetSession.SelectedZombies.Count > 0)
         {
-            if (IsAvailable(management, entry.name)) usable.Add(entry);
+            foreach (string name in NetSession.SelectedZombies)
+            {
+                if (usable.Count >= 6) break;
+                ZombieRoster.Entry entry = ZombieRoster.Find(name);
+                if (entry != null && IsAvailable(management, entry.name))
+                    usable.Add(entry);
+            }
+        }
+
+        // Nếu danh sách người chơi chọn chưa có hoặc rỗng, lấy 6 con cơ bản mặc định
+        if (usable.Count == 0)
+        {
+            string[] defaultNames = { "ZombieNormal", "ConeZombie", "ChineseZombie", "BucketZombie", "PoleVaultingZombie", "FootballZombie" };
+            foreach (string name in defaultNames)
+            {
+                if (usable.Count >= 6) break;
+                ZombieRoster.Entry entry = ZombieRoster.Find(name);
+                if (entry != null && IsAvailable(management, entry.name))
+                    usable.Add(entry);
+            }
+        }
+
+        // Dự phòng nếu các con trên không có trong level: lấy 6 con đầu tiên khả dụng
+        if (usable.Count == 0)
+        {
+            foreach (ZombieRoster.Entry entry in ZombieRoster.All)
+            {
+                if (usable.Count >= 6) break;
+                if (IsAvailable(management, entry.name)) usable.Add(entry);
+            }
         }
 
         if (usable.Count == 0) return;
 
         const float left = 0.125f;
-        const float right = 0.995f;
+        const float right = 0.995f; // Trải đều thẻ dọc theo toàn bộ thanh chỉ huy
         float width = (right - left) / usable.Count;
 
         for (int i = 0; i < usable.Count; i++)
@@ -302,14 +334,27 @@ public class ZombieCommanderUI : MonoBehaviour
         int captured = index;
         button.onClick.AddListener(delegate { SelectCard(captured); });
 
-        Text label = CreateText("Tên", go.transform, entry.label, 17,
+        // Ảnh đại diện zombie (kích thước vừa vặn, không quá to)
+        Sprite zombieIcon = ZombieIconHelper.GetIcon(entry.name);
+        if (zombieIcon != null)
+        {
+            GameObject iconObj = new GameObject("Icon", typeof(RectTransform), typeof(Image));
+            iconObj.transform.SetParent(go.transform, false);
+            SetAnchors(iconObj.GetComponent<RectTransform>(), 0.12f, 0.34f, 0.88f, 0.92f);
+            Image iconImg = iconObj.GetComponent<Image>();
+            iconImg.sprite = zombieIcon;
+            iconImg.preserveAspect = true;
+            iconImg.raycastTarget = false;
+        }
+
+        Text label = CreateText("Tên", go.transform, entry.label, 13,
             TextAnchor.LowerCenter, Color.white);
-        SetAnchors(label.rectTransform, 0.03f, 0.42f, 0.97f, 0.97f);
+        SetAnchors(label.rectTransform, 0.02f, 0.22f, 0.98f, 0.44f);
         label.raycastTarget = false;
 
-        Text cost = CreateText("Giá", go.transform, entry.cost.ToString(), 20,
-            TextAnchor.UpperCenter, new Color(0.95f, 0.90f, 0.45f));
-        SetAnchors(cost.rectTransform, 0.03f, 0.05f, 0.97f, 0.44f);
+        Text cost = CreateText("Giá", go.transform, entry.cost.ToString(), 18,
+            TextAnchor.MiddleCenter, new Color(0.95f, 0.90f, 0.45f));
+        SetAnchors(cost.rectTransform, 0.03f, 0.02f, 0.97f, 0.24f);
         cost.raycastTarget = false;
 
         //Lớp phủ hồi chiêu, rút dần từ trên xuống
@@ -362,6 +407,27 @@ public class ZombieCommanderUI : MonoBehaviour
         text.horizontalOverflow = HorizontalWrapMode.Wrap;
         text.verticalOverflow = VerticalWrapMode.Overflow;
         return text;
+    }
+
+    private GameObject CreateButton(string name, Transform parent, string label, int size,
+        float xMin, float yMin, float xMax, float yMax, UnityEngine.Events.UnityAction action)
+    {
+        GameObject go = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(Button));
+        go.transform.SetParent(parent, false);
+        SetAnchors(go.GetComponent<RectTransform>(), xMin, yMin, xMax, yMax);
+
+        Image img = go.GetComponent<Image>();
+        img.sprite = buttonSprite;
+        img.type = Image.Type.Sliced;
+        img.color = new Color(0.85f, 0.40f, 0.35f, 1f);
+
+        Button btn = go.GetComponent<Button>();
+        btn.onClick.AddListener(action);
+
+        Text txt = CreateText("Label", go.transform, label, size, TextAnchor.MiddleCenter, Color.white);
+        SetAnchors(txt.rectTransform, 0.05f, 0.05f, 0.95f, 0.95f);
+        txt.raycastTarget = false;
+        return go;
     }
 
     private static void SetAnchors(RectTransform rect, float xMin, float yMin, float xMax, float yMax)

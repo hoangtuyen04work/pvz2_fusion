@@ -7,8 +7,6 @@ using UnityEngine.UI;
 
 public class MainMenuController : MonoBehaviour
 {
-    private const int GargantuarArenaLevelIndex = 6;
-
     public Font menuFont;
     public Sprite stoneButtonNormal;
     public Sprite stoneButtonHighlighted;
@@ -30,9 +28,56 @@ public class MainMenuController : MonoBehaviour
     private Material menuHoverMaterial;
     private float menuHoverTarget;
     private float menuHoverAmount;
+    private Text adventureProgressText;
+    private Button networkPlayButton;
+    private float nextNetworkCheck;
+
+    // Danh sách 8 màn chơi chính (bỏ màn thử nghiệm Map Test id 5)
+    private static readonly int[] LevelOrder = { 0, 1, 2, 3, 4, 6, 7, 8 };
+    private static readonly string[] LevelNames =
+    {
+        "Hướng Dẫn Tân Thủ",
+        "Hành Trình Mới",
+        "Thầy Luyện Xác",
+        "Vùng Đất Bất Tử",
+        "Sông Băng Địa Cực",
+        "Map Test",
+        "Rừng Nhật Thực",
+        "Đảo Thiên Đường",
+        "Đền Mạch Năng Lượng"
+    };
+    private static readonly string[] LevelThumbnails =
+    {
+        "Sprites/BackGround/Background_Day",
+        "Sprites/BackGround/BG_sanvuon",
+        "Sprites/BackGround/Background_Night_Wall",
+        "Sprites/BackGround/background_Night_Bone",
+        "Sprites/BackGround/Background_Ice",
+        "Sprites/BackGround/Background_Forest",
+        "Sprites/BackGround/map7",
+        "Sprites/BackGround/map8",
+        "Sprites/Map9_Art/background/map9"
+    };
 
     private void Update()
     {
+        // Phím tắt F12 trên máy tính (Editor, Windows, macOS, Linux) để mở khóa tất cả màn chơi
+#if UNITY_EDITOR || UNITY_STANDALONE
+        if (Input.GetKeyDown(KeyCode.F12))
+        {
+            CampaignProgress.UnlockAllLevels();
+            RefreshLevelCardsLockState();
+            UpdateAdventureProgressText();
+            ShowNotice("ĐÃ MỞ KHÓA TẤT CẢ CÁC MÀN CHƠI (F12)!");
+        }
+#endif
+
+        if (Time.unscaledTime >= nextNetworkCheck)
+        {
+            nextNetworkCheck = Time.unscaledTime + 1f;
+            RefreshNetworkFeatures();
+        }
+
         if (menuHoverMaterial == null) return;
         menuHoverAmount = Mathf.Lerp(menuHoverAmount, menuHoverTarget, 18f * Time.unscaledDeltaTime);
         menuHoverMaterial.SetFloat("_HoverAmount", menuHoverAmount);
@@ -70,15 +115,15 @@ public class MainMenuController : MonoBehaviour
 
         EnsureEventSystem();
 
-        var frameObject = new GameObject("Khung Menu 4x3", typeof(RectTransform), typeof(AspectRatioFitter));
+        var frameObject = new GameObject("Khung Menu 3x2", typeof(RectTransform), typeof(AspectRatioFitter));
         frameObject.transform.SetParent(canvasObject.transform, false);
         Stretch(frameObject.GetComponent<RectTransform>());
         var frameFitter = frameObject.GetComponent<AspectRatioFitter>();
         frameFitter.aspectMode = AspectRatioFitter.AspectMode.FitInParent;
-        frameFitter.aspectRatio = 4f / 3f;
+        frameFitter.aspectRatio = 3f / 2f;
         Transform menuFrame = frameObject.transform;
 
-        var background = CreateImage("Nền Menu", menuFrame, Resources.Load<Sprite>("Sprites/UI/MainMenu/main_menu_vi"));
+        var background = CreateImage("Nền Menu", menuFrame, Resources.Load<Sprite>("Sprites/UI/MainMenu/menu_Main_final"));
         Stretch(background.rectTransform);
         background.raycastTarget = false;
         var hoverShader = Resources.Load<Shader>("Shaders/UIMenuTextHover");
@@ -88,20 +133,20 @@ public class MainMenuController : MonoBehaviour
             background.material = menuHoverMaterial;
         }
 
-        // Các hitbox bám theo đúng vị trí các phiến đá trên ảnh nền 4:3.
-        CreateHotspot(menuFrame, "Phiêu lưu", 0.500f, 0.656f, 0.891f, 0.843f, new Vector4(0.520f, 0.710f, 0.865f, 0.825f), StartAdventure);
-        CreateHotspot(menuFrame, "Trò chơi nhỏ", 0.503f, 0.497f, 0.880f, 0.690f, new Vector4(0.520f, 0.535f, 0.850f, 0.655f), () => ShowNotice("Chế độ Trò chơi nhỏ sẽ sớm ra mắt!"));
-        CreateHotspot(menuFrame, "Giải đố", 0.512f, 0.385f, 0.862f, 0.548f, new Vector4(0.545f, 0.420f, 0.835f, 0.515f), () => ShowNotice("Chế độ Giải đố sẽ sớm ra mắt!"));
-        CreateHotspot(menuFrame, "Sinh tồn", 0.514f, 0.287f, 0.839f, 0.435f, new Vector4(0.540f, 0.310f, 0.805f, 0.405f), () => ShowNotice("Chế độ Sinh tồn sẽ sớm ra mắt!"));
-        CreateHotspot(menuFrame, "Cửa hàng", 0.341f, 0.059f, 0.445f, 0.144f, new Vector4(0.350f, 0.075f, 0.435f, 0.130f), () => ShowNotice("Cửa hàng hiện đang đóng cửa."));
+        // Các hitbox bám theo đúng vị trí artwork menu_Main_final 1536x1024 (3 chế độ trên bia đá).
+        CreateHotspot(menuFrame, "Phiêu lưu", 0.615f, 0.710f, 0.912f, 0.895f, new Vector4(0.655f, 0.755f, 0.885f, 0.855f), StartAdventure);
+        networkPlayButton = CreateHotspot(menuFrame, "Kết hợp", 0.620f, 0.590f, 0.910f, 0.715f, new Vector4(0.679f, 0.592f, 0.850f, 0.676f), OpenNetLobby);
+        CreateHotspot(menuFrame, "Sinh tồn", 0.632f, 0.470f, 0.902f, 0.595f, new Vector4(0.680f, 0.500f, 0.865f, 0.570f), StartSurvival);
+        CreateHotspot(menuFrame, "Bảng xếp hạng", 0.130f, 0.085f, 0.345f, 0.245f, new Vector4(0.205f, 0.115f, 0.335f, 0.195f), ShowLeaderboard);
+
         // Bấm trực tiếp vào cuốn sách The Suburban Almanac để mở Bách khoa Hỏi Đáp AI
-        CreateHotspot(menuFrame, "Bách khoa", 0.405f, 0.112f, 0.530f, 0.282f, new Vector4(0.415f, 0.120f, 0.520f, 0.275f), ShowAlmanacQA);
+        CreateHotspot(menuFrame, "Bách khoa", 0.355f, 0.090f, 0.480f, 0.270f, new Vector4(0.370f, 0.100f, 0.470f, 0.260f), ShowAlmanacQA);
 
         // Kẹp sách Dave mini nhô lên tự nhiên từ mép trên cuốn sách Almanac
         var bookBadgeObj = new GameObject("Almanac_Dave_Badge", typeof(RectTransform), typeof(Image));
         bookBadgeObj.transform.SetParent(menuFrame, false);
         var rtBadge = bookBadgeObj.GetComponent<RectTransform>();
-        SetAnchors(rtBadge, 0.475f, 0.225f, 0.530f, 0.295f);
+        SetAnchors(rtBadge, 0.435f, 0.225f, 0.485f, 0.295f);
         var badgeImg = bookBadgeObj.GetComponent<Image>();
         badgeImg.sprite = Resources.Load<Sprite>("Sprites/CrazyDave/Dave_Head_Transparent");
         if (badgeImg.sprite == null)
@@ -109,19 +154,19 @@ public class MainMenuController : MonoBehaviour
         badgeImg.preserveAspect = true;
         badgeImg.raycastTarget = false;
 
-        CreateHotspot(menuFrame, "Tùy chọn", 0.683f, 0.109f, 0.784f, 0.227f, new Vector4(0.690f, 0.130f, 0.770f, 0.200f), ShowOptions);
-        CreateHotspot(menuFrame, "Trợ giúp", 0.775f, 0.069f, 0.871f, 0.218f, new Vector4(0.790f, 0.085f, 0.855f, 0.165f), ShowHelp);
-        CreateHotspot(menuFrame, "Thoát", 0.864f, 0.084f, 0.965f, 0.229f, new Vector4(0.880f, 0.110f, 0.950f, 0.190f), QuitGame);
+        CreateHotspot(menuFrame, "Zombie", 0.488f, 0.102f, 0.671f, 0.365f, new Vector4(0.488f, 0.200f, 0.676f, 0.355f), ShowZombieAlmanac);
+        CreateHotspot(menuFrame, "Cây trồng", 0.684f, 0.082f, 0.827f, 0.268f, new Vector4(0.690f, 0.102f, 0.833f, 0.228f), ShowPlantAlmanac);
+        CreateHotspot(menuFrame, "Thoát", 0.830f, 0.090f, 0.978f, 0.235f, new Vector4(0.865f, 0.120f, 0.955f, 0.205f), QuitGame);
 
-        noticeText = CreateText("Thông báo", menuFrame, string.Empty, 27, TextAnchor.MiddleCenter, Color.white);
-        SetAnchors(noticeText.rectTransform, 0.22f, 0.02f, 0.78f, 0.105f);
+        noticeText = CreateText("Thông báo", menuFrame, string.Empty, 24, TextAnchor.MiddleCenter, new Color(0.28f, 0.12f, 0.035f));
+        SetAnchors(noticeText.rectTransform, 0.085f, 0.660f, 0.335f, 0.755f);
         noticeText.gameObject.SetActive(false);
 
         levelPanel = BuildLevelSelection(menuFrame);
         optionsPanel = BuildModal(menuFrame, "TÙY CHỌN", "Âm thanh và thiết lập nâng cao sẽ được bổ sung trong bản cập nhật tiếp theo.");
         helpPanel = BuildModal(menuFrame, "TRỢ GIÚP",
             "Chọn PHIÊU LƯU để chơi một mình: chọn thẻ cây rồi nhấn vào ô đất để trồng cây chống zombie.\n\n"
-            + "CHƠI MẠNG: vào PHIÊU LƯU rồi bấm nút CHƠI MẠNG ở góc trái trên bảng chọn màn. Một người bấm TẠO PHÒNG rồi đọc địa chỉ hiện trên màn hình, người kia bấm THAM GIA và gõ địa chỉ đó vào.\n\n"
+            + "KẾT HỢP (CHƠI MẠNG): nhấn trực tiếp vào nút KẾT HỢP ở menu chính (hoặc nút CHƠI MẠNG trong bảng chọn màn). Một người bấm TẠO PHÒNG rồi đọc địa chỉ hiện trên màn hình, người kia bấm THAM GIA và gõ địa chỉ đó vào.\n\n"
             + "Chế độ ĐỒNG ĐỘI: hai người cùng trồng cây, dùng chung kho nắng và dãy thẻ.\n"
             + "Chế độ ĐỐI KHÁNG: chủ phòng giữ phe Cây, người tham gia chỉ huy phe Zombie, tích não để thả quân theo từng hàng.\n\n"
             + "Hai máy phải cùng mạng nội bộ. Nếu chơi qua Internet thì cần mở cổng 7777 hoặc dùng phần mềm tạo mạng ảo.");
@@ -131,6 +176,20 @@ public class MainMenuController : MonoBehaviour
         almanacQAPanel = qaPopup.gameObject;
         almanacQAPanel.SetActive(false);
 
+        // Hiển thị tiến trình chơi dưới chữ "Phiêu lưu" trên tấm biển kim loại (ví dụ: MÀN 1.2)
+        adventureProgressText = CreateText("Tiến trình Phiêu lưu", menuFrame, string.Empty, 14, TextAnchor.MiddleCenter, new Color(0.92f, 0.92f, 0.88f));
+        SetAnchors(adventureProgressText.rectTransform, 0.680f, 0.724f, 0.850f, 0.766f);
+        adventureProgressText.fontStyle = FontStyle.Bold;
+        adventureProgressText.raycastTarget = false;
+        var advOutline = adventureProgressText.gameObject.AddComponent<Outline>();
+        advOutline.effectColor = new Color(0.12f, 0.08f, 0.05f, 0.95f);
+        advOutline.effectDistance = new Vector2(1f, -1f);
+        UpdateAdventureProgressText();
+
+        // Nút Tài Khoản / Tên người chơi ở góc trên bên trái
+        CreateUserAccountBar(menuFrame);
+        RefreshNetworkFeatures();
+
         fadeImage = CreateImage("Chuyển cảnh", canvasObject.transform, null);
         Stretch(fadeImage.rectTransform);
         fadeImage.color = Color.black;
@@ -139,7 +198,67 @@ public class MainMenuController : MonoBehaviour
         fadeImage.gameObject.SetActive(false);
     }
 
-    private void CreateHotspot(Transform parent, string label, float xMin, float yMin, float xMax, float yMax, Vector4 textRect, UnityEngine.Events.UnityAction action)
+    private void UpdateAdventureProgressText()
+    {
+        if (adventureProgressText == null) return;
+        adventureProgressText.text = "MÀN 1." + CampaignProgress.UnlockedLevelsCount;
+    }
+
+    private GameObject userAccountBarObj;
+    private Text userAccountText;
+
+    private void CreateUserAccountBar(Transform parent)
+    {
+        userAccountBarObj = new GameObject("UserAccountBar", typeof(RectTransform), typeof(Image), typeof(Button), typeof(MenuButtonMotion));
+        userAccountBarObj.transform.SetParent(parent, false);
+        SetAnchors(userAccountBarObj.GetComponent<RectTransform>(), 0.02f, 0.90f, 0.28f, 0.97f);
+
+        var bgImage = userAccountBarObj.GetComponent<Image>();
+        bgImage.sprite = Resources.Load<Sprite>("GameUI/button1");
+        bgImage.type = Image.Type.Sliced;
+        bgImage.color = new Color(1f, 1f, 1f, 0.9f);
+
+        var btn = userAccountBarObj.GetComponent<Button>();
+        btn.onClick.AddListener(() =>
+        {
+            PlayClick();
+            LoginOverlay.Show(UpdateAccountBarText);
+        });
+
+        userAccountBarObj.GetComponent<MenuButtonMotion>().targetGraphic = bgImage;
+
+        userAccountText = CreateText("UserText", userAccountBarObj.transform, "", 16, TextAnchor.MiddleCenter, new Color(1f, 0.95f, 0.7f));
+        Stretch(userAccountText.rectTransform);
+        userAccountText.fontStyle = FontStyle.Bold;
+        userAccountText.raycastTarget = false;
+        var outline = userAccountText.gameObject.AddComponent<Outline>();
+        outline.effectColor = new Color(0.12f, 0.05f, 0.02f);
+        outline.effectDistance = new Vector2(1f, -1f);
+
+        UpdateAccountBarText();
+    }
+
+    private void UpdateAccountBarText()
+    {
+        if (userAccountBarObj == null || userAccountText == null) return;
+        userAccountBarObj.SetActive(true);
+
+        if (FirebaseAuthService.IsLoggedIn)
+        {
+            string email = FirebaseAuthService.CurrentUserEmail;
+            if (email.Contains("@pvzgame.com"))
+                email = email.Replace("@pvzgame.com", "");
+            userAccountText.text = email;
+            userAccountText.color = new Color(1f, 0.95f, 0.7f);
+        }
+        else
+        {
+            userAccountText.text = "ĐĂNG NHẬP";
+            userAccountText.color = new Color(1f, 1f, 1f);
+        }
+    }
+
+    private Button CreateHotspot(Transform parent, string label, float xMin, float yMin, float xMax, float yMax, Vector4 textRect, UnityEngine.Events.UnityAction action)
     {
         var go = new GameObject("Nút " + label, typeof(RectTransform), typeof(Image), typeof(Button), typeof(MenuButtonMotion));
         go.transform.SetParent(parent, false);
@@ -156,13 +275,26 @@ public class MainMenuController : MonoBehaviour
         motion.highlightMenuText = true;
         motion.menuController = this;
         motion.hoverRect = textRect;
+        return button;
     }
 
-    // Mở sảnh chờ chơi mạng, mang theo màn đang chọn để chủ phòng khỏi phải chọn lại.
+    private void RefreshNetworkFeatures()
+    {
+        bool available = FirebaseAuthService.HasNetworkConnection;
+        if (networkPlayButton != null) networkPlayButton.interactable = available;
+    }
+
+    // Mở sảnh chờ chơi mạng, mang theo màn đang chọn (nếu có) để chủ phòng khỏi phải chọn lại.
     private void OpenNetLobby()
     {
         if (transitioning) return;
+        if (!FirebaseAuthService.HasNetworkConnection) return;
         PlayClick();
+        if (selectedLevel == 7)
+        {
+            ShowNotice("Đảo Thiên Đường đang ở chế độ chơi đơn để giữ đúng chu kỳ thủy triều.");
+            return;
+        }
         NetLobbyUI.Open(selectedLevel);
     }
 
@@ -170,28 +302,64 @@ public class MainMenuController : MonoBehaviour
     {
         var panel = new GameObject(title + " Panel", typeof(RectTransform), typeof(Image), typeof(CanvasGroup));
         panel.transform.SetParent(parent, false);
-        SetAnchors(panel.GetComponent<RectTransform>(), 0.22f, 0.24f, 0.78f, 0.76f);
-        panel.GetComponent<Image>().color = new Color(0.09f, 0.12f, 0.06f, 0.95f);
+        RectTransform panelRect = panel.GetComponent<RectTransform>();
+        panelRect.anchorMin = panelRect.anchorMax = new Vector2(.5f, .5f);
+        panelRect.pivot = new Vector2(.5f, .5f);
+        panelRect.anchoredPosition = Vector2.zero;
+        panelRect.sizeDelta = new Vector2(640f, 360f);
+        Image panelHitArea = panel.GetComponent<Image>();
+        panelHitArea.color = new Color(0f, 0f, 0f, .001f);
 
-        var titleText = CreateText("Tiêu đề", panel.transform, title, 44, TextAnchor.MiddleCenter, new Color(0.55f, 1f, 0.24f));
-        SetAnchors(titleText.rectTransform, 0.08f, 0.72f, 0.92f, 0.94f);
+        Sprite dialogSprite = Resources.Load<Sprite>("GameUI/dialog_main");
+        Image dialog = CreateImage("Khung dialog", panel.transform, dialogSprite);
+        RectTransform dialogRect = dialog.rectTransform;
+        dialogRect.anchorMin = dialogRect.anchorMax = new Vector2(.5f, .5f);
+        dialogRect.pivot = new Vector2(.5f, .5f);
+        dialogRect.anchoredPosition = new Vector2(0f, 15f);
+        dialogRect.sizeDelta = new Vector2(620f, 277f);
+        dialog.preserveAspect = true;
+        dialog.raycastTarget = false;
 
-        var bodyText = CreateText("Nội dung", panel.transform, body, 25, TextAnchor.MiddleCenter, Color.white);
-        SetAnchors(bodyText.rectTransform, 0.09f, 0.28f, 0.91f, 0.72f);
+        var titleText = CreateText("Tiêu đề", panel.transform, title, 30,
+            TextAnchor.MiddleCenter, new Color(.23f, .085f, .025f, 1f));
+        SetAnchors(titleText.rectTransform, .30f, .70f, .70f, .88f);
+        titleText.fontStyle = FontStyle.Bold;
+
+        int bodySize = body.Length > 180 ? 19 : 24;
+        var bodyText = CreateText("Nội dung", panel.transform, body, bodySize,
+            TextAnchor.MiddleCenter, new Color(.26f, .11f, .035f, 1f));
+        SetAnchors(bodyText.rectTransform, .10f, .28f, .90f, .69f);
+        bodyText.resizeTextMinSize = body.Length > 180 ? 13 : 16;
 
         var close = new GameObject("Đóng", typeof(RectTransform), typeof(Image), typeof(Button), typeof(MenuButtonMotion));
         close.transform.SetParent(panel.transform, false);
-        SetAnchors(close.GetComponent<RectTransform>(), 0.34f, 0.07f, 0.66f, 0.24f);
+        RectTransform closeRect = close.GetComponent<RectTransform>();
+        closeRect.anchorMin = closeRect.anchorMax = new Vector2(.5f, .5f);
+        closeRect.pivot = new Vector2(.5f, .5f);
+        closeRect.anchoredPosition = new Vector2(0f, -145f);
+        closeRect.sizeDelta = new Vector2(168f, 51f);
         var closeImage = close.GetComponent<Image>();
-        closeImage.sprite = stoneButtonNormal != null ? stoneButtonNormal : Resources.Load<Sprite>("Sprites/UI/Menu/button_normal");
-        closeImage.type = Image.Type.Sliced;
+        Sprite normalButton = Resources.Load<Sprite>("GameUI/button1");
+        Sprite highlightedButton = Resources.Load<Sprite>("GameUI/button2");
+        closeImage.sprite = normalButton;
+        closeImage.preserveAspect = true;
         var closeButton = close.GetComponent<Button>();
-        closeButton.transition = Selectable.Transition.None;
+        closeButton.transition = Selectable.Transition.SpriteSwap;
+        SpriteState states = closeButton.spriteState;
+        states.highlightedSprite = highlightedButton;
+        states.pressedSprite = highlightedButton;
+        states.selectedSprite = highlightedButton;
+        closeButton.spriteState = states;
         closeButton.onClick.AddListener(() => CloseModal(panel));
         close.GetComponent<MenuButtonMotion>().targetGraphic = closeImage;
-        var closeText = CreateText("Chữ", close.transform, "ĐÓNG", 27, TextAnchor.MiddleCenter, Color.white);
+        var closeText = CreateText("Chữ", close.transform, "ĐÓNG", 23,
+            TextAnchor.MiddleCenter, new Color(1f, .96f, .74f, 1f));
         Stretch(closeText.rectTransform);
+        closeText.fontStyle = FontStyle.Bold;
         closeText.raycastTarget = false;
+        Outline closeOutline = closeText.gameObject.AddComponent<Outline>();
+        closeOutline.effectColor = new Color(.12f, .045f, .01f, .9f);
+        closeOutline.effectDistance = new Vector2(1.4f, -1.4f);
 
         panel.SetActive(false);
         return panel;
@@ -201,122 +369,197 @@ public class MainMenuController : MonoBehaviour
     {
         var panel = new GameObject("Chọn màn chơi Panel", typeof(RectTransform), typeof(Image), typeof(CanvasGroup));
         panel.transform.SetParent(parent, false);
-        SetAnchors(panel.GetComponent<RectTransform>(), 0.055f, 0.065f, 0.945f, 0.935f);
-        panel.GetComponent<Image>().color = new Color(0.075f, 0.10f, 0.055f, 0.975f);
+        Stretch(panel.GetComponent<RectTransform>());
+        panel.GetComponent<Image>().color = new Color(0f, 0f, 0f, .72f);
 
-        var title = CreateText("Tiêu đề", panel.transform, "CHỌN MÀN CHƠI", 42, TextAnchor.MiddleCenter, new Color(0.62f, 1f, 0.25f));
-        SetAnchors(title.rectTransform, 0.27f, 0.855f, 0.73f, 0.97f);
+        Image mainFrame = CreateImage("Khung chọn màn", panel.transform,
+            Resources.Load<Sprite>("GameUI/dialog_main"));
+        RectTransform frameRect = mainFrame.rectTransform;
+        frameRect.anchorMin = frameRect.anchorMax = new Vector2(.5f, .5f);
+        frameRect.pivot = new Vector2(.5f, .5f);
+        frameRect.anchoredPosition = new Vector2(0f, 25f);
+        frameRect.sizeDelta = new Vector2(920f, 411f);
+        mainFrame.preserveAspect = true;
+        mainFrame.raycastTarget = false;
 
-        // Góc trái trên: lối vào chế độ chơi mạng hai người, dùng chung màn đang chọn bên dưới.
-        var netButton = CreateStoneButton("Chơi mạng", panel.transform, "CHƠI MẠNG", 22, OpenNetLobby);
-        SetAnchors(netButton.GetComponent<RectTransform>(), 0.032f, 0.878f, 0.235f, 0.968f);
+        var title = CreateText("Tiêu đề", panel.transform, "CHỌN MÀN CHƠI", 30,
+            TextAnchor.MiddleCenter, new Color(.23f, .085f, .025f, 1f));
+        CenterRect(title.rectTransform, new Vector2(360f, 48f), new Vector2(0f, 178f));
+        title.fontStyle = FontStyle.Bold;
+        title.raycastTarget = false;
 
-        var netHint = CreateText("Chú thích chơi mạng", panel.transform, "2 người", 17,
-            TextAnchor.MiddleCenter, new Color(0.72f, 0.78f, 0.66f));
-        SetAnchors(netHint.rectTransform, 0.032f, 0.828f, 0.235f, 0.874f);
-        netHint.raycastTarget = false;
+        var close = new GameObject("Đóng chọn màn", typeof(RectTransform), typeof(Image),
+            typeof(Button), typeof(MenuButtonMotion));
+        close.transform.SetParent(panel.transform, false);
+        CenterRect(close.GetComponent<RectTransform>(), new Vector2(50f, 55f), new Vector2(438f, 218f));
+        Image closeImage = close.GetComponent<Image>();
+        closeImage.sprite = Resources.Load<Sprite>("GameUI/cancel");
+        closeImage.preserveAspect = true;
+        Button closeButton = close.GetComponent<Button>();
+        closeButton.transition = Selectable.Transition.None;
+        closeButton.onClick.AddListener(() => CloseModal(panel));
+        close.GetComponent<MenuButtonMotion>().targetGraphic = closeImage;
 
-        var close = CreateStoneButton("Đóng chọn màn", panel.transform, "X", 26, () => CloseModal(panel));
-        SetAnchors(close.GetComponent<RectTransform>(), 0.91f, 0.88f, 0.975f, 0.965f);
-
-        var viewportObject = new GameObject("Viewport", typeof(RectTransform), typeof(Image), typeof(Mask));
-        viewportObject.transform.SetParent(panel.transform, false);
-        var viewportRect = viewportObject.GetComponent<RectTransform>();
-        SetAnchors(viewportRect, 0.045f, 0.165f, 0.955f, 0.845f);
-        viewportObject.GetComponent<Image>().color = new Color(0.18f, 0.24f, 0.12f, 0.28f);
-        viewportObject.GetComponent<Mask>().showMaskGraphic = true;
-
-        var contentObject = new GameObject("Danh sách màn", typeof(RectTransform), typeof(GridLayoutGroup), typeof(ContentSizeFitter));
-        contentObject.transform.SetParent(viewportObject.transform, false);
-        var contentRect = contentObject.GetComponent<RectTransform>();
-        contentRect.anchorMin = new Vector2(0f, 1f);
-        contentRect.anchorMax = new Vector2(1f, 1f);
-        contentRect.pivot = new Vector2(0.5f, 1f);
-        contentRect.anchoredPosition = Vector2.zero;
-        contentRect.sizeDelta = Vector2.zero;
+        var contentObject = new GameObject("Danh sách màn", typeof(RectTransform), typeof(GridLayoutGroup));
+        contentObject.transform.SetParent(panel.transform, false);
+        RectTransform contentRect = contentObject.GetComponent<RectTransform>();
+        CenterRect(contentRect, new Vector2(642f, 226f), new Vector2(0f, 22f));
 
         var grid = contentObject.GetComponent<GridLayoutGroup>();
-        grid.padding = new RectOffset(12, 12, 12, 12);
-        grid.spacing = new Vector2(12f, 14f);
-        grid.cellSize = new Vector2(142f, 130f);
+        grid.padding = new RectOffset(0, 0, 0, 0);
+        grid.spacing = new Vector2(16f, 12f);
+        // Khung Intro có tỉ lệ 270:236; giữ đúng tỉ lệ để artwork không bị ép ngang.
+        grid.cellSize = new Vector2(132f, 115f);
         grid.startCorner = GridLayoutGroup.Corner.UpperLeft;
         grid.startAxis = GridLayoutGroup.Axis.Horizontal;
         grid.childAlignment = TextAnchor.UpperCenter;
         grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-        grid.constraintCount = 5;
+        grid.constraintCount = 4;
 
-        var fitter = contentObject.GetComponent<ContentSizeFitter>();
-        fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
-        fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-
-        var scroll = panel.AddComponent<ScrollRect>();
-        scroll.viewport = viewportRect;
-        scroll.content = contentRect;
-        scroll.horizontal = false;
-        scroll.vertical = true;
-        scroll.movementType = ScrollRect.MovementType.Elastic;
-        scroll.elasticity = 0.12f;
-        scroll.inertia = true;
-        scroll.scrollSensitivity = 34f;
-
-        string[] levelNames =
+        for (int cardIndex = 0; cardIndex < LevelOrder.Length; cardIndex++)
         {
-            "Mèo Miu Xuất Trận",
-            "Hành Trình Mới",
-            "Thầy Luyện Xác",
-            "Vùng Đất Bất Tử",
-            "Sông Băng Địa Cực",
-            "Sân Thử Nghiệm",
-            "Đấu Trường Gargantuar"
-        };
-        string[] thumbnails =
-        {
-            "Sprites/BackGround/Background_Day",
-            "Sprites/BackGround/Background_Day",
-            "Sprites/BackGround/Background_Night_Wall",
-            "Sprites/BackGround/background_Night_Bone",
-            "Sprites/BackGround/Background_Ice",
-            "Sprites/BackGround/Background_Day",
-            "Sprites/BackGround/Background_Day"
-        };
+            int levelId = LevelOrder[cardIndex];
+            CreateLevelCard(contentObject.transform, cardIndex, levelId, LevelNames[levelId],
+                LevelThumbnails[levelId], DisplayLevelLabel(levelId));
+        }
 
-        for (int i = 0; i < levelNames.Length; i++)
-            CreateLevelCard(contentObject.transform, i, levelNames[i], thumbnails[i]);
+        selectedLevelText = CreateText("Màn đã chọn", panel.transform, "HÃY CHỌN MỘT MÀN CHƠI", 20,
+            TextAnchor.MiddleCenter, new Color(.29f, .12f, .035f, 1f));
+        CenterRect(selectedLevelText.rectTransform, new Vector2(520f, 36f), new Vector2(0f, -132f));
+        selectedLevelText.fontStyle = FontStyle.Bold;
+        selectedLevelText.raycastTarget = false;
 
-        selectedLevelText = CreateText("Màn đã chọn", panel.transform, "Hãy chọn một màn chơi", 24, TextAnchor.MiddleCenter, Color.white);
-        SetAnchors(selectedLevelText.rectTransform, 0.10f, 0.055f, 0.62f, 0.15f);
+        GameObject netButton = CreateGameUiButton("Chơi mạng", panel.transform, "CHƠI MẠNG", 20, OpenNetLobby);
+        CenterRect(netButton.GetComponent<RectTransform>(), new Vector2(176f, 54f), new Vector2(-330f, -224f));
 
-        playLevelButton = CreateStoneButton("Chơi", panel.transform, "CHƠI", 29, PlaySelectedLevel).GetComponent<Button>();
-        SetAnchors(playLevelButton.GetComponent<RectTransform>(), 0.66f, 0.045f, 0.88f, 0.15f);
+        GameObject playObject = CreateGameUiButton("Chơi", panel.transform, "CHƠI", 23, PlaySelectedLevel);
+        CenterRect(playObject.GetComponent<RectTransform>(), new Vector2(176f, 54f), new Vector2(330f, -224f));
+        playLevelButton = playObject.GetComponent<Button>();
         playLevelButton.interactable = false;
+        playObject.GetComponent<Image>().color = new Color(.55f, .55f, .55f, .85f);
 
         panel.SetActive(false);
         return panel;
     }
 
-    private void CreateLevelCard(Transform parent, int levelIndex, string levelName, string thumbnailPath)
+    private readonly List<GameObject> levelLockOverlays = new List<GameObject>();
+    private readonly List<Button> levelCardButtons = new List<Button>();
+
+    private void RefreshLevelCardsLockState()
     {
-        var card = new GameObject("Màn " + (levelIndex + 1), typeof(RectTransform), typeof(Image), typeof(Button), typeof(MenuButtonMotion));
+        for (int cardIndex = 0; cardIndex < LevelOrder.Length; cardIndex++)
+        {
+            bool unlocked = CampaignProgress.IsLevelUnlocked(cardIndex);
+            if (cardIndex < levelLockOverlays.Count && levelLockOverlays[cardIndex] != null)
+                levelLockOverlays[cardIndex].SetActive(!unlocked);
+
+            if (cardIndex < levelCardButtons.Count && levelCardButtons[cardIndex] != null)
+                levelCardButtons[cardIndex].interactable = true; // vẫn cho click để phát âm thanh hoặc thông báo nếu khóa
+        }
+    }
+
+    private static string DisplayLevelLabel(int levelId)
+    {
+        int index = System.Array.IndexOf(LevelOrder, levelId);
+        return index >= 0 ? "MÀN " + (index + 1) : "MÀN " + (levelId + 1);
+    }
+
+    private void CreateLevelCard(Transform parent, int cardIndex, int levelIndex, string levelName,
+        string thumbnailPath, string displayLabel)
+    {
+        var card = new GameObject(displayLabel, typeof(RectTransform), typeof(Image), typeof(Button), typeof(MenuButtonMotion));
         card.transform.SetParent(parent, false);
         var frame = card.GetComponent<Image>();
-        frame.sprite = stoneButtonNormal != null ? stoneButtonNormal : Resources.Load<Sprite>("Sprites/UI/Menu/button_normal");
-        frame.type = Image.Type.Sliced;
-        frame.color = new Color(0.74f, 0.76f, 0.70f, 1f);
+        frame.sprite = Resources.Load<Sprite>("Sprites/UI/Intro/khung");
+        frame.preserveAspect = true;
+        frame.color = Color.white;
         levelCardFrames.Add(frame);
 
         var button = card.GetComponent<Button>();
         button.transition = Selectable.Transition.None;
         int capturedLevel = levelIndex;
-        button.onClick.AddListener(() => SelectLevel(capturedLevel));
+        int capturedCard = cardIndex;
+        button.onClick.AddListener(() => OnClickLevelCard(capturedCard, capturedLevel));
+        levelCardButtons.Add(button);
         card.GetComponent<MenuButtonMotion>().targetGraphic = frame;
 
-        var thumbnail = CreateImage("Ảnh màn", card.transform, Resources.Load<Sprite>(thumbnailPath));
-        SetAnchors(thumbnail.rectTransform, 0.075f, 0.39f, 0.925f, 0.90f);
+        var thumbnail = CreateImage("Ảnh preview màn", card.transform, Resources.Load<Sprite>(thumbnailPath));
+        // Cửa sổ trong suốt của khung: x 27..244, y 44..154 trên ảnh 270x236.
+        SetAnchors(thumbnail.rectTransform, .105f, .350f, .895f, .805f);
+        thumbnail.preserveAspect = true;
         thumbnail.raycastTarget = false;
 
-        var label = CreateText("Tên màn", card.transform, "MÀN " + (levelIndex + 1) + "\n" + levelName, 21, TextAnchor.MiddleCenter, Color.white);
-        SetAnchors(label.rectTransform, 0.07f, 0.045f, 0.93f, 0.38f);
+        var label = CreateText("Tên màn", card.transform, displayLabel + " • " + levelName, 12,
+            TextAnchor.MiddleCenter, new Color(.92f, .94f, 1f, 1f));
+        // Bảng kim loại phía dưới khung: x 34..236 (0.125f..0.875f), y 165..218 từ trên xuống (0.076f..0.300f từ đáy).
+        SetAnchors(label.rectTransform, .11f, .075f, .89f, .285f);
+        label.fontStyle = FontStyle.Bold;
+        label.resizeTextMinSize = 8;
+        label.resizeTextMaxSize = 12;
+        label.horizontalOverflow = HorizontalWrapMode.Wrap;
         label.raycastTarget = false;
+        var cardLabelOutline = label.gameObject.AddComponent<Outline>();
+        cardLabelOutline.effectColor = new Color(0.10f, 0.08f, 0.06f, 0.95f);
+        cardLabelOutline.effectDistance = new Vector2(1f, -1f);
+
+        // Lớp khóa màn chơi (Lock Overlay)
+        var lockOverlay = new GameObject("LockOverlay", typeof(RectTransform), typeof(Image));
+        lockOverlay.transform.SetParent(card.transform, false);
+        Stretch(lockOverlay.GetComponent<RectTransform>());
+        var lockBg = lockOverlay.GetComponent<Image>();
+        lockBg.color = new Color(0f, 0f, 0f, 0.65f);
+        lockBg.raycastTarget = false;
+
+        var lockIcon = CreateImage("LockIcon", lockOverlay.transform, Resources.Load<Sprite>("GameUI/icon_lock"));
+        CenterRect(lockIcon.rectTransform, new Vector2(48f, 54f), new Vector2(0f, 12f));
+        lockIcon.preserveAspect = true;
+        lockIcon.raycastTarget = false;
+
+        bool unlocked = CampaignProgress.IsLevelUnlocked(cardIndex);
+        lockOverlay.SetActive(!unlocked);
+        levelLockOverlays.Add(lockOverlay);
+    }
+
+    private void OnClickLevelCard(int cardIndex, int levelIndex)
+    {
+        if (!CampaignProgress.IsLevelUnlocked(cardIndex))
+        {
+            PlayClick();
+            ShowNotice("Hãy hoàn thành " + DisplayLevelLabel(LevelOrder[cardIndex - 1]) + " để mở khóa màn này!");
+            return;
+        }
+
+        SelectLevel(levelIndex);
+    }
+
+    private GameObject CreateGameUiButton(string name, Transform parent, string label, int fontSize,
+        UnityEngine.Events.UnityAction action)
+    {
+        var go = new GameObject(name, typeof(RectTransform), typeof(Image), typeof(Button), typeof(MenuButtonMotion));
+        go.transform.SetParent(parent, false);
+        Image image = go.GetComponent<Image>();
+        image.sprite = Resources.Load<Sprite>("GameUI/button1");
+        image.preserveAspect = true;
+        Button button = go.GetComponent<Button>();
+        button.transition = Selectable.Transition.SpriteSwap;
+        Sprite highlighted = Resources.Load<Sprite>("GameUI/button2");
+        SpriteState states = button.spriteState;
+        states.highlightedSprite = highlighted;
+        states.pressedSprite = highlighted;
+        states.selectedSprite = highlighted;
+        button.spriteState = states;
+        button.onClick.AddListener(action);
+        go.GetComponent<MenuButtonMotion>().targetGraphic = image;
+
+        Text text = CreateText("Chữ", go.transform, label, fontSize,
+            TextAnchor.MiddleCenter, new Color(1f, .96f, .74f, 1f));
+        Stretch(text.rectTransform);
+        text.fontStyle = FontStyle.Bold;
+        text.raycastTarget = false;
+        Outline outline = text.gameObject.AddComponent<Outline>();
+        outline.effectColor = new Color(.12f, .045f, .01f, .9f);
+        outline.effectDistance = new Vector2(1.3f, -1.3f);
+        return go;
     }
 
     private GameObject CreateStoneButton(string name, Transform parent, string label, int fontSize, UnityEngine.Events.UnityAction action)
@@ -339,14 +582,15 @@ public class MainMenuController : MonoBehaviour
     private void SelectLevel(int levelIndex)
     {
         selectedLevel = levelIndex;
+        int selectedCardIndex = System.Array.IndexOf(LevelOrder, levelIndex);
         for (int i = 0; i < levelCardFrames.Count; i++)
-            levelCardFrames[i].color = i == levelIndex
-                ? new Color(0.64f, 1f, 0.30f, 1f)
-                : new Color(0.74f, 0.76f, 0.70f, 1f);
+            levelCardFrames[i].color = i == selectedCardIndex
+                ? new Color(.79f, 1f, .62f, 1f)
+                : Color.white;
 
-        string[] names = { "Mèo Miu Xuất Trận", "Hành Trình Mới", "Thầy Luyện Xác", "Vùng Đất Bất Tử", "Sông Băng Địa Cực", "Sân Thử Nghiệm", "Đấu Trường Gargantuar" };
-        selectedLevelText.text = "Đã chọn: Màn " + (levelIndex + 1) + " — " + names[levelIndex];
+        selectedLevelText.text = "Đã chọn: " + DisplayLevelLabel(levelIndex) + " — " + LevelNames[levelIndex];
         playLevelButton.interactable = true;
+        if (playLevelButton.targetGraphic != null) playLevelButton.targetGraphic.color = Color.white;
         PlayClick();
     }
 
@@ -354,13 +598,17 @@ public class MainMenuController : MonoBehaviour
     {
         if (selectedLevel < 0 || transitioning) return;
 
-        if (selectedLevel == GargantuarArenaLevelIndex)
+        GameSession.SelectedLevel = selectedLevel;
+
+        // Nếu là Màn 1 (Hướng Dẫn Tân Thủ), đưa thẳng vào trận với bộ cây mặc định để hiện bảng hướng dẫn giống như vừa tải game
+        if (selectedLevel == 0)
         {
-            StartCoroutine(LoadSceneWithFade(GargantuarArenaBootstrap.SceneName));
+            GameSession.SelectedPlants.Clear();
+            GameSession.SelectedPlants.AddRange(new[] { "SunFlower", "PeaShooter", "WallNut", "Squash", "TorchWood", "MiaoMiao" });
+            StartCoroutine(LoadSceneWithFade("GameScene"));
             return;
         }
 
-        GameSession.SelectedLevel = selectedLevel;
         PlantSelectionOverlay.Show(selectedLevel, () => StartCoroutine(LoadSceneWithFade("GameScene")));
     }
 
@@ -372,9 +620,30 @@ public class MainMenuController : MonoBehaviour
         OpenModal(almanacQAPanel);
     }
 
+    private void ShowZombieAlmanac()
+    {
+        if (transitioning) return;
+        ZombieListOverlay.Show();
+    }
+
+    private void ShowLeaderboard()
+    {
+        if (transitioning) return;
+        PlayClick();
+        EndlessLeaderboardOverlay.Show();
+    }
+
+    private void ShowPlantAlmanac()
+    {
+        if (transitioning) return;
+        PlantAlmanacOverlay.Show();
+    }
+
     private void OpenModal(GameObject panel)
     {
         if (transitioning || panel == null) return;
+        if (panel == levelPanel)
+            RefreshLevelCardsLockState();
         panel.SetActive(true);
         StartCoroutine(FadeCanvasGroup(panel.GetComponent<CanvasGroup>(), 0f, 1f, 0.2f, false));
     }
@@ -405,8 +674,27 @@ public class MainMenuController : MonoBehaviour
 
     private void StartAdventure()
     {
-        if (!transitioning)
-            OpenModal(levelPanel);
+        if (transitioning) return;
+
+        // Nếu người chơi mới tải game về (chưa hoàn thành/xem hướng dẫn), đưa ngay vào Màn 1 đơn giản hướng dẫn Ghép Cây & Zombie Fusion
+        if (PlayerPrefs.GetInt(DialogLevel0.FirstTimeTutorialKey, 0) == 0)
+        {
+            selectedLevel = 0;
+            GameSession.SelectedLevel = 0;
+            GameSession.SelectedPlants.Clear();
+            GameSession.SelectedPlants.AddRange(new[] { "SunFlower", "PeaShooter", "WallNut", "Squash", "TorchWood", "MiaoMiao" });
+            StartCoroutine(LoadSceneWithFade("GameScene"));
+            return;
+        }
+
+        OpenModal(levelPanel);
+    }
+
+    private void StartSurvival()
+    {
+        if (transitioning) return;
+        PlayClick();
+        EndlessMenuOverlay.Show();
     }
 
     private IEnumerator LoadSceneWithFade(string sceneName)
@@ -506,6 +794,14 @@ public class MainMenuController : MonoBehaviour
     private static void Stretch(RectTransform rect)
     {
         SetAnchors(rect, 0f, 0f, 1f, 1f);
+    }
+
+    private static void CenterRect(RectTransform rect, Vector2 size, Vector2 position)
+    {
+        rect.anchorMin = rect.anchorMax = new Vector2(.5f, .5f);
+        rect.pivot = new Vector2(.5f, .5f);
+        rect.sizeDelta = size;
+        rect.anchoredPosition = position;
     }
 
     private static void SetAnchors(RectTransform rect, float xMin, float yMin, float xMax, float yMax)

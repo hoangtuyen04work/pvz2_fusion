@@ -5,6 +5,7 @@ using UnityEngine;
 public class BoneZombie : Zombie
 {
     int lifeNumber = 3;   //Còn lại mấy mạng
+    public override bool IsDefeatedForEndless => lifeNumber <= 0 && bloodVolume <= 0;
 
     protected override void Start()
     {
@@ -13,6 +14,7 @@ public class BoneZombie : Zombie
 
     public override void beAttacked(int hurt)
     {
+        hurt = ModifyDamageForEndless(hurt);
         bloodVolume -= hurt;
         if (bloodVolume <= 0)
         {

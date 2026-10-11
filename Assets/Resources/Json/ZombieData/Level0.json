@@ -1,91 +1,91 @@
 {
   "info": [
     {
-      "deltaTime": 0,
+      "deltaTime": 5,
+      "isWave": false,
+      "isFinalWave": false,
+      "number": 1,
+      "zombie": "ZombieNormal"
+    },
+    {
+      "deltaTime": 16,
+      "isWave": false,
+      "isFinalWave": false,
+      "number": 1,
+      "zombie": "ZombieNormal"
+    },
+    {
+      "deltaTime": 16,
       "isWave": false,
       "isFinalWave": false,
       "number": 1,
       "zombie": "ConeZombie"
     },
     {
-      "deltaTime": 15,
+      "deltaTime": 18,
       "isWave": false,
       "isFinalWave": false,
       "number": 1,
-      "zombie": "ZombieNormal"
+      "zombie": "ConeBucketZombie"
     },
     {
-      "deltaTime": 10,
+      "deltaTime": 18,
       "isWave": false,
       "isFinalWave": false,
       "number": 2,
       "zombie": "ZombieNormal"
     },
     {
-      "deltaTime": 5,
+      "deltaTime": 16,
       "isWave": false,
       "isFinalWave": false,
       "number": 1,
-      "zombie": "SnowZombie"
+      "zombie": "GatlingZombie"
     },
     {
-      "deltaTime": 0,
-      "isWave": false,
-      "isFinalWave": false,
-      "number": 1,
-      "zombie": "ZombieNormal"
-    },
-    {
-      "deltaTime": 15,
-      "isWave": false,
-      "isFinalWave": false,
-      "number": 3,
-      "zombie": "ZombieNormal"
-    },
-    {
-      "deltaTime": 10,
+      "deltaTime": 18,
       "isWave": false,
       "isFinalWave": false,
       "number": 2,
       "zombie": "SnowZombie"
     },
     {
-      "deltaTime": 5,
+      "deltaTime": 16,
       "isWave": false,
       "isFinalWave": false,
       "number": 1,
-      "zombie": "ZombieNormal"
+      "zombie": "ConeBucketZombie"
     },
     {
-      "deltaTime": 15,
-      "isWave": false,
-      "isFinalWave": false,
-      "number": 2,
-      "zombie": "ZombieNormal"
-    },
-    {
-      "deltaTime": 15,
+      "deltaTime": 16,
       "isWave": false,
       "isFinalWave": false,
       "number": 1,
-      "zombie": "ZombieNormal"
+      "zombie": "FireImpZombie"
     },
     {
-      "deltaTime": 10,
+      "deltaTime": 14,
       "isWave": true,
       "isFinalWave": true,
-      "number": 7,
+      "number": 5,
       "zombie": "ZombieNormal"
     },
     {
-      "deltaTime": 5,
+      "deltaTime": 4,
       "isWave": false,
       "isFinalWave": false,
-      "number": 3,
-      "zombie": "SnowZombie"
+      "number": 1,
+      "zombie": "ConeBucketZombie"
     },
     {
-      "deltaTime": 0,
+      "deltaTime": 2,
+      "isWave": false,
+      "isFinalWave": false,
+      "number": 1,
+      "zombie": "GatlingZombie"
+    },
+    {
+      "deltaTime": 4,
       "isWave": false,
       "isFinalWave": false,
       "number": 1,
@@ -95,7 +95,7 @@
       "deltaTime": 5,
       "isWave": false,
       "isFinalWave": false,
-      "number": 7,
+      "number": 4,
       "zombie": "ZombieNormal"
     }
   ]

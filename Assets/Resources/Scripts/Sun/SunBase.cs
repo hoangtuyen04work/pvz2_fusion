@@ -23,6 +23,7 @@ public abstract class SunBase : MonoBehaviour
     // Start is called before the first frame update
     protected virtual void Start()
     {
+        EndlessModifierSystem.ApplyToSun(this);
         dropState = true;
         pickState = false;
         mySpriteRenderer = gameObject.GetComponent<SpriteRenderer>();
@@ -51,10 +52,29 @@ public abstract class SunBase : MonoBehaviour
         return netParam;
     }
 
+    private Vector3 targetPos = new Vector3(-4.47f, 2.61f, 0f);
+    public bool pickedByZombie;
+
     public void bePickedUp()
+    {
+        bePickedUp(NetSession.IsOnline && NetSession.ControlsZombies);
+    }
+
+    public void bePickedUp(bool byZombie)
     {
         dropState = false;
         pickState = true;
+        pickedByZombie = byZombie;
+
+        // Nếu người nhặt là Zombie, bay về phía góc dưới bên trái (khay não Zombie)
+        if (byZombie)
+        {
+            targetPos = new Vector3(-4.2f, -2.8f, 0f);
+        }
+        else
+        {
+            targetPos = finalPos;
+        }
 
         //Phát âm thanh
         GetComponent<AudioSource>().Play();
@@ -62,14 +82,17 @@ public abstract class SunBase : MonoBehaviour
 
     private void collect()
     {
-        if (Vector3.Distance(transform.position, finalPos) > 0.1f)  //Chưa tới điểm cuối thì di chuyển về phía điểm cuối
+        if (Vector3.Distance(transform.position, targetPos) > 0.1f)  //Chưa tới điểm cuối thì di chuyển về phía điểm cuối
         {
-            transform.Translate((finalPos - transform.position) * 4 * Time.deltaTime);
+            transform.Translate((targetPos - transform.position) * 4 * Time.deltaTime);
         }
-        else   //Tới điểm cuối, cộng số nắng, huỷ GameObject này
+        else   //Tới điểm cuối, cộng số nắng hoặc não, huỷ GameObject này
         {
-            //Chỉ máy chủ cộng nắng, máy khách nhận tổng số nắng qua gói tin
-            if (NetSession.IsAuthority) sunControl.addSun(sunNumber);
+            //Chỉ máy chủ cộng nắng nếu không phải nhặt bởi zombie, máy khách nhận tổng số nắng qua gói tin
+            if (NetSession.IsAuthority && !pickedByZombie)
+            {
+                if (sunControl != null) sunControl.addSun(sunNumber);
+            }
             Destroy(gameObject);
         }
     }

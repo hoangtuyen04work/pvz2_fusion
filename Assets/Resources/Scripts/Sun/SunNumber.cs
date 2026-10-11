@@ -115,6 +115,11 @@ public class SunNumber : MonoBehaviour
             i.updateSunEnough(nowSun >= i.sunNeeded);
         }
     }
+
+    public void RefreshCardAvailability()
+    {
+        updateCard();
+    }
     private void RefreshText()
     {
         if (myText == null) myText = GetComponent<Text>();

@@ -439,6 +439,7 @@ public sealed class HybridPlant : Plant
         targetZombies.Clear();
         if (attackRegion == null) return;
 
+        // Quét bằng Overlap với cả LayerMask Zombie và quét mở rộng bằng overlap không layer filter
         attackRegion.Overlap(zombieFilter, targetColliders);
         foreach (Collider2D targetCollider in targetColliders)
         {
@@ -447,6 +448,22 @@ public sealed class HybridPlant : Plant
             if (zombie == null) zombie = targetCollider.GetComponentInParent<Zombie>();
             if (zombie != null && !zombie.IsHypnotized && zombie.enabled && zombie.gameObject.activeInHierarchy && zombie.bloodVolume > 0)
                 targetZombies.Add(zombie);
+        }
+
+        // Quét bổ sung dự phòng trực tiếp trên toàn bãi cỏ để bảo đảm không bỏ sót bất kỳ Zombie nào
+        if (kind == HybridPlantKind.SunflowerQueen)
+        {
+            Zombie[] allZombies = FindObjectsByType<Zombie>();
+            foreach (Zombie z in allZombies)
+            {
+                if (z != null && !z.IsHypnotized && z.enabled && z.gameObject.activeInHierarchy && z.bloodVolume > 0)
+                {
+                    if (z.transform.position.x >= LawnLeftEdge && z.transform.position.x <= LawnRightEdge)
+                    {
+                        targetZombies.Add(z);
+                    }
+                }
+            }
         }
     }
 
@@ -519,7 +536,7 @@ public sealed class HybridPlant : Plant
 public sealed class QueenHomingFirePea : MonoBehaviour
 {
     private const float Lifetime = 7f;
-    private const float HitDistance = 0.24f;
+    private const float HitDistance = 0.42f;
     private const float InitialSpeed = 3.2f;
     private const float HomingSpeed = 5.8f;
 
@@ -567,6 +584,14 @@ public sealed class QueenHomingFirePea : MonoBehaviour
         Vector2 targetPoint = (Vector2)target.transform.position + new Vector2(0f, 0.12f);
         Vector2 toTarget = targetPoint - (Vector2)transform.position;
         if (toTarget.sqrMagnitude <= HitDistance * HitDistance)
+        {
+            ImpactTarget();
+            return;
+        }
+
+        // Quét va chạm vật lý với collider của mục tiêu hoặc zombie trên đường bay
+        Collider2D col = target.GetComponent<Collider2D>();
+        if (col != null && col.OverlapPoint(transform.position))
         {
             ImpactTarget();
             return;

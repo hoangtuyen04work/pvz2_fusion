@@ -13,6 +13,7 @@ public class SunManagement : MonoBehaviour
 
     //Đếm giờ mặt trời rơi
     float minInterval = 10f, maxInterval = 20f;
+    bool spawningPaused;
     //Vị trí ban đầu của mặt trời
     float posY =  3.4f;
     //Giới hạn trục x của vị trí mặt trời rơi
@@ -23,6 +24,11 @@ public class SunManagement : MonoBehaviour
     {
         minInterval = Mathf.Max(0.15f, minimum);
         maxInterval = Mathf.Max(minInterval, maximum);
+    }
+
+    public void SetSpawningPaused(bool paused)
+    {
+        spawningPaused = paused;
     }
 
     // Start is called before the first frame update
@@ -46,18 +52,27 @@ public class SunManagement : MonoBehaviour
 
     private void createSun()
     {
-        Instantiate(
-            skysunPrefab, 
-            new Vector3(Random.Range(leftEdge, rightEdge), posY, 0), 
-            Quaternion.Euler(0, 0, 0), 
-            transform
-        );
+        if (!spawningPaused)
+        {
+            Instantiate(
+                skysunPrefab,
+                new Vector3(Random.Range(leftEdge, rightEdge), posY, 0),
+                Quaternion.Euler(0, 0, 0),
+                transform
+            );
+        }
 
         Invoke(createFunc, Random.Range(minInterval, maxInterval));
     }
 
     private void createMoon()
     {
+        if (spawningPaused)
+        {
+            Invoke(createFunc, Random.Range(minInterval, maxInterval));
+            return;
+        }
+
         GameObject randPrefab;
         if (Random.Range(0.0f, 10.0f) > 3.0f) randPrefab = fullMoonPrefab;
         else randPrefab = crescentMoonPrefab;
@@ -74,16 +89,28 @@ public class SunManagement : MonoBehaviour
 
     private void clickSun()
     {
-        //Phe zombie trong chế độ đối kháng không nhặt được nắng
-        if (NetSession.IsOnline && !NetSession.ControlsPlants) return;
-
         Vector2 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         Collider2D[] allSun = Physics2D.OverlapPointAll(mouseWorldPos, LayerMask.GetMask("Sun"));
         if (allSun.Length > 0)
         {
-            //Chơi mạng thì máy chủ mới quyết định mặt trời có được nhặt hay không
-            NetGameplay.RequestSunPickup(
-                allSun[allSun.Length - 1].gameObject.GetComponent<SunBase>());
+            SunBase sun = allSun[allSun.Length - 1].gameObject.GetComponent<SunBase>();
+            if (sun == null) return;
+
+            // Kiểm tra quyền nhặt trong chế độ chơi mạng:
+            // Phe cây nhặt được mọi loại nắng/mặt trăng.
+            // Phe zombie trong đối kháng chỉ được nhặt Mặt Trăng (FullMoon / CrescentMoon).
+            if (NetSession.IsOnline)
+            {
+                bool isMoon = sun.name.Contains("Moon") || sun.gameObject.name.Contains("Moon");
+                if (NetSession.ControlsZombies && !isMoon) return;
+                if (!NetSession.ControlsPlants && !NetSession.ControlsZombies) return;
+
+                NetGameplay.RequestSunPickup(sun);
+            }
+            else
+            {
+                sun.bePickedUp();
+            }
         }
     }
 }

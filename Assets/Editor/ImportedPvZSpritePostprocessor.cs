@@ -7,7 +7,7 @@ using UnityEngine;
 /// </summary>
 public sealed class ImportedPvZSpritePostprocessor : AssetPostprocessor
 {
-    private const uint ImportRevision = 6;
+    private const uint ImportRevision = 12;
     private const string ImportedRoot = "Assets/Resources/Sprites/Imported/";
     private const string HybridRoot = "Assets/Resources/Sprites/Plants/Hybrids/";
 
@@ -24,7 +24,13 @@ public sealed class ImportedPvZSpritePostprocessor : AssetPostprocessor
         var importer = (TextureImporter)assetImporter;
         importer.textureType = TextureImporterType.Sprite;
         importer.spriteImportMode = SpriteImportMode.Single;
-        importer.spritePixelsPerUnit = 250f;
+        bool originalPultFrame=assetPath.StartsWith(
+            "Assets/Resources/Sprites/Imported/OriginalPvZ/Pults/Rendered/",
+            System.StringComparison.Ordinal);
+        bool umbrellaFrame=assetPath.StartsWith(
+            "Assets/Resources/Sprites/Imported/OriginalPvZ/Pults/Rendered/Umbrellaleaf/",
+            System.StringComparison.Ordinal);
+        importer.spritePixelsPerUnit = umbrellaFrame ? 100f : originalPultFrame ? 137f : 250f;
         importer.isReadable = false;
         importer.alphaSource = TextureImporterAlphaSource.FromInput;
         importer.alphaIsTransparency = true;

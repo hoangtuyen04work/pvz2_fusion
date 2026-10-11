@@ -20,7 +20,7 @@ public static class ImportedPlantRuntime
     private const string Root = "Sprites/Imported/MarbleXu/";
     private static readonly Dictionary<string, ImportedPlantDefinition> Definitions = BuildDefinitions();
 
-    public static bool Supports(string key) => Definitions.ContainsKey(key);
+    public static bool Supports(string key) => Definitions.ContainsKey(key) || OriginalPvZPlantRuntime.Supports(key);
 
     public static bool TryGetDefinition(string key, out ImportedPlantDefinition definition)
     {
@@ -29,6 +29,7 @@ public static class ImportedPlantRuntime
 
     public static Sprite Preview(string key)
     {
+        if (OriginalPvZPlantRuntime.Supports(key)) return OriginalPvZPlantRuntime.Preview(key);
         if (!Definitions.TryGetValue(key, out var d)) return null;
         var sprites = Resources.LoadAll<Sprite>(d.framePath);
         return sprites.OrderBy(s => NaturalIndex(s.name)).FirstOrDefault();
@@ -36,6 +37,9 @@ public static class ImportedPlantRuntime
 
     public static Sprite CardPreview(string key)
     {
+        Sprite customSlot = Resources.Load<Sprite>("Sprites/UI/Card/" + key + "Slot");
+        if (customSlot != null) return customSlot;
+        if (OriginalPvZPlantRuntime.Supports(key)) return OriginalPvZPlantRuntime.Preview(key);
         return Definitions.TryGetValue(key, out var definition)
             ? Resources.Load<Sprite>(definition.cardPath)
             : null;
@@ -51,6 +55,7 @@ public static class ImportedPlantRuntime
 
     public static GameObject CreatePlant(string key, Vector3 position, Transform parent)
     {
+        if (OriginalPvZPlantRuntime.Supports(key)) return OriginalPvZPlantRuntime.Create(key, position, parent);
         if (!Definitions.TryGetValue(key, out var d)) return null;
         var go = new GameObject(key);
         go.tag = "Plant";
@@ -97,7 +102,8 @@ public static class ImportedPlantRuntime
         Add(map, "Threepeater", ImportedPlantKind.Shooter, 325, 300, 20, 1, 7.5f, 1.45f, 99f, "Threepeater", "Threepeater", new[]{-1,0,1});
         Add(map, "CherryBomb", ImportedPlantKind.Bomb, 150, 300, 1800, 1, 50f, 0.75f, 1.65f, "CherryBomb", "CherryBomb");
         Add(map, "PotatoMine", ImportedPlantKind.Mine, 25, 300, 1800, 1, 30f, 14f, 0.55f, "PotatoMine/PotatoMineInit", "PotatoMine/PotatoMineExplode");
-        Add(map, "Chomper", ImportedPlantKind.Chomper, 150, 300, 1800, 1, 7.5f, 42f, 1.15f, "Chomper/Chomper", "Chomper/ChomperAttack", secondary: "Chomper/ChomperDigest");
+        // Chomper's interval is its long digestion cooldown, not its first-bite delay.
+        Add(map, "Chomper", ImportedPlantKind.Chomper, 150, 300, 1800, 1, 7.5f, 42f, 1.55f, "Chomper/Chomper", "Chomper/ChomperAttack", secondary: "Chomper/ChomperDigest", initialDelay: 0.2f);
         Add(map, "PuffShroom", ImportedPlantKind.Shooter, 0, 300, 20, 1, 7.5f, 1.45f, 3.2f, "PuffShroom/PuffShroom", "PuffShroom/PuffShroom");
         Add(map, "SunShroom", ImportedPlantKind.Sun, 25, 300, 0, 1, 7.5f, 24f, 0f, "SunShroom/SunShroom", "SunShroom/SunShroom", secondary: "SunShroom/SunShroomBig", initialDelay: 7f);
         Add(map, "ScaredyShroom", ImportedPlantKind.Shooter, 25, 300, 20, 1, 7.5f, 1.45f, 99f, "ScaredyShroom/ScaredyShroom", "ScaredyShroom/ScaredyShroom", secondary: "ScaredyShroom/ScaredyShroomCry");
@@ -140,17 +146,23 @@ public sealed class RuntimeFrameAnimator : MonoBehaviour
     public void Configure(SpriteRenderer target, string path, float rate) { renderer=target; fps=rate; SetFrames(path); }
     public void SetFrames(string path) { LoadFrames(path, true, null); }
     public void PlayOnce(string path, Action completed = null) { LoadFrames(path, false, completed); }
+    public void PlayOnce(string path, float playbackSpeed, Action completed = null)
+    {
+        LoadFrames(path, false, completed);
+        speed = Mathf.Max(.01f, playbackSpeed);
+    }
+    private float speed = 1f;
     private void LoadFrames(string path, bool shouldLoop, Action completed)
     {
         frames=Resources.LoadAll<Sprite>(path).OrderBy(s=>ImportedPlantRuntime.NaturalIndex(s.name)).ToArray();
-        elapsed=0f; loop=shouldLoop; onComplete=completed;
+        elapsed=0f; loop=shouldLoop; onComplete=completed; speed=1f;
         if(frames.Length>0 && renderer!=null) renderer.sprite=frames[0];
     }
     private void Update()
     {
         if(frames.Length==0 || renderer==null) return;
         elapsed += Time.deltaTime;
-        int index=Mathf.FloorToInt(elapsed*fps);
+        int index=Mathf.FloorToInt(elapsed*fps*speed);
         if(loop) { renderer.sprite=frames[index%frames.Length]; return; }
         if(index<frames.Length) { renderer.sprite=frames[index]; return; }
         renderer.sprite=frames[frames.Length-1];
@@ -165,8 +177,9 @@ public sealed class ImportedPlant : Plant
     private ImportedPlantDefinition definition;
     private RuntimeFrameAnimator frameAnimator;
     private float nextAction;
-    private bool armed, grown, scared, resolvingSingleUse;
+    private bool armed, grown, scared, resolvingSingleUse, chomping;
 
+    public ImportedPlantDefinition Definition => definition;
     public bool CanBeEaten => definition==null || definition.kind!=ImportedPlantKind.Spikeweed;
 
     public void Configure(ImportedPlantDefinition value, RuntimeFrameAnimator animator)
@@ -233,6 +246,8 @@ public sealed class ImportedPlant : Plant
             for(int shot=0;shot<definition.shots;shot++) SpawnProjectile(targetRow, shot*0.16f);
             fired=true;
         }
+        if(fired)
+            frameAnimator.PlayOnce(definition.attackPath, ()=>frameAnimator.SetFrames(definition.framePath));
         nextAction=Time.time+(fired?definition.interval:0.25f);
     }
 
@@ -245,12 +260,19 @@ public sealed class ImportedPlant : Plant
 
     private void SpawnProjectile(int targetRow, float delay)
     {
+        Vector3 muzzle=transform.position+new Vector3(0.42f,0.15f,0f);
+        // Threepeater fires from the plant, but each projectile must immediately
+        // occupy its own lane instead of travelling on top of the centre shot.
+        if(GameManagement.levelData!=null && GameManagement.levelData.zombieInitPosY!=null &&
+            targetRow>=0 && targetRow<GameManagement.levelData.zombieInitPosY.Count)
+            muzzle.y=GameManagement.levelData.zombieInitPosY[targetRow]+0.15f;
         ImportedProjectile.Create(
             definition.key,
-            transform.position+new Vector3(0.42f,0.15f,0f),
+            muzzle,
             targetRow,
             definition.damage,
             delay);
+        PlaySfx(definition.key=="SnowPea" ? "Sounds/Plants/frozen" : "Sounds/Plants/firepea", 0.35f);
     }
 
     private void CreateSun()
@@ -263,6 +285,8 @@ public sealed class ImportedPlant : Plant
             SunBase value=sun.GetComponent<SunBase>();
             if(value!=null) value.sunNumber=grown ? 25 : 15;
         }
+        frameAnimator.PlayOnce(definition.attackPath, ()=>frameAnimator.SetFrames(definition.framePath));
+        PlaySfx("Sounds/Plants/sunCollected", 0.3f);
         nextAction=Time.time+definition.interval;
     }
 
@@ -276,13 +300,26 @@ public sealed class ImportedPlant : Plant
     private void ChompIfPossible()
     {
         var target=Targets(row,definition.range).FirstOrDefault();
-        if(target==null) { nextAction=Time.time+0.2f; return; }
-        target.beAttacked(definition.damage);
-        frameAnimator.PlayOnce(definition.attackPath, BeginDigest);
-        Invoke(nameof(ResetIdleFrames), definition.interval);
+        if(target==null || chomping) { nextAction=Time.time+0.2f; return; }
+        chomping=true;
+        // Do not switch to the digest loop mid-animation: it hides the bite.
+        frameAnimator.PlayOnce(definition.attackPath, ()=>ResolveChomp(target));
+        PlaySfx("Sounds/Zombies/chomp1", 0.8f);
         nextAction=Time.time+definition.interval;
+        Invoke(nameof(FinishDigest), definition.interval);
     }
 
+    private void ResolveChomp(Zombie target)
+    {
+        if(target!=null && target.gameObject.activeInHierarchy && target.bloodVolume>0 &&
+            target.pos_row==row)
+        {
+            target.playAudioOfBeingAttacked();
+            target.beAttacked(definition.damage);
+            BeginDigest();
+        }
+        else frameAnimator.SetFrames(definition.framePath);
+    }
 
     private void BeginDigest()
     {
@@ -297,6 +334,8 @@ public sealed class ImportedPlant : Plant
                 zombie.bloodVolume>0 && zombie.pos_row==row &&
                 Mathf.Abs(zombie.transform.position.x-transform.position.x)<=halfTileRange)
                 zombie.beAttacked(definition.damage);
+        frameAnimator.PlayOnce(definition.attackPath, ()=>frameAnimator.SetFrames(definition.framePath));
+        PlaySfx("Sounds/Plants/firepea", 0.25f);
         nextAction=Time.time+definition.interval;
     }
 
@@ -308,11 +347,31 @@ public sealed class ImportedPlant : Plant
         resolvingSingleUse=true;
         foreach(Zombie target in targets) target.beAttacked(definition.damage);
         frameAnimator.SetFrames(definition.attackPath);
+        ImportedPlantVfx.CreateBurst(transform.position, GetComponent<SpriteRenderer>().sprite, new Color(1f,0.72f,0.25f));
+        PlaySfx("Sounds/Plants/SquashFall", 0.7f);
         Invoke(nameof(FinishBomb),0.35f);
     }
 
     private void TriggerBomb()
     {
+        if(definition.key=="Jalapeno")
+        {
+            // The damage already targets every zombie in this row; the VFX must
+            // match it and remain within the playable lawn edges.
+            ImportedPlantVfx.CreateFireLane(transform.position.y, -5.3f, 5.3f);
+            PlaySfx("Sounds/Plants/fire", 0.85f);
+            ZomboniIceRoad.ThawLane(row);
+        }
+        else if(definition.key=="CherryBomb")
+        {
+            ImportedPlantVfx.CreateCherryExplosion(transform.position);
+            PlaySfx("Sounds/Plants/SquashFall", 0.9f);
+        }
+        else if(definition.key=="IceShroom")
+        {
+            ImportedPlantVfx.CreateBurst(transform.position, GetComponent<SpriteRenderer>().sprite, new Color(0.58f,0.9f,1f));
+            PlaySfx("Sounds/Plants/frozen", 0.85f);
+        }
         var all=FindObjectsByType<Zombie>();
         foreach(var zombie in all)
         {
@@ -329,11 +388,23 @@ public sealed class ImportedPlant : Plant
     }
     private void FinishBomb(){die("");}
     private void ResetIdleFrames(){ if(definition!=null) frameAnimator.SetFrames(definition.framePath); }
+    private void FinishDigest(){ ResetIdleFrames(); chomping=false; }
+
+    private void PlaySfx(string path, float volume)
+    {
+        AudioClip clip=Resources.Load<AudioClip>(path);
+        if(audioSource!=null && clip!=null) audioSource.PlayOneShot(clip, volume);
+    }
 
     public bool OnBitten(Zombie attacker)
     {
         if(definition==null || definition.kind!=ImportedPlantKind.Hypno) return false;
-        attacker.Hypnotize(); die(""); return true;
+        attacker.Hypnotize();
+        frameAnimator.PlayOnce(definition.attackPath);
+        PlaySfx("Sounds/Plants/frozen", 0.55f);
+        Invoke(nameof(FinishBomb), 0.35f);
+        resolvingSingleUse=true;
+        return true;
     }
 
     protected override void beforeDie()
@@ -365,14 +436,26 @@ public sealed class ImportedProjectile : MonoBehaviour
 
         SpriteRenderer renderer=bullet.AddComponent<SpriteRenderer>();
         bool mushroom=sourceKey=="PuffShroom" || sourceKey=="ScaredyShroom";
-        string spritePath=mushroom
+        bool snowPea=sourceKey=="SnowPea";
+        string spritePath=snowPea
+            ? "Sprites/Imported/MarbleXu/Bullets/PeaIce/PeaIce_0"
+            : mushroom
             ? "Sprites/Imported/MarbleXu/Bullets/BulletMushRoom/BulletMushRoom_0"
             : "Sprites/PlantBullet/PeaBullet/PeaBullet";
         renderer.sprite=Resources.Load<Sprite>(spritePath);
         renderer.sortingLayerName="PlantBullet";
+        float snowPeaScale=1f;
+        if(snowPea)
+        {
+            Sprite normalPea=Resources.Load<Sprite>("Sprites/PlantBullet/PeaBullet/PeaBullet");
+            if(normalPea!=null && renderer.sprite!=null && renderer.sprite.bounds.size.x>0f && renderer.sprite.bounds.size.y>0f)
+                snowPeaScale=Mathf.Max(
+                    normalPea.bounds.size.x/renderer.sprite.bounds.size.x,
+                    normalPea.bounds.size.y/renderer.sprite.bounds.size.y);
+        }
         bullet.transform.localScale=mushroom
             ? new Vector3(MushroomVisualScale,MushroomVisualScale,1f)
-            : Vector3.one;
+            : snowPea ? Vector3.one*snowPeaScale : Vector3.one;
 
         CircleCollider2D collider=bullet.AddComponent<CircleCollider2D>();
         collider.isTrigger=true;
@@ -384,7 +467,7 @@ public sealed class ImportedProjectile : MonoBehaviour
 
         ImportedProjectile projectile=bullet.AddComponent<ImportedProjectile>();
         projectile.Configure(targetRow,hurt,sourceKey=="SnowPea",!mushroom,delay,renderer);
-        if(sourceKey=="SnowPea") renderer.color=new Color(0.56f,0.83f,1f,1f);
+        if(sourceKey=="SnowPea") renderer.color=Color.white;
         if(projectile.canIgnite) bullet.tag="Pea";
         return projectile;
     }
@@ -453,4 +536,126 @@ public sealed class ImportedProjectile : MonoBehaviour
         }
         if(transform.position.x>7f) Destroy(gameObject);
     }
+}
+
+// Lightweight VFX generated from existing sprites. They are deliberately
+// independent of the plant object because one-shot plants destroy themselves.
+public static class ImportedPlantVfx
+{
+    public static void CreateCherryExplosion(Vector3 position)
+    {
+        const string sourceRoot="Sprites/Effects/CherryExplosion/";
+        Sprite cloudSprite=Resources.Load<Sprite>(sourceRoot+"ExplosionCloud");
+        Sprite powieSprite=Resources.Load<Sprite>(sourceRoot+"ExplosionPowie");
+        if(cloudSprite==null || powieSprite==null)
+        {
+            Debug.LogWarning("Cherry Bomb explosion sprites are missing.");
+            return;
+        }
+
+        // Port of the original Powie.xml effect: a brief POWIE card over two
+        // rings of orange/yellow explosion-cloud particles.
+        CreateBurst(position+new Vector3(0f,0.08f,0f),powieSprite,Color.white,1.08f,0.62f,121);
+
+        GameObject explosion=new GameObject("Cherry Bomb Explosion VFX",typeof(ParticleSystem));
+        explosion.transform.position=position+new Vector3(0f,0.08f,-0.3f);
+        ParticleSystem particles=explosion.GetComponent<ParticleSystem>();
+        particles.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
+
+        ParticleSystem.MainModule main=particles.main;
+        main.loop=false;
+        main.duration=0.12f;
+        main.startLifetime=new ParticleSystem.MinMaxCurve(0.4f,0.62f);
+        main.startSpeed=new ParticleSystem.MinMaxCurve(0.65f,2.5f);
+        main.startSize=new ParticleSystem.MinMaxCurve(0.42f,0.82f);
+        main.startRotation=new ParticleSystem.MinMaxCurve(0f,Mathf.PI*2f);
+        main.startColor=new ParticleSystem.MinMaxGradient(
+            new Color(1f,0.45f,0f,1f),new Color(1f,0.92f,0.22f,1f));
+        main.gravityModifier=0f;
+        main.simulationSpace=ParticleSystemSimulationSpace.World;
+        main.maxParticles=32;
+        main.stopAction=ParticleSystemStopAction.Destroy;
+
+        ParticleSystem.EmissionModule emission=particles.emission;
+        emission.rateOverTime=0f;
+        emission.SetBursts(new[]{new ParticleSystem.Burst(0f,28)});
+
+        ParticleSystem.ShapeModule shape=particles.shape;
+        shape.enabled=true;
+        shape.shapeType=ParticleSystemShapeType.Circle;
+        shape.radius=0.24f;
+
+        ParticleSystem.ColorOverLifetimeModule colorOverLifetime=particles.colorOverLifetime;
+        colorOverLifetime.enabled=true;
+        Gradient fade=new Gradient();
+        fade.SetKeys(
+            new[]{new GradientColorKey(new Color(1f,0.92f,0.22f),0f),new GradientColorKey(new Color(1f,0.35f,0f),1f)},
+            new[]{new GradientAlphaKey(1f,0f),new GradientAlphaKey(0f,1f)});
+        colorOverLifetime.color=fade;
+
+        ParticleSystem.SizeOverLifetimeModule sizeOverLifetime=particles.sizeOverLifetime;
+        sizeOverLifetime.enabled=true;
+        sizeOverLifetime.size=new ParticleSystem.MinMaxCurve(1f,AnimationCurve.EaseInOut(0f,0.35f,1f,1f));
+
+        ParticleSystemRenderer particleRenderer=explosion.GetComponent<ParticleSystemRenderer>();
+        particleRenderer.sortingLayerName="PlantBullet";
+        particleRenderer.sortingOrder=120;
+        Shader spriteShader=Shader.Find("Sprites/Default");
+        if(spriteShader!=null)
+        {
+            Material particleMaterial=new Material(spriteShader);
+            particleMaterial.mainTexture=cloudSprite.texture;
+            particleRenderer.material=particleMaterial;
+        }
+
+        particles.Play();
+    }
+
+    public static void CreateBurst(Vector3 position, Sprite sprite, Color tint)
+    {
+        CreateBurst(position,sprite,tint,1.8f,0.58f,0);
+    }
+
+    private static void CreateBurst(Vector3 position, Sprite sprite, Color tint, float maxScale, float lifetime, int sortingOrder)
+    {
+        if(sprite==null) return;
+        GameObject burst=new GameObject("Plant Explosion VFX", typeof(SpriteRenderer), typeof(ImportedPlantBurstVfx));
+        burst.transform.position=position+new Vector3(0f,0.06f,-0.2f);
+        SpriteRenderer renderer=burst.GetComponent<SpriteRenderer>();
+        renderer.sprite=sprite;
+        renderer.color=tint;
+        renderer.sortingLayerName="PlantBullet";
+        renderer.sortingOrder=sortingOrder;
+        burst.GetComponent<ImportedPlantBurstVfx>().Configure(renderer,maxScale,lifetime);
+    }
+
+    public static void CreateFireLane(float y, float leftEdge, float rightEdge)
+    {
+        Sprite[] frames=Resources.LoadAll<Sprite>("Sprites/Items/Fire").OrderBy(sprite=>ImportedPlantRuntime.NaturalIndex(sprite.name)).ToArray();
+        if(frames.Length==0) return;
+        const float spacing=0.72f;
+        for(float x=leftEdge+0.15f; x<=rightEdge-0.15f; x+=spacing)
+        {
+            GameObject flame=new GameObject("Jalapeno Lane Fire VFX", typeof(SpriteRenderer), typeof(ImportedPlantFlameVfx));
+            flame.transform.position=new Vector3(Mathf.Clamp(x,leftEdge,rightEdge),y-0.15f,-0.2f);
+            SpriteRenderer renderer=flame.GetComponent<SpriteRenderer>();
+            renderer.sprite=frames[0]; renderer.sortingLayerName="PlantBullet";
+            flame.transform.localScale=Vector3.one*0.72f;
+            flame.GetComponent<ImportedPlantFlameVfx>().Configure(renderer,frames,0.72f);
+        }
+    }
+}
+
+public sealed class ImportedPlantBurstVfx : MonoBehaviour
+{
+    private SpriteRenderer renderer; private float scale, lifetime, age;
+    public void Configure(SpriteRenderer value,float maxScale,float seconds){renderer=value;scale=maxScale;lifetime=seconds;}
+    private void Update(){age+=Time.deltaTime; float t=Mathf.Clamp01(age/lifetime); transform.localScale=Vector3.one*Mathf.Lerp(0.45f,scale,t); renderer.color=new Color(renderer.color.r,renderer.color.g,renderer.color.b,1f-t); if(t>=1f) Destroy(gameObject);}
+}
+
+public sealed class ImportedPlantFlameVfx : MonoBehaviour
+{
+    private SpriteRenderer renderer; private Sprite[] frames; private float lifetime, age;
+    public void Configure(SpriteRenderer value,Sprite[] valueFrames,float seconds){renderer=value;frames=valueFrames;lifetime=seconds;}
+    private void Update(){age+=Time.deltaTime; renderer.sprite=frames[Mathf.FloorToInt(age*16f)%frames.Length]; if(age>=lifetime) Destroy(gameObject);}
 }

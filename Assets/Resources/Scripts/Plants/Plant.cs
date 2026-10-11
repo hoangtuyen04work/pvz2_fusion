@@ -27,6 +27,7 @@ public class Plant : MonoBehaviour
     protected virtual void Start()
     {
         bloodVolumeMax = bloodVolume;
+        EndlessModifierSystem.ApplyToPlant(this);
         if(SnowKingSong.play)
         {
             intensify();
@@ -98,6 +99,16 @@ public class Plant : MonoBehaviour
     {
         bloodVolume += value;
         if(bloodVolume > bloodVolumeMax) bloodVolume = bloodVolumeMax;
+    }
+
+    public void ScaleHealthForEndless(float relativeMultiplier)
+    {
+        if (!EndlessRun.Active) return;
+        relativeMultiplier = Mathf.Clamp(relativeMultiplier, 0.25f, 4f);
+        int previousMaximum = Mathf.Max(1, bloodVolumeMax);
+        float healthRatio = Mathf.Clamp01(bloodVolume / (float)previousMaximum);
+        bloodVolumeMax = Mathf.Max(1, Mathf.RoundToInt(previousMaximum * relativeMultiplier));
+        bloodVolume = Mathf.Clamp(Mathf.RoundToInt(bloodVolumeMax * healthRatio), 1, bloodVolumeMax);
     }
 
     //Hàm tăng cường, chạy thao tác chung rồi gọi hàm thao tác riêng
