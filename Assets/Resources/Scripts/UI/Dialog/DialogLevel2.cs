@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DialogLevel2 : MonoBehaviour
+public class DialogLevel2 : MonoBehaviour, IStartupDialogSkippable
 {
     public SpeechBubble flowerSpeechBubble;   //Khung thoại của Hướng Dương
     public SpeechBubble nutSpeechBubble;    //Khung thoại của Tường Hạt Dẻ
@@ -16,6 +16,7 @@ public class DialogLevel2 : MonoBehaviour
     BGMusicControl bGMusicControl;   //Component nguồn âm thanh của đối tượng nền
 
     int count = 0;  //Đếm hội thoại, hiện là câu thứ mấy
+    bool informationShown;
 
     private void Awake()
     {
@@ -35,11 +36,35 @@ public class DialogLevel2 : MonoBehaviour
         bGMusicControl.changeMusic("Music_Night");
 
         flowerSpeechBubble.showDialog("Cuối cùng cũng tìm được cậu, Hạ sĩ Hạt Dẻ!");
+        AdventureDialogUI.AddCloseButton(introduce, clickStart);
+    }
+
+    public void SkipConversationToInformation()
+    {
+        if (informationShown) return;
+        informationShown = true;
+        CancelInvoke();
+        RemoveDialogPlant(ref flower);
+        RemoveDialogPlant(ref nut);
+        RemoveDialogPlant(ref pea);
+        introduce.SetActive(true);
+        AdventureDialogUI.AddCloseButton(introduce, clickStart);
+    }
+
+    private static void RemoveDialogPlant(ref GameObject plant)
+    {
+        if (plant != null)
+        {
+            Plant component = plant.GetComponent<Plant>();
+            if (component != null) component.die("");
+        }
+        plant = null;
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (informationShown) return;
         //Bấm chuột trái để sang sự kiện tiếp theo
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {

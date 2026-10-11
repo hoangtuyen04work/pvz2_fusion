@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class DialogLevel4 : MonoBehaviour
+public class DialogLevel4 : MonoBehaviour, IStartupDialogSkippable
 {
     public SpeechBubble peaSpeechBubble;   //Khung thoại của Đậu Bắn
     public SpeechBubble woodAndFlowerSpeechBubble;   //Khung thoại của Đuốc và Hướng Dương
@@ -18,6 +18,7 @@ public class DialogLevel4 : MonoBehaviour
     GameObject snowKing;
 
     int count = 0;  //Đếm hội thoại, hiện là câu thứ mấy
+    bool informationShown;
     private void Awake()
     {
         //Trồng những cây tham gia hội thoại
@@ -31,11 +32,40 @@ public class DialogLevel4 : MonoBehaviour
     void Start()
     {
         woodAndFlowerSpeechBubble.showDialog("Hắt......hắt xì!");
+        AdventureDialogUI.AddCloseButton(zombieIntroduce1, clickStart);
+        AdventureDialogUI.AddCloseButton(zombieIntroduce2, clickStart);
+        AdventureDialogUI.AddCloseButton(plantIntroduce, clickStart);
+    }
+
+    public void SkipConversationToInformation()
+    {
+        if (informationShown) return;
+        informationShown = true;
+        CancelInvoke();
+        RemoveDialogPlant(ref flower);
+        RemoveDialogPlant(ref pea);
+        RemoveDialogPlant(ref wood);
+        RemoveDialogPlant(ref snowKing);
+        zombieIntroduce2.SetActive(false);
+        plantIntroduce.SetActive(false);
+        zombieIntroduce1.SetActive(true);
+        AdventureDialogUI.AddCloseButton(zombieIntroduce1, clickStart);
+    }
+
+    private static void RemoveDialogPlant(ref GameObject plant)
+    {
+        if (plant != null)
+        {
+            Plant component = plant.GetComponent<Plant>();
+            if (component != null) component.die("");
+        }
+        plant = null;
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (informationShown) return;
         //Bấm chuột trái để sang sự kiện tiếp theo
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {

@@ -301,7 +301,11 @@ public sealed class GameplayBackgroundMotion : MonoBehaviour
         // Level setup can replace the background during its first frames.
         yield return null;
         yield return null;
-        if (GameManagement.levelData != null && !GameManagement.levelData.animateBackground)
+        // A moving/scaled lawn no longer lines up with the stationary clickable
+        // planting cells. Keep gameplay backgrounds fixed whenever a planting
+        // grid is present so each painted lane remains one plantable lane.
+        if ((GameManagement.levelData != null && !GameManagement.levelData.animateBackground) ||
+            GameObject.Find("Planting Management") != null)
         {
             Destroy(gameObject);
             yield break;

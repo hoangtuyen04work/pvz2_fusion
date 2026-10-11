@@ -94,20 +94,33 @@ public class GameManagement : MonoBehaviour
 
     private void applyCustomGridLayout(GameObject plantingRoot)
     {
-        if (levelData.plantGridPosX == null || levelData.plantGridPosY == null ||
-            levelData.plantGridPosX.Count == 0 || levelData.plantGridPosY.Count == 0) return;
+        // The zombie lane centres are the canonical row centres.  Older levels
+        // only configured zombieInitPosY, while their planting prefab retained
+        // slightly different Y values; that made a visual lawn row and a
+        // plantable row disagree.  A level may still override plantGridPosY,
+        // but otherwise both plants and zombies now share the same centres.
+        List<float> rowPositions = levelData.plantGridPosY != null && levelData.plantGridPosY.Count > 0
+            ? levelData.plantGridPosY
+            : levelData.zombieInitPosY;
+        bool hasColumns = levelData.plantGridPosX != null && levelData.plantGridPosX.Count > 0;
+        bool hasRows = rowPositions != null && rowPositions.Count > 0;
+        if (!hasColumns && !hasRows) return;
 
         foreach (PlantGrid grid in plantingRoot.GetComponentsInChildren<PlantGrid>(true))
         {
             string[] parts = grid.gameObject.name.Split('-');
             if (parts.Length != 3 || !int.TryParse(parts[1], out int column) ||
                 !int.TryParse(parts[2], out int row)) continue;
-            if (column < 0 || column >= levelData.plantGridPosX.Count ||
-                row < 0 || row >= levelData.plantGridPosY.Count) continue;
 
             Vector3 local = grid.transform.localPosition;
+            float x = hasColumns && column >= 0 && column < levelData.plantGridPosX.Count
+                ? levelData.plantGridPosX[column]
+                : local.x;
+            float y = hasRows && row >= 0 && row < rowPositions.Count
+                ? rowPositions[row]
+                : local.y;
             grid.transform.localPosition = new Vector3(
-                levelData.plantGridPosX[column], levelData.plantGridPosY[row], local.z);
+                x, y, local.z);
         }
     }
 

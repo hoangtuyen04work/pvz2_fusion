@@ -21,12 +21,12 @@ public class Level1Controller : LevelController
             backgroundSuffix = "_Day",   //Hậu tố nhạc nền tương ứng
 
             //Vị trí trục Y ban đầu của zombie từng hàng
-            zombieInitPosY = new List<float> { -1.97f, -1.17f, -0.36f, 0.44f, 1.25f },
+            zombieInitPosY = new List<float> { -1.79f, -1.02f, -0.27f, 0.47f, 1.21f },
             plantGridPosX = new List<float>
             {
-                -2.03f, -1.19f, -0.35f, 0.49f, 1.33f, 2.17f, 3.01f, 3.85f, 4.69f
+                -1.81f, -1.00f, -0.20f, 0.60f, 1.41f, 2.21f, 3.02f, 3.82f, 4.62f
             },
-            plantGridPosY = new List<float> { -1.97f, -1.17f, -0.36f, 0.44f, 1.25f },
+            plantGridPosY = new List<float> { -1.79f, -1.02f, -0.27f, 0.47f, 1.21f },
 
             //Dãy thẻ cây của màn này
             plantCards = new List<string>

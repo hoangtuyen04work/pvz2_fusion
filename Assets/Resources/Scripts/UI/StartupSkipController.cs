@@ -4,6 +4,11 @@ using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
+public interface IStartupDialogSkippable
+{
+    void SkipConversationToInformation();
+}
+
 public class StartupSkipController : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler
 {
     private static StartupSkipController instance;
@@ -51,6 +56,8 @@ public class StartupSkipController : MonoBehaviour, IPointerEnterHandler, IPoint
         scaler.matchWidthOrHeight = 0.5f;
         group = canvasObject.GetComponent<CanvasGroup>();
         group.alpha = 0f;
+        group.interactable = false;
+        group.blocksRaycasts = false;
 
         if (EventSystem.current == null)
             new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
@@ -71,7 +78,7 @@ public class StartupSkipController : MonoBehaviour, IPointerEnterHandler, IPoint
 
         var button = buttonObject.GetComponent<Button>();
         button.transition = Selectable.Transition.None;
-        button.onClick.AddListener(SkipToMenu);
+        button.onClick.AddListener(SkipConversation);
 
         var trigger = buttonObject.AddComponent<EventTriggerRelay>();
         trigger.receiver = this;
@@ -98,39 +105,41 @@ public class StartupSkipController : MonoBehaviour, IPointerEnterHandler, IPoint
         buttonRect.localScale = Vector3.Lerp(buttonRect.localScale, targetScale, 15f * Time.unscaledDeltaTime);
     }
 
-    private void SkipToMenu()
+    private void SkipConversation()
     {
         if (leaving) return;
 
-        // The main menu forces first-time players into level 0 while this flag is unset.
-        // Mark the tutorial as handled when its opening is skipped, otherwise pressing
-        // Adventure after returning to the menu sends the player straight back here.
-        GameManagement gameManagement = FindAnyObjectByType<GameManagement>();
-        if (gameManagement != null && gameManagement.level == 0 &&
-            !EndlessRun.Active && !NetSession.IsOnline)
+        IStartupDialogSkippable skippable = FindDialog();
+        if (skippable != null)
         {
-            PlayerPrefs.SetInt(DialogLevel0.FirstTimeTutorialKey, 1);
-            PlayerPrefs.Save();
+            skippable.SkipConversationToInformation();
+            StartCoroutine(HideAndDestroy());
+            return;
         }
 
-        StartCoroutine(LoadMenu());
+        // A level without a tutorial must never be blocked by the navigation button.
+        GameManagement gameManagement = FindAnyObjectByType<GameManagement>();
+        if (gameManagement != null) gameManagement.awakeAll();
     }
 
-    private IEnumerator LoadMenu()
+    private static IStartupDialogSkippable FindDialog()
     {
-        leaving = true;
-        var clip = Resources.Load<AudioClip>("Sounds/UI/buttonClick");
-        if (clip != null) AudioSource.PlayClipAtPoint(clip, Vector3.zero);
-        fadeImage.raycastTarget = true;
-        fadeImage.CrossFadeAlpha(1f, 0.35f, true);
-        yield return new WaitForSecondsRealtime(0.38f);
-        Time.timeScale = 1f;
-        SceneManager.LoadScene("MainMenu");
+        foreach (MonoBehaviour behaviour in FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include))
+            if (behaviour is IStartupDialogSkippable skippable)
+                return skippable;
+        return null;
     }
 
     private IEnumerator FadeIn()
     {
+        // The dialog is instantiated only after the opening camera preview. Do not
+        // accept an early click that would bypass both the dialog and its info popup.
+        while (FindDialog() == null)
+            yield return null;
+
         yield return new WaitForSecondsRealtime(0.35f);
+        group.interactable = true;
+        group.blocksRaycasts = true;
         float elapsed = 0f;
         while (elapsed < 0.35f)
         {

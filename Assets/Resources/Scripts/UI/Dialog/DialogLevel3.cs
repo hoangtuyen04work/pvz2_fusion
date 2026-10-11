@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DialogLevel3 : MonoBehaviour
+public class DialogLevel3 : MonoBehaviour, IStartupDialogSkippable
 {
     public SpeechBubble flowerSpeechBubble;   //Khung thoại của Hướng Dương
     public SpeechBubble squashSpeechBubble;    //Khung thoại của Bí Ngòi
@@ -15,6 +15,7 @@ public class DialogLevel3 : MonoBehaviour
     GameObject pea;
 
     int count = 0;  //Đếm hội thoại, hiện là câu thứ mấy
+    bool informationShown;
 
     private void Awake()
     {
@@ -32,11 +33,37 @@ public class DialogLevel3 : MonoBehaviour
         Invoke("flipPea", 2f);
         Invoke("peaHide", 3f);
         Invoke("showFirstTalk", 3.5f);
+        AdventureDialogUI.AddCloseButton(introduce1, clickStart);
+        AdventureDialogUI.AddCloseButton(introduce2, clickStart);
+    }
+
+    public void SkipConversationToInformation()
+    {
+        if (informationShown) return;
+        informationShown = true;
+        CancelInvoke();
+        RemoveDialogPlant(ref flower);
+        RemoveDialogPlant(ref squash);
+        RemoveDialogPlant(ref pea);
+        introduce2.SetActive(false);
+        introduce1.SetActive(true);
+        AdventureDialogUI.AddCloseButton(introduce1, clickStart);
+    }
+
+    private static void RemoveDialogPlant(ref GameObject plant)
+    {
+        if (plant != null)
+        {
+            Plant component = plant.GetComponent<Plant>();
+            if (component != null) component.die("");
+        }
+        plant = null;
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (informationShown) return;
         //Bấm chuột trái để sang sự kiện tiếp theo
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {

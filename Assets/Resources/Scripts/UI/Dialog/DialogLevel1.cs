@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DialogLevel1 : MonoBehaviour
+public class DialogLevel1 : MonoBehaviour, IStartupDialogSkippable
 {
     public CrazyDave crazyDave;   //Component script của Dave Điên
     public SpeechBubble peaSpeechBubble;    //Khung thoại của Đậu Bắn
@@ -11,6 +11,7 @@ public class DialogLevel1 : MonoBehaviour
     SpriteRenderer pea_spriteRenderer;   //SpriteRenderer của Đậu Bắn được sinh ra, dùng để lật nó
 
     int count = 0;  //Đếm hội thoại, hiện là câu thứ mấy
+    bool informationShown;
 
     private void Awake()
     {
@@ -29,6 +30,7 @@ public class DialogLevel1 : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (informationShown) return;
         //Bấm chuột trái để sang sự kiện tiếp theo
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
@@ -85,5 +87,28 @@ public class DialogLevel1 : MonoBehaviour
         peaSpeechBubble.showDialog("Hừ~ đám tép riu này thì cần gì đến xe đẩy"); //Hiển thị hội thoại
 
         count = 6;   //Tăng bộ đếm
+    }
+
+    public void SkipConversationToInformation()
+    {
+        if (informationShown) return;
+        informationShown = true;
+        CancelInvoke();
+        if (crazyDave != null) crazyDave.gameObject.SetActive(false);
+        if (peaSpeechBubble != null) peaSpeechBubble.gameObject.SetActive(false);
+        if (daveSpeechBubble != null) daveSpeechBubble.gameObject.SetActive(false);
+
+        AdventureDialogUI.ShowLevelInformation(
+            transform,
+            "HÀNH TRÌNH MỚI",
+            "Zombie đang tiến vào khu vườn theo 5 hàng. Trồng Hướng Dương để tạo nắng, sau đó dùng Đậu Bắn bảo vệ từng hàng. Bấm X để đóng thông tin và bắt đầu màn chơi.",
+            FinishAfterInformation);
+    }
+
+    private void FinishAfterInformation()
+    {
+        GameManagement management = GameObject.Find("Game Management")?.GetComponent<GameManagement>();
+        if (management != null) management.awakeAll();
+        gameObject.SetActive(false);
     }
 }

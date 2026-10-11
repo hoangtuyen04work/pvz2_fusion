@@ -95,6 +95,29 @@ public static class CampaignProgress
         PlayerPrefs.Save();
     }
 
+    /// <summary>Reset progress owned by a newly-created account.</summary>
+    public static void ResetForNewAccount()
+    {
+        PlayerPrefs.DeleteKey(PrefUnlockedLevels);
+        PlayerPrefs.DeleteKey(Prefix + "Checkpoint");
+        PlayerPrefs.DeleteKey(Prefix + "CheckpointHealth");
+        PlayerPrefs.DeleteKey(Prefix + "CheckpointScore");
+        PlayerPrefs.DeleteKey(Prefix + "HighestMap");
+        PlayerPrefs.DeleteKey(Prefix + "BestScore");
+        PlayerPrefs.DeleteKey(Prefix + "Wins");
+        PlayerPrefs.DeleteKey(Prefix + "Losses");
+
+        for (int map = 1; map <= 3; map++)
+        {
+            PlayerPrefs.DeleteKey(Prefix + "Map" + map + "Clears");
+            PlayerPrefs.DeleteKey(Prefix + "Map" + map + "Last");
+        }
+
+        // A new account should see the first-time Adventure tutorial again.
+        PlayerPrefs.DeleteKey(DialogLevel0.FirstTimeTutorialKey);
+        PlayerPrefs.Save();
+    }
+
     private static void SetBool(string key, bool value)
     {
         PlayerPrefs.SetInt(Prefix + key, value ? 1 : 0);

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class DialogLevel0 : MonoBehaviour
+public class DialogLevel0 : MonoBehaviour, IStartupDialogSkippable
 {
     public GameObject zombieIntroduce;   //Bảng giới thiệu zombie ban đầu
     public GameObject plantIntroduce;    //Bảng giới thiệu cây ban đầu
@@ -13,6 +13,9 @@ public class DialogLevel0 : MonoBehaviour
     private const int TotalTutorialPages = 2;
 
     private Text pageIndicatorText;
+    private Text nextPageButtonText;
+    private Image pageDot1;
+    private Image pageDot2;
     private GameObject page1Container;
     private GameObject page2Container;
     private ScrollRect tutorialScrollRect;
@@ -72,13 +75,39 @@ public class DialogLevel0 : MonoBehaviour
         if (zombieIntroduce != null) zombieIntroduce.SetActive(false);
 
         BuildFusionTutorialUI();
+        AdventureDialogUI.AddCloseButton(zombieIntroduce, FinishTutorialFromInformation);
+        AdventureDialogUI.AddCloseButton(plantIntroduce, FinishTutorialFromInformation);
+    }
+
+    public void SkipConversationToInformation()
+    {
+        CancelInvoke();
+        PlayButtonClickAudio();
+        if (fusionTutorialPanel != null) fusionTutorialPanel.SetActive(false);
+        if (plantIntroduce != null) plantIntroduce.SetActive(false);
+        if (zombieIntroduce != null)
+        {
+            zombieIntroduce.SetActive(true);
+            AdventureDialogUI.AddCloseButton(zombieIntroduce, FinishTutorialFromInformation);
+        }
+        else
+        {
+            FinishTutorialFromInformation();
+        }
+    }
+
+    private void FinishTutorialFromInformation()
+    {
+        PlayerPrefs.SetInt(FirstTimeTutorialKey, 1);
+        PlayerPrefs.Save();
+        FinishAndStartGame();
     }
 
     private void BuildFusionTutorialUI()
     {
         Font font = Resources.Load<Font>("Fonts/Baloo2");
 
-        fusionTutorialPanel = new GameObject("Bảng Hướng Dẫn Fusion", typeof(RectTransform), typeof(CanvasRenderer));
+        fusionTutorialPanel = new GameObject("Bảng Hướng Dẫn Fusion", typeof(RectTransform), typeof(CanvasRenderer), typeof(CanvasGroup));
         fusionTutorialPanel.transform.SetParent(transform, false);
 
         RectTransform panelRect = fusionTutorialPanel.GetComponent<RectTransform>();
@@ -104,6 +133,23 @@ public class DialogLevel0 : MonoBehaviour
         Image frameImg = woodFrame.GetComponent<Image>();
         frameImg.sprite = Resources.Load<Sprite>("GameUI/dialog_main");
         frameImg.preserveAspect = true;
+        Shadow frameShadow = woodFrame.AddComponent<Shadow>();
+        frameShadow.effectColor = new Color(0f, 0f, 0f, 0.72f);
+        frameShadow.effectDistance = new Vector2(10f, -12f);
+
+        // Lớp giấy sáng giúp nội dung tách khỏi nền gỗ và dễ đọc trên mọi bản đồ.
+        GameObject contentBackdrop = new GameObject("Nền Giấy Nội Dung", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        contentBackdrop.transform.SetParent(woodFrame.transform, false);
+        RectTransform backdropRect = contentBackdrop.GetComponent<RectTransform>();
+        backdropRect.anchorMin = new Vector2(0.045f, 0.17f);
+        backdropRect.anchorMax = new Vector2(0.955f, 0.855f);
+        backdropRect.offsetMin = Vector2.zero;
+        backdropRect.offsetMax = Vector2.zero;
+        Image backdropImage = contentBackdrop.GetComponent<Image>();
+        backdropImage.sprite = Resources.Load<Sprite>("GameUI/dialog_child");
+        backdropImage.type = Image.Type.Sliced;
+        backdropImage.color = new Color(1f, 0.96f, 0.82f, 0.92f);
+        backdropImage.raycastTarget = false;
 
         // Tiêu đề bảng
         GameObject titleObj = new GameObject("Tiêu Đề", typeof(RectTransform), typeof(CanvasRenderer), typeof(Text), typeof(Outline));
@@ -143,6 +189,9 @@ public class DialogLevel0 : MonoBehaviour
         pageIndicatorText.alignment = TextAnchor.MiddleCenter;
         pageIndicatorText.color = new Color(0.38f, 0.18f, 0.05f, 1f);
         pageIndicatorText.text = "Trang 1 / 2: Cách thức Thao Tác & Quy Tắc Ghép";
+
+        pageDot1 = CreatePageDot("Trang 1", woodFrame.transform, new Vector2(-220f, -86f));
+        pageDot2 = CreatePageDot("Trang 2", woodFrame.transform, new Vector2(220f, -86f));
 
         // Vùng cuộn nội dung (Scroll View)
         GameObject scrollObj = new GameObject("Scroll View", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image), typeof(ScrollRect));
@@ -245,8 +294,9 @@ public class DialogLevel0 : MonoBehaviour
         BuildPage2_FormulasAndEvolution(contentArea.transform, font);
 
         // Nút CHUYỂN TRANG / TIẾP THEO
-        CreateActionButton("Nút Chuyển Trang", woodFrame.transform, new Vector2(-155f, 48f), new Vector2(170f, 52f),
-            "TIẾP THEO", font, 20, OnNextPageClicked);
+        GameObject nextPageButton = CreateActionButton("Nút Chuyển Trang", woodFrame.transform, new Vector2(-155f, 48f), new Vector2(170f, 52f),
+            "TRANG SAU", font, 20, OnNextPageClicked);
+        nextPageButtonText = nextPageButton.GetComponentInChildren<Text>();
 
         // Nút VÀO TRẬN / BẮT ĐẦU CHƠI
         CreateActionButton("Nút Bắt Đầu", woodFrame.transform, new Vector2(40f, 48f), new Vector2(170f, 52f),
@@ -257,6 +307,42 @@ public class DialogLevel0 : MonoBehaviour
             "BỎ QUA >>", font, 20, OnSkipClicked);
 
         UpdatePageVisibility();
+        StartCoroutine(AnimateTutorialEntrance(woodFrame.transform, fusionTutorialPanel.GetComponent<CanvasGroup>()));
+    }
+
+    private Image CreatePageDot(string name, Transform parent, Vector2 position)
+    {
+        GameObject dot = new GameObject(name, typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
+        dot.transform.SetParent(parent, false);
+        RectTransform rect = dot.GetComponent<RectTransform>();
+        rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 1f);
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.anchoredPosition = position;
+        rect.sizeDelta = new Vector2(14f, 14f);
+        Image image = dot.GetComponent<Image>();
+        image.sprite = GetRoundedUiSprite();
+        image.type = Image.Type.Sliced;
+        image.raycastTarget = false;
+        return image;
+    }
+
+    private IEnumerator AnimateTutorialEntrance(Transform frame, CanvasGroup canvasGroup)
+    {
+        canvasGroup.alpha = 0f;
+        frame.localScale = Vector3.one * 0.92f;
+        float elapsed = 0f;
+        const float duration = 0.28f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float progress = Mathf.Clamp01(elapsed / duration);
+            float eased = 1f - Mathf.Pow(1f - progress, 3f);
+            canvasGroup.alpha = eased;
+            frame.localScale = Vector3.LerpUnclamped(Vector3.one * 0.92f, Vector3.one, eased);
+            yield return null;
+        }
+        canvasGroup.alpha = 1f;
+        frame.localScale = Vector3.one;
     }
 
     private void BuildPage1_CoreLogic(Transform parent, Font font)
@@ -426,6 +512,9 @@ public class DialogLevel0 : MonoBehaviour
         bg.sprite = Resources.Load<Sprite>("GameUI/dialog_child");
         bg.type = Image.Type.Sliced;
         bg.color = new Color(1f, 1f, 1f, 0.98f);
+        Shadow cardShadow = card.AddComponent<Shadow>();
+        cardShadow.effectColor = new Color(0.18f, 0.07f, 0.02f, 0.38f);
+        cardShadow.effectDistance = new Vector2(4f, -5f);
 
         // Tiêu đề bước
         GameObject stepObj = new GameObject("Bước", typeof(RectTransform), typeof(CanvasRenderer), typeof(Text));
@@ -460,6 +549,9 @@ public class DialogLevel0 : MonoBehaviour
         if (sp == null) sp = Resources.Load<Sprite>("Sprites/Plants/PeaShooterSingle");
         iconImg.sprite = sp;
         iconImg.preserveAspect = true;
+        Shadow iconShadow = iconObj.AddComponent<Shadow>();
+        iconShadow.effectColor = new Color(0f, 0f, 0f, 0.32f);
+        iconShadow.effectDistance = new Vector2(2f, -3f);
 
         // Tên phụ
         GameObject subObj = new GameObject("Tên Phụ", typeof(RectTransform), typeof(CanvasRenderer), typeof(Text));
@@ -525,6 +617,9 @@ public class DialogLevel0 : MonoBehaviour
         bg.sprite = Resources.Load<Sprite>("GameUI/dialog_child");
         bg.type = Image.Type.Sliced;
         bg.color = new Color(1f, 1f, 1f, 0.98f);
+        Shadow cardShadow = card.AddComponent<Shadow>();
+        cardShadow.effectColor = new Color(0.18f, 0.07f, 0.02f, 0.38f);
+        cardShadow.effectDistance = new Vector2(4f, -5f);
 
         // Tên cây
         GameObject nameObj = new GameObject("Tên", typeof(RectTransform), typeof(CanvasRenderer), typeof(Text));
@@ -559,6 +654,9 @@ public class DialogLevel0 : MonoBehaviour
         if (sp == null) sp = Resources.Load<Sprite>("Sprites/Plants/SunFlower");
         iconImg.sprite = sp;
         iconImg.preserveAspect = true;
+        Shadow iconShadow = iconObj.AddComponent<Shadow>();
+        iconShadow.effectColor = new Color(0f, 0f, 0f, 0.32f);
+        iconShadow.effectDistance = new Vector2(2f, -3f);
 
         // Công thức ghép
         GameObject recipeObj = new GameObject("Công Thức", typeof(RectTransform), typeof(CanvasRenderer), typeof(Text));
@@ -720,6 +818,13 @@ public class DialogLevel0 : MonoBehaviour
     {
         if (page1Container != null) page1Container.SetActive(currentTutorialPage == 0);
         if (page2Container != null) page2Container.SetActive(currentTutorialPage == 1);
+
+        Color activeDot = new Color(0.96f, 0.67f, 0.14f, 1f);
+        Color inactiveDot = new Color(0.34f, 0.16f, 0.06f, 0.45f);
+        if (pageDot1 != null) pageDot1.color = currentTutorialPage == 0 ? activeDot : inactiveDot;
+        if (pageDot2 != null) pageDot2.color = currentTutorialPage == 1 ? activeDot : inactiveDot;
+        if (nextPageButtonText != null)
+            nextPageButtonText.text = currentTutorialPage == 0 ? "TRANG SAU" : "TRANG TRƯỚC";
 
         if (tutorialScrollRect != null)
         {

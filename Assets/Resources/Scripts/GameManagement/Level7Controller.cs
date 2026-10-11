@@ -20,12 +20,12 @@ public class Level7Controller : LevelController
             isDay = true,
             plantingManagementSuffix = "_OriginalLawn",
             backgroundSuffix = "_Roco_PetPark",
-            zombieInitPosY = new List<float> { -1.82f, -0.94f, -0.06f, 0.82f, 1.70f },
+            zombieInitPosY = new List<float> { -1.58f, -0.79f, 0.00f, 0.79f, 1.58f },
             plantGridPosX = new List<float>
             {
-                -2.33f, -1.39f, -0.45f, 0.50f, 1.44f, 2.39f, 3.33f, 4.27f, 5.21f
+                -2.35f, -1.48f, -0.60f, 0.28f, 1.15f, 2.03f, 2.91f, 3.78f, 4.66f
             },
-            plantGridPosY = new List<float> { -1.82f, -0.94f, -0.06f, 0.82f, 1.70f },
+            plantGridPosY = new List<float> { -1.58f, -0.79f, 0.00f, 0.79f, 1.58f },
             plantCards = new List<string>
             {
                 "SunFlower", "PeaShooter", "WallNut", "Squash", "TorchWood", "SunNut"

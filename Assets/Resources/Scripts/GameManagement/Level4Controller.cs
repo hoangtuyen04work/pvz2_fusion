@@ -27,7 +27,12 @@ public class Level4Controller : LevelController
             backgroundSuffix = "_Ice",   //Hậu tố nhạc nền tương ứng
 
             //Vị trí trục Y ban đầu của zombie từng hàng
-            zombieInitPosY = new List<float> { -2.168f, -1.24f, -0.2f, 0.85f, 1.82f },
+            zombieInitPosY = new List<float> { -2.23f, -1.24f, -0.23f, 0.78f, 1.77f },
+            plantGridPosX = new List<float>
+            {
+                -2.57f, -1.70f, -0.83f, 0.04f, 0.91f, 1.78f, 2.65f, 3.52f, 4.39f
+            },
+            plantGridPosY = new List<float> { -2.23f, -1.24f, -0.23f, 0.78f, 1.77f },
 
             //Dãy thẻ cây của màn này
             plantCards = new List<string>

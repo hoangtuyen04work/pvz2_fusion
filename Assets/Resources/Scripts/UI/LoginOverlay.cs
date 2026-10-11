@@ -309,10 +309,35 @@ public class LoginOverlay : MonoBehaviour
 
             if (success)
             {
-                // Tự động lưu tiến trình hiện tại lên tài khoản mới
-                OnClickSyncCloud();
-                RefreshView();
-                onLoginSuccessCallback?.Invoke();
+                // Tài khoản vừa tạo phải bắt đầu như bản cài mới, không kế thừa
+                // tiến trình khách đang có trên thiết bị.
+                CampaignProgress.ResetForNewAccount();
+
+                var freshProfile = new FirebaseAuthService.PlayerProfileData
+                {
+                    progressVersion = 2,
+                    username = FirebaseAuthService.GetCurrentPlayerName(),
+                    email = FirebaseAuthService.CurrentUserEmail,
+                    unlockedLevelsCount = 2,
+                    campaignCheckpointHealth = 100,
+                    mapClears = new int[3],
+                    mapLastClears = new string[3]
+                };
+
+                SetInteractable(false);
+                messageText.text = "Đang khởi tạo tiến trình mới...";
+                FirebaseAuthService.Instance.SavePlayerDataToCloud(freshProfile, (saveOk, saveMsg) =>
+                {
+                    SetInteractable(true);
+                    messageText.color = saveOk
+                        ? new Color(0.4f, 1f, 0.4f)
+                        : new Color(1f, 0.4f, 0.3f);
+                    messageText.text = saveOk
+                        ? "Đăng ký thành công! Tiến trình đã được bắt đầu lại."
+                        : saveMsg;
+                    RefreshView();
+                    onLoginSuccessCallback?.Invoke();
+                });
             }
         });
     }

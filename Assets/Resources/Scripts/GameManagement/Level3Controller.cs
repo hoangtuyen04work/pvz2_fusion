@@ -20,7 +20,12 @@ public class Level3Controller : LevelController
             backgroundSuffix = "_Night_Bone",   //Hậu tố nhạc nền tương ứng
 
             //Vị trí trục Y ban đầu của zombie từng hàng
-            zombieInitPosY = new List<float> { -2.3f, -1.25f, -0.35f, 0.7f, 1.7f },
+            zombieInitPosY = new List<float> { -2.25f, -1.25f, -0.25f, 0.75f, 1.75f },
+            plantGridPosX = new List<float>
+            {
+                -2.60f, -1.75f, -0.90f, -0.05f, 0.80f, 1.65f, 2.50f, 3.35f, 4.20f
+            },
+            plantGridPosY = new List<float> { -2.25f, -1.25f, -0.25f, 0.75f, 1.75f },
 
             //Dãy thẻ cây của màn này
             plantCards = new List<string>

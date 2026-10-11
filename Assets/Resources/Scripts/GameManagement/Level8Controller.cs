@@ -22,12 +22,12 @@ public class Level8Controller : LevelController
             backgroundSuffix = "_Night_Bone",
             // Ảnh map9 có phần kiến trúc lớn phía trên. Giữ toàn bộ tâm hàng trong
             // vùng cỏ (xấp xỉ pixel y=267..650 trên ảnh gốc 1916x821).
-            zombieInitPosY = new List<float> { -1.75f, -1.05f, -0.35f, 0.35f, 1.05f },
+            zombieInitPosY = new List<float> { -1.82f, -1.17f, -0.51f, 0.15f, 0.81f },
             plantGridPosX = new List<float>
             {
-                -2.33f, -1.39f, -0.45f, 0.50f, 1.44f, 2.39f, 3.33f, 4.27f, 5.21f
+                -2.44f, -1.42f, -0.40f, 0.61f, 1.63f, 2.64f, 3.66f, 4.68f, 5.69f
             },
-            plantGridPosY = new List<float> { -1.75f, -1.05f, -0.35f, 0.35f, 1.05f },
+            plantGridPosY = new List<float> { -1.82f, -1.17f, -0.51f, 0.15f, 0.81f },
             plantCards = new List<string>
             {
                 "SunFlower", "PeaShooter", "WallNut", "RepeaterPea", "CherryBomb", "PuffShroom"
