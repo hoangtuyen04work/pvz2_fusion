@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,7 +7,7 @@ public class FirePea : StraightBulletAnimationSwitch
 
     protected override void attack(Zombie target)
     {
-        //½©Ê¬ÊÜµ½¹¥»÷
+        //Zombie há»©ng Ä‘Ã²n táº¥n cÃ´ng
         target.beAttacked(hurt);
         target.beBurned();
     }

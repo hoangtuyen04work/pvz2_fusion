@@ -1,4 +1,4 @@
-using System.Collections;
+锘縰sing System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,7 +7,7 @@ public class MotionPanel : MonoBehaviour
     bool moving = false;
 
     public Direction direction;
-    protected RectTransform rectTransform;   //自身RectTransform组件
+    protected RectTransform rectTransform;   //Component RectTransform c峄 ch铆nh n贸
 
     // Start is called before the first frame update
     void Start()

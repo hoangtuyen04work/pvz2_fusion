@@ -1,21 +1,43 @@
 # PvZ-Unity
-基于Unity对植物大战僵尸（PvZ）进行的复刻，高还原度。仅实现了完整的关卡流程，未复刻原版PVZ的完整游戏流程。自定义了一些新植物、新僵尸、新关卡，部分所用素材来源于网络。
+
+## Màn 9: Đền Mạch Năng Lượng
+
+Màn 9 biến cách xây đội hình thành một thử thách chủ động. Cứ sau một khoảng nghỉ, bốn nút năng
+lượng nối thành một mạch mới trên sân. Trồng cây phủ đủ cả bốn nút trước khi đồng hồ hết hạn để
+phóng xung điện gây 140 sát thương, đóng băng toàn bộ zombie và nhận 75 nắng. Nếu thất bại, cây
+đang đứng trên các nút bị quá tải và mất 80 máu. Mỗi mạch có 26 giây và ưu tiên vùng đang có ít cây,
+buộc người chơi cân bằng giữa tuyến phòng thủ lâu dài và Puff-shroom dùng để khép mạch đúng lúc.
+Màn bắt đầu với 200 nắng, nắng trời rơi mỗi 6–9 giây và có 10 giây nghỉ giữa hai mạch.
+
+## Màn 8: Đảo Thiên Đường
+
+Màn 8 dùng chu kỳ thủy triều trên bãi biển. Sáu cột bên trái luôn an toàn; ba cột ven biển là vùng
+mạo hiểm. Khi nước ròng, trồng trên hai ô Cát Vàng để nhận 25 nắng và giữ cây sống tới lúc sóng đến
+để nhận thêm 50 nắng. Khi HUD báo **SÓNG**, chuẩn bị rút cây quan trọng khỏi bãi triều. Trong lúc
+**TRIỀU**, không thể trồng tại vùng ngập; cây ở đó mất ít máu, còn zombie bị chậm và đẩy lùi.
+Mỗi chu kỳ thứ ba là Sóng Lớn, ngập thêm một cột. Màn được cân bằng để dễ thắng và trải nghiệm đủ
+các pha thủy triều.
+
+## Màn 7: Rừng Nhật Thực
+
+Chọn **Phiêu lưu**, sau đó chọn **Rừng Nhật Thực** để chơi trên bản đồ `map7`. Màn demo kéo dài khoảng 1–2 phút, có hai pha ánh sáng và nhật thực luân phiên. Khi nhật thực xuất hiện, nắng trời tạm ngừng và zombie ở hai hàng phủ bóng được tăng nhẹ tốc độ.
+Bản dựng lại game Plants vs. Zombies (PvZ) bằng Unity với độ tái hiện cao. Dự án mới hoàn thiện luồng chơi của các màn, chưa dựng lại toàn bộ luồng game của bản gốc. Có bổ sung một số cây, zombie và màn chơi mới do tác giả tự thiết kế; một phần tài nguyên được lấy từ trên mạng.
 
 
 
-## 项目展示
+## Giới thiệu dự án
 
-### 项目视频
+### Video dự án
 
-项目展示视频已上传至B站，欢迎到UP“落拓的狗子”主页查看，部分视频链接如下：
+Video giới thiệu dự án đã được đăng lên Bilibili, mời ghé trang của tác giả “落拓的狗子” để xem. Một số link video:
 
-【戴夫：没想到吧，小推车被我偷走了［自制PVZ］】 https://www.bilibili.com/video/BV1U84y1b7i4/?share_source=copy_web&vd_source=c0fb8fd2ce069eb3b7f57c407f2e3a26
+【Dave: Không ngờ đúng không, xe đẩy bị tôi trộm mất rồi (PVZ tự làm)】 https://www.bilibili.com/video/BV1U84y1b7i4/?share_source=copy_web&vd_source=c0fb8fd2ce069eb3b7f57c407f2e3a26
 
-【新关卡：不亡之地 | 四处飘荡的幽灵、会复活的僵尸】 https://www.bilibili.com/video/BV1C14y1F77b/?share_source=copy_web&vd_source=c0fb8fd2ce069eb3b7f57c407f2e3a26
+【Màn mới: Vùng Đất Bất Tử | Bóng ma lởn vởn khắp nơi, zombie biết hồi sinh】 https://www.bilibili.com/video/BV1C14y1F77b/?share_source=copy_web&vd_source=c0fb8fd2ce069eb3b7f57c407f2e3a26
 
-【新植物：喵喵 | 一秒落泪？你的童年DNA动了吗】 https://www.bilibili.com/video/BV13k4y1e7bL/?share_source=copy_web&vd_source=c0fb8fd2ce069eb3b7f57c407f2e3a26
+【Cây mới: Mèo Miu | Rơi nước mắt trong một giây? DNA tuổi thơ của bạn có rung động không】 https://www.bilibili.com/video/BV13k4y1e7bL/?share_source=copy_web&vd_source=c0fb8fd2ce069eb3b7f57c407f2e3a26
 
-### 项目截图
+### Ảnh chụp màn hình
 
 ![image-20231014152934799](README.assets/image-20231014152934799.png)
 
@@ -25,15 +47,61 @@
 
 
 
-## 快速上手
+## Bắt đầu nhanh
 
-- 下载源代码，使用 Unity 将文件夹作为项目打开。
-    - Unity版本：2021.3.8f1c1
-- 加载游戏场景 Assets/Scenes/GameScene 。
-- 启动项目。
+- Tải mã nguồn, dùng Unity mở thư mục này như một project.
+    - Phiên bản Unity: 6000.5.8f1
+- Mở scene game Assets/Scenes/GameScene .
+- Chạy project.
 
 
 
-## 项目注释
+## Chơi mạng hai người
 
-- 游戏场景中对象 Game Management 具有同名脚本组件，其参数 level 用于设置所加载关卡，目前可使用值为 0 - 4 。
+Vào **PHIÊU LƯU**, bấm nút **CHƠI MẠNG** ở góc trái trên bảng chọn màn. Màn đang chọn sẽ được mang
+sẵn sang sảnh chờ. Một người bấm **TẠO PHÒNG**, đọc địa chỉ hiện trên
+màn hình cho người kia; người kia bấm **THAM GIA**, gõ địa chỉ đó vào rồi bấm **KẾT NỐI**. Khi chủ phòng
+bấm **BẮT ĐẦU**, cả hai máy cùng vào màn.
+
+Hai chế độ:
+
+- **Đồng đội** — hai người cùng phe trồng cây, dùng chung kho nắng và chung dãy thẻ. Zombie vẫn sinh
+  theo trục thời gian trong file JSON của màn.
+- **Đối kháng** — chủ phòng giữ phe Cây, người tham gia chỉ huy phe Zombie. Trục thời gian bị tắt,
+  phe zombie tích **não** (10 mỗi giây, tối đa 500) rồi chọn thẻ zombie và bấm vào hàng để thả quân.
+  Zombie chạm vạch cuối là phe zombie thắng; phe cây trụ hết **4 phút** là phe cây thắng.
+
+### Cách hoạt động
+
+Mô hình **máy chủ giữ quyền quyết định**: máy tạo phòng chạy toàn bộ logic trò chơi, máy khách chỉ gửi
+thao tác lên rồi vẽ lại kết quả nhận về. Nhờ vậy hai máy không thể lệch trạng thái. Truyền tin bằng
+socket TCP tự viết, mỗi gói là một dòng JSON, vị trí và máu zombie đồng bộ 10 lần mỗi giây.
+
+Toàn bộ mã nằm trong `Assets/Resources/Scripts/Net/`:
+
+| Tệp | Việc |
+| --- | --- |
+| `NetSession.cs` | Trạng thái phiên: chế độ, vai trò, các cờ phân quyền |
+| `NetMessage.cs` | Danh sách loại gói tin và cấu trúc gói |
+| `NetTransport.cs` | Socket TCP thô, luồng đọc và luồng ghi riêng |
+| `NetManager.cs` | Bơm gói tin ra luồng chính, giữ kết nối, đo độ trễ |
+| `NetLobbyUI.cs` | Sảnh chờ ở menu chính |
+| `NetGameplay.cs` | Đồng bộ trong màn chơi: cây, nắng, zombie, kết quả |
+| `NetZombieView.cs` | Kéo zombie ở máy khách bám theo vị trí máy chủ |
+| `ZombieCommanderUI.cs` | Thanh thả quân của phe zombie |
+
+Cổng mặc định là **7777**. Hai máy cùng mạng nội bộ thì chơi được ngay; qua Internet thì cần mở cổng
+này trên router hoặc dùng phần mềm tạo mạng ảo.
+
+### Giới hạn hiện tại
+
+- Chỉ hai người mỗi phòng.
+- Mất kết nối giữa trận thì không nối lại được, phải tạo phòng mới.
+- Khối băng của Zombie Tuyết và hiệu ứng đóng băng của màn Sông Băng chỉ là hình ảnh, có thể khác
+  nhau đôi chút giữa hai máy; máu và sống chết vẫn do máy chủ quyết định nên không ảnh hưởng luật chơi.
+
+
+
+## Ghi chú dự án
+
+- Đối tượng Game Management trong scene có component script cùng tên; tham số level của nó dùng để chọn màn chơi sẽ tải, hiện dùng được các giá trị 0–8.

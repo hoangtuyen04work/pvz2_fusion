@@ -4,58 +4,91 @@ using UnityEngine;
 
 public class Zombie : MonoBehaviour
 {
-    public float speed;   //“∆∂ØÀŸ∂»
-    public float eatOffset;   //≥‘÷≤ŒÔŒª÷√∆´“∆£¨æÕ «÷≤ŒÔ‘⁄◊‘º∫∫Û±ﬂ∂‡‘∂ ±æÕ≤ª≥‘¡À
-    public int pos_row;   //Œª”⁄µ⁄º∏––
+    public float speed;   //T·ªëc ƒë·ªô di chuy·ªÉn
+    public float eatOffset;   //ƒê·ªô l·ªách v·ªã tr√≠ ƒÉn c√¢y, t·ª©c l√† c√¢y ·ªü ph√≠a sau m√¨nh bao xa th√¨ kh√¥ng ƒÉn n·ªØa
+    public int pos_row;   //ƒêang ·ªü h√†ng th·ª© m·∫•y
     public ZombieState state = ZombieState.Normal;
-    private Plant parasiticPlant;   //ºƒ…˙◊¥Ã¨œ¬ºƒ…˙◊‘º∫µƒ÷≤ŒÔ
+    private Plant parasiticPlant;   //C√¢y ƒëang k√Ω sinh l√™n m√¨nh khi ·ªü tr·∫°ng th√°i b·ªã k√Ω sinh
 
-    //…˙√¸œ‡πÿ
-    public int bloodVolume;   //—™¡ø
+    //Li√™n quan t·ªõi m√°u
+    public int bloodVolume;   //L∆∞·ª£ng m√°u
     protected int bloodVolumeMax;
-    private bool alive = true;
+    public int BloodVolumeMax => bloodVolumeMax; // Getter cho GameStateCollector
+    protected bool alive = true;
+    public bool IsAlive => alive && bloodVolume > 0;
+    public virtual bool IsDefeatedForEndless => !alive || bloodVolume <= 0;
+    private bool burning;
+    private float burnEndTime;
+    private int burnDamagePerTick;
+    private bool slowed;
+    private float slowEndTime;
+    private float slowMultiplier = 1f;
+    private bool frozen;
+    private float freezeEndTime;
+    private bool hypnotized;
+    private float nextHypnotizedScan;
+    private float nextHypnotizedBite;
+    private Zombie hypnotizedTarget;
 
-    //π•ª˜œ‡πÿ
-    public int attackPower;  //π•ª˜¡¶
-    protected Plant plant;   //µ±«∞À˘π•ª˜÷≤ŒÔµƒPlant◊Èº˛
+    public bool IsHypnotized => hypnotized;
+    public bool IsBurning => burning;
+    public bool IsSlowed => slowed;
+    public bool IsFrozen => frozen;
 
-    protected Animator myAnimator;   //∂Øª≠◊Èº˛
-    protected AudioSource audioSource;  //◊‘…ÌAudioSource◊Èº˛
+    //Li√™n quan t·ªõi t·∫•n c√¥ng
+    public int attackPower;  //S·ª©c t·∫•n c√¥ng
+    protected Plant plant;   //Component Plant c·ªßa c√¢y ƒëang b·ªã t·∫•n c√¥ng
+
+    protected Animator myAnimator;   //Component animation
+    protected AudioSource audioSource;  //Component AudioSource c·ªßa ch√≠nh n√≥
     protected string audioOfBeingAttacked = "Sounds/Zombies/bodyhit";
     private int audioIndex = 1;
 
     static int orderOffset = 0;
 
-    bool sleep = true;   // «∑Ò”–≥ı ºæ≤÷π
+    bool sleep = true;   //C√≥ ƒë·ª©ng y√™n l√∫c ƒë·∫ßu kh√¥ng
+
+    //Hai gi√° tr·ªã ng·∫´u nhi√™n do m√°y ch·ªß quy·∫øt ƒë·ªãnh, ƒë·ªÉ hai m√°y sinh ra zombie gi·ªëng h·ªát nhau
+    [HideInInspector] public float netSpeedScale = 0f;   //H·ªá s·ªë tƒÉng t·ªëc, 0 nghƒ©a l√† t·ª± b·ªëc ng·∫´u nhi√™n
+    [HideInInspector] public float netSleepTime = -1f;   //Th·ªùi gian ƒë·ª©ng y√™n l√∫c ƒë·∫ßu, √¢m nghƒ©a l√† t·ª± b·ªëc
 
     protected virtual void Awake()
     {
-        //ªÒ»°◊Èº˛
+        //L·∫•y component
         myAnimator = gameObject.GetComponent<Animator>();
         audioSource = gameObject.GetComponent<AudioSource>();
+        if (GetComponent<StatusEffectIndicator>() == null) gameObject.AddComponent<StatusEffectIndicator>();
     }
 
     // Start is called before the first frame update
     protected virtual void Start()
     {
-        //Ω© ¨≥ı ºÀÊª˙æ≤÷π“ª∂Œ ±º‰£¨ πΩ© ¨––∂Ø≤ªƒ«√¥’˚∆ÎªÆ“ª
+        //Zombie ƒë·ª©ng y√™n ng·∫´u nhi√™n m·ªôt l√∫c l√∫c ƒë·∫ßu, ƒë·ªÉ ch√∫ng kh√¥ng di chuy·ªÉn ƒë·ªÅu tƒÉm t·∫Øp
         if (sleep == true)
         {
             gameObject.SetActive(false);
-            Invoke("activate", Random.Range(0.0f, 5.0f));
+            Invoke("activate", netSleepTime >= 0f ? netSleepTime : Random.Range(0.0f, 5.0f));
         }
 
-        //ÃÌº”ÀÊª˙ÀŸ∂»‘ˆ∑˘
-        float increase = Random.Range(1.0f, 1.5f);
+        //Th√™m m·ª©c tƒÉng t·ªëc ƒë·ªô ng·∫´u nhi√™n, ch∆°i m·∫°ng th√¨ l·∫•y ƒë√∫ng h·ªá s·ªë m√°y ch·ªß g·ª≠i sang
+        float increase = netSpeedScale > 0f ? netSpeedScale : Random.Range(1.0f, 1.5f);
         speed *= increase;
         myAnimator.speed *= increase;
 
-        bloodVolumeMax = bloodVolume;
+        if (bloodVolumeMax <= 0 || bloodVolume > bloodVolumeMax)
+            bloodVolumeMax = bloodVolume;
     }
 
     // Update is called once per frame
     protected virtual void Update()
     {
+        UpdateTimedStatusEffects();
+
+        //M√°y kh√°ch kh√¥ng t·ª± cho zombie ƒëi, v·ªã tr√≠ do NetZombieView k√©o theo m√°y ch·ªß
+        if (!NetSession.IsAuthority) return;
+
+        if (UpdateHypnotizedBehavior()) return;
+
         if (myAnimator.GetBool("Walk") == true)
         {
             transform.Translate(-speed * Time.deltaTime, 0, 0);
@@ -64,8 +97,13 @@ public class Zombie : MonoBehaviour
 
     protected virtual void OnTriggerEnter2D(Collider2D collision)
     {
+        if (hypnotized) return;
+        Plant candidate = collision.GetComponent<Plant>();
+        ImportedPlant importedCandidate = candidate != null ? candidate.GetComponent<ImportedPlant>() : null;
         if (collision.tag == "Plant" 
-            && collision.GetComponent<Plant>().row == pos_row 
+            && candidate != null
+            && (importedCandidate == null || importedCandidate.CanBeEaten)
+            && candidate.row == pos_row
             && collision.transform.position.x < transform.position.x + eatOffset
             && myAnimator.GetBool("Attack") == false)
         {
@@ -76,12 +114,15 @@ public class Zombie : MonoBehaviour
         }
         else if (collision.tag == "GameOverLine")
         {
+            //Ch·ªâ m√°y ch·ªß ƒë∆∞·ª£c tuy√™n b·ªë thua, m√°y kh√°ch ch·ªù g√≥i tin k·∫øt th√∫c
+            if (!NetSession.IsAuthority) return;
             GameObject.Find("Game Management").GetComponent<GameManagement>().gameOver();
         }
     }
 
     protected virtual void OnTriggerExit2D(Collider2D collision)
     {
+        if (hypnotized) return;
         if (collision.tag == "Plant" && collision.GetComponent<Plant>().row == pos_row)
         {
             myAnimator.SetBool("Attack", false);
@@ -96,41 +137,88 @@ public class Zombie : MonoBehaviour
 
     public virtual void attack()
     {
-        //÷≤ŒÔ±ªπ•ª˜
-        if (plant != null)
+        //M√°y kh√°ch ch·ªâ di·ªÖn ho·∫°t ·∫£nh g·∫∑m, s√°t th∆∞∆°ng do m√°y ch·ªß t√≠nh
+        if (!NetSession.IsAuthority || hypnotized) return;
+
+        //C√¢y b·ªã t·∫•n c√¥ng
+        Plant target = plant;
+        if (target != null)
         {
-            plant.beAttacked(attackPower, "beEated");
+            ImportedPlant imported = target.GetComponent<ImportedPlant>();
+            if (imported != null && imported.OnBitten(this)) return;
+            target.beAttacked(attackPower, "beEated");
+            if (target != null)
+            {
+                FireWallNutFusion fusion = target.GetComponent<FireWallNutFusion>();
+                if (fusion != null) fusion.OnBitten(this);
+                IceWallNut iceWallNut = target.GetComponent<IceWallNut>();
+                if (iceWallNut != null) iceWallNut.OnBitten(this);
+            }
         }
     }
 
     protected virtual void die()
     {
-        //≈ˆ◊≤ÃÂ ß–ß
+        //M√°y ch·ªß b√°o cho m√°y kh√°ch tr∆∞·ªõc khi x√°c bi·∫øn m·∫•t
+        NetGameplay.NotifyZombieDead(this, false);
+
+        //V√¥ hi·ªáu collider
         gameObject.GetComponent<Collider2D>().enabled = false;
-        //»´≥°Ω© ¨ ˝ºı“ª
+        //Gi·∫£m m·ªôt zombie tr√™n to√†n m√†n
         GameObject.Find("Zombie Management").GetComponent<ZombieManagement>().minusZombieNumAll();
         alive = false;
-        //“˛≤ÿÕ∑
+        //·∫®n ƒë·∫ßu
         hideHead();
-        //∂Øª≠«–ªª
+        //Chuy·ªÉn animation
         myAnimator.SetBool("Walk", false);
         myAnimator.SetBool("Die", true);
     }
 
-    //”…”⁄∏˜∏ˆΩ© ¨Õ∑≤ø∑÷ø…ƒ‹≤ªÕ¨£¨π ∏√∫Ø ˝”…◊”¿‡÷ÿ–¥
+    //V√¨ ph·∫ßn ƒë·∫ßu c·ªßa m·ªói zombie c√≥ th·ªÉ kh√°c nhau n√™n h√†m n√†y do l·ªõp con ghi ƒë√®
     protected virtual void hideHead()
     {
 
     }
 
-    //±ªπ•ª˜
+    //B·ªã t·∫•n c√¥ng
     public virtual void beAttacked(int hurt)
     {
+        //Ch∆°i m·∫°ng: m√°u do m√°y ch·ªß gi·ªØ, m√°y kh√°ch nh·∫≠n s·ªë m√°u qua g√≥i ƒë·ªìng b·ªô
+        if (!NetSession.IsAuthority) return;
+
+        hurt = ModifyDamageForEndless(hurt);
         bloodVolume -= hurt;
         if (bloodVolume <= 0 && alive == true)
         {
             die();
         }
+    }
+
+    protected int ModifyDamageForEndless(int damage)
+    {
+        EndlessEliteRuntime elite = GetComponent<EndlessEliteRuntime>();
+        return elite != null ? elite.ModifyIncomingDamage(damage) : damage;
+    }
+
+    public void SetBloodVolumeMaxForEndless(int maxHealth)
+    {
+        if (!EndlessRun.Active) return;
+        bloodVolumeMax = Mathf.Max(1, maxHealth);
+        if (bloodVolume > bloodVolumeMax) bloodVolume = bloodVolumeMax;
+    }
+
+    public void Heal(int value)
+    {
+        if (!alive || value <= 0) return;
+        bloodVolume = Mathf.Min(bloodVolumeMax, bloodVolume + value);
+    }
+
+    public void ApplyEndlessSpeedFactor(float factor)
+    {
+        if (!EndlessRun.Active) return;
+        factor = Mathf.Clamp(factor, 0.1f, 3f);
+        speed *= factor;
+        if (myAnimator != null) myAnimator.speed *= factor;
     }
 
     public virtual void playAudioOfBeingAttacked()
@@ -142,22 +230,254 @@ public class Zombie : MonoBehaviour
         else audioIndex = 1;
     }
 
-    //±ª◊∆…À£¨±ªª—Êπ•ª˜ ±µ˜”√
+    //B·ªã thi√™u, g·ªçi khi tr√∫ng ƒë√≤n l·ª≠a
     public virtual void beBurned()
     {
+        Thaw();
         beAttacked(10);
+    }
+
+    protected void UpdateTimedStatusEffects()
+    {
+        if (frozen && Time.time >= freezeEndTime)
+        {
+            float previousMultiplier = slowMultiplier;
+            slowMultiplier = 0.5f;
+            if (previousMultiplier > 0f)
+            {
+                speed = speed / previousMultiplier * slowMultiplier;
+                if (myAnimator != null) myAnimator.speed = myAnimator.speed / previousMultiplier * slowMultiplier;
+            }
+            frozen = false;
+            RefreshStatusTint();
+        }
+        if (slowed && Time.time >= slowEndTime) ClearSlow();
+    }
+
+    public void applyBurn(int damagePerTick, float duration)
+    {
+        burnDamagePerTick = Mathf.Max(burnDamagePerTick, damagePerTick);
+        burnEndTime = Mathf.Max(burnEndTime, Time.time + duration);
+        if (!burning)
+        {
+            burning = true;
+            InvokeRepeating("burnTick", 0f, 1f);
+            setBurnColor(true);
+        }
+    }
+
+    public void ApplySlow(float multiplier, float duration)
+    {
+        multiplier = Mathf.Clamp(multiplier, 0.1f, 1f);
+        if (!slowed)
+        {
+            slowed = true;
+            slowMultiplier = multiplier;
+            speed *= slowMultiplier;
+            if (myAnimator != null) myAnimator.speed *= slowMultiplier;
+        }
+        slowEndTime = Mathf.Max(slowEndTime, Time.time + duration);
+        state = ZombieState.Cold;
+        RefreshStatusTint();
+    }
+
+    public void ApplyButterStun(float duration)
+    {
+        const float immobilizedMultiplier = 0.1f;
+        if (!slowed)
+        {
+            slowed = true;
+            slowMultiplier = immobilizedMultiplier;
+            speed *= slowMultiplier;
+            if (myAnimator != null) myAnimator.speed *= slowMultiplier;
+        }
+        else if (slowMultiplier > immobilizedMultiplier)
+        {
+            speed = speed / slowMultiplier * immobilizedMultiplier;
+            if (myAnimator != null) myAnimator.speed = myAnimator.speed / slowMultiplier * immobilizedMultiplier;
+            slowMultiplier = immobilizedMultiplier;
+        }
+        slowEndTime = Mathf.Max(slowEndTime, Time.time + Mathf.Max(0f, duration));
+        // Butter immobilizes without applying the blue cold/freeze tint. The
+        // attached butter splat is the original game's status indicator.
+    }
+
+    public void ApplyFreeze(float immobilizeDuration, float chilledDuration)
+    {
+        if (!alive || (immobilizeDuration <= 0f && chilledDuration <= 0f)) return;
+        if (slowed) ClearSlow();
+        slowed = true;
+        frozen = true;
+        slowMultiplier = 0.01f;
+        speed *= slowMultiplier;
+        if (myAnimator != null) myAnimator.speed *= slowMultiplier;
+        freezeEndTime = Time.time + Mathf.Max(0f, immobilizeDuration);
+        slowEndTime = freezeEndTime + Mathf.Max(0f, chilledDuration);
+        state = ZombieState.Cold;
+        RefreshStatusTint();
+    }
+
+    public void Thaw()
+    {
+        if (slowed) ClearSlow();
+        frozen = false;
+        RefreshStatusTint();
+    }
+
+    private void ClearSlow()
+    {
+        if (!slowed) return;
+        speed /= slowMultiplier;
+        if (myAnimator != null) myAnimator.speed /= slowMultiplier;
+        slowed = false;
+        slowMultiplier = 1f;
+        if (state == ZombieState.Cold) state = hypnotized ? ZombieState.Hypnotized : ZombieState.Normal;
+        RefreshStatusTint();
+    }
+
+    public void Hypnotize()
+    {
+        if (hypnotized || !alive) return;
+        hypnotized = true;
+        plant = null;
+        state = ZombieState.Hypnotized;
+        nextHypnotizedBite = Time.time;
+        Vector3 scale = transform.localScale;
+        scale.x = -Mathf.Abs(scale.x);
+        transform.localScale = scale;
+        RefreshStatusTint();
+        OnHypnotized();
+    }
+
+    protected virtual void OnHypnotized()
+    {
+        SetAnimatorBoolIfPresent("Attack", false);
+        SetAnimatorBoolIfPresent("Walk", true);
+    }
+
+    protected bool UpdateHypnotizedBehavior()
+    {
+        if (!hypnotized) return false;
+        if (!NetSession.IsAuthority) return true;
+
+        if (Time.time >= nextHypnotizedScan)
+        {
+            nextHypnotizedScan = Time.time + 0.15f;
+            hypnotizedTarget = null;
+            float nearest = float.MaxValue;
+            foreach (Zombie candidate in FindObjectsByType<Zombie>())
+            {
+                if (candidate == this || candidate.IsHypnotized || !candidate.alive ||
+                    !candidate.gameObject.activeInHierarchy || candidate.pos_row != pos_row) continue;
+                float distance = candidate.transform.position.x - transform.position.x;
+                if (distance >= -0.15f && distance < nearest)
+                {
+                    nearest = distance;
+                    hypnotizedTarget = candidate;
+                }
+            }
+        }
+
+        if (hypnotizedTarget != null && hypnotizedTarget.alive &&
+            Mathf.Abs(hypnotizedTarget.transform.position.x-transform.position.x) <= 0.62f)
+        {
+            SetAnimatorBoolIfPresent("Walk", false);
+            SetAnimatorBoolIfPresent("Attack", true);
+            if (Time.time >= nextHypnotizedBite)
+            {
+                hypnotizedTarget.playAudioOfBeingAttacked();
+                hypnotizedTarget.beAttacked(attackPower);
+                nextHypnotizedBite = Time.time + 1f;
+            }
+        }
+        else
+        {
+            SetAnimatorBoolIfPresent("Attack", false);
+            SetAnimatorBoolIfPresent("Walk", true);
+            transform.Translate(speed * Time.deltaTime, 0f, 0f, Space.World);
+        }
+
+        if (transform.position.x > 7f)
+        {
+            GameObject manager = GameObject.Find("Zombie Management");
+            if (manager != null) manager.GetComponent<ZombieManagement>()?.minusZombieNumAll();
+            Destroy(gameObject);
+        }
+        return true;
+    }
+
+    private void SetAnimatorBoolIfPresent(string parameter, bool value)
+    {
+        if (myAnimator == null) return;
+        foreach (AnimatorControllerParameter item in myAnimator.parameters)
+            if (item.type == AnimatorControllerParameterType.Bool && item.name == parameter)
+            {
+                myAnimator.SetBool(parameter, value);
+                return;
+            }
+    }
+
+    private void burnTick()
+    {
+        if (!alive || Time.time >= burnEndTime)
+        {
+            burning = false;
+            CancelInvoke("burnTick");
+            setBurnColor(false);
+            return;
+        }
+        beAttacked(burnDamagePerTick);
+    }
+
+    private void setBurnColor(bool value)
+    {
+        RefreshStatusTint();
+    }
+
+    // Freeze and slow use the classic blue PvZ-style tint. Keep this central so
+    // thawing, burning and hypnosis cannot leave stale colours on child sprites.
+    private void RefreshStatusTint()
+    {
+        Color tint = frozen ? new Color(0.38f, 0.68f, 1f) :
+            slowed ? new Color(0.55f, 0.78f, 1f) :
+            burning ? new Color(1f, 0.48f, 0.16f) :
+            hypnotized ? new Color(0.72f, 1f, 0.72f) : Color.white;
+        foreach (SpriteRenderer renderer in GetComponentsInChildren<SpriteRenderer>(true))
+        {
+            Color color = renderer.color;
+            renderer.color = new Color(tint.r, tint.g, tint.b, color.a);
+        }
     }
 
     public virtual void beSquashed()
     {
+        //M√°y kh√°ch ch·ªù m√°y ch·ªß b√°o, kh√¥ng t·ª± nghi·ªÅn ch·∫øt zombie
+        if (!NetSession.IsAuthority) return;
+
         bloodVolume -= 1800;
         if(bloodVolume <= 0)
         {
-            //»´≥°Ω© ¨ ˝ºı“ª
+            NetGameplay.NotifyZombieDead(this, true);
+            //Gi·∫£m m·ªôt zombie tr√™n to√†n m√†n
             GameObject.Find("Zombie Management").GetComponent<ZombieManagement>().minusZombieNumAll();
-            //Ω© ¨œ˚ ß
+            //Zombie bi·∫øn m·∫•t
             Destroy(gameObject);
         }
+    }
+
+    //M√°y ch·ªß b√°o zombie n√†y ƒë√£ ch·∫øt, m√°y kh√°ch di·ªÖn l·∫°i y h·ªát
+    public void applyNetworkDeath(bool squashed)
+    {
+        if (squashed)
+        {
+            GameObject.Find("Zombie Management").GetComponent<ZombieManagement>().minusZombieNumAll();
+            Destroy(gameObject);
+            return;
+        }
+
+        if (!alive) return;
+        bloodVolume = 0;
+        die();
     }
 
     public void beParasiticed(Plant parasiticPlant)
@@ -191,13 +511,13 @@ public class Zombie : MonoBehaviour
         sleep = false;
     }
 
-    //…Ë÷√À˘‘⁄––£¨≤¢ÀÊ∫Û“¿æ›À˘‘⁄––…Ë÷√œ‘ æÀ≥–Ú
+    //ƒê·∫∑t h√†ng ƒëang ƒë·ª©ng, r·ªìi d·ª±a v√†o h√†ng ƒë√≥ ƒë·ªÉ ƒë·∫∑t th·ª© t·ª± hi·ªÉn th·ªã
     public virtual void setPosRow(int pos)
     {
-        //…Ë÷√À˘‘⁄––
+        //ƒê·∫∑t h√†ng ƒëang ƒë·ª©ng
         pos_row = pos;
 
-        //…Ë÷√À≥–ÚÕº≤„º∞œ‘ æÀ≥–Ú
+        //ƒê·∫∑t sorting layer v√† th·ª© t·ª± hi·ªÉn th·ªã
         SpriteRenderer[] spriteRenderers = gameObject.GetComponentsInChildren<SpriteRenderer>(true);
         foreach (SpriteRenderer spriteRenderer in spriteRenderers)
         {
@@ -210,7 +530,7 @@ public class Zombie : MonoBehaviour
         orderOffset++;
     }
 
-    //≤•∑≈Ω© ¨µπœ¬µƒ“Ù–ß
+    //Ph√°t √¢m thanh zombie ng√£ xu·ªëng
     public virtual void fallDown()
     {
         audioSource.PlayOneShot(
@@ -218,7 +538,7 @@ public class Zombie : MonoBehaviour
         );
     }
 
-    //≤•∑≈Ω© ¨ø–“ßµƒ“Ù–ß
+    //Ph√°t √¢m thanh zombie g·∫∑m
     public virtual void PlayEatAudio()
     {
         audioSource.PlayOneShot(
@@ -226,7 +546,7 @@ public class Zombie : MonoBehaviour
         );
     }
 
-    //Ω© ¨µπœ¬∫Û ¨ÃÂœ˚ ß
+    //X√°c zombie bi·∫øn m·∫•t sau khi ng√£ xu·ªëng
     public void disappear()
     {
         Destroy(gameObject);
@@ -234,4 +554,4 @@ public class Zombie : MonoBehaviour
 
 }
 
-public enum ZombieState { Normal, Cold, Parasiticed }
+public enum ZombieState { Normal, Cold, Parasiticed, Hypnotized }

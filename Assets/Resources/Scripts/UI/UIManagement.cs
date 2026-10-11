@@ -11,39 +11,171 @@ public class UIManagement : MonoBehaviour
     public GameObject shovelBank;
     public Text levelNameText;
 
-    public GameObject cardGroup;   //ø®≤€»∫◊È
+    public GameObject cardGroup;   //Nh√≥m th·∫ª c√¢y
 
     // Start is called before the first frame update
     public void initUI()
     {
-        //º”‘ÿπÿø®√˚◊÷
+        //Thi·∫øt l·∫≠p tr∆∞·ªõc Start c·ªßa SunNumber ƒë·ªÉ m√†n ƒë·∫∑c bi·ªát c√≥ th·ªÉ ƒë·ªïi l∆∞·ª£ng n·∫Øng ƒë·∫ßu.
+        GameObject sunObject = GameObject.Find("Sun Text");
+        Text sunText = sunObject.GetComponent<Text>();
+        PlaceSunCounterAboveSeedBank(sunObject);
+        sunObject.SetActive(true);
+        sunText.enabled = true;
+        if (sunText.font == null) sunText.font = Resources.Load<Font>("Fonts/Baloo2");
+        sunText.color = new Color(0.18f, 0.09f, 0.02f, 1f);
+        sunText.fontStyle = FontStyle.Bold;
+        sunText.fontSize = 20;
+        sunText.alignment = TextAnchor.MiddleCenter;
+        sunText.horizontalOverflow = HorizontalWrapMode.Overflow;
+        sunText.verticalOverflow = VerticalWrapMode.Overflow;
+        sunText.raycastTarget = false;
+        Outline sunOutline = sunObject.GetComponent<Outline>();
+        if (sunOutline == null) sunOutline = sunObject.AddComponent<Outline>();
+        sunOutline.effectColor = new Color(1f, 0.91f, 0.50f, 0.9f);
+        sunOutline.effectDistance = new Vector2(1f, -1f);
+
+        //T·∫£i t√™n m√†n ch∆°i
         levelNameText.text = GameManagement.levelData.levelName;
 
-        //º”‘ÿø®≤€»∫◊È£¨≤¢…Ë÷√œ‡πÿUIµƒ¥Û–°Œª÷√
-        List<string> plantCards = GameManagement.levelData.plantCards;
+        //T·∫£i nh√≥m th·∫ª c√¢y v√† ƒë·∫∑t k√≠ch th∆∞·ªõc, v·ªã tr√≠ cho UI li√™n quan
+        RebuildCardGroup(GameManagement.levelData.plantCards, true);
+    }
+
+    public void RefreshEndlessDeck()
+    {
+        if (!EndlessRun.Active || GameManagement.levelData == null) return;
+        GameManagement.levelData.plantCards = new List<string>(GameSession.SelectedPlants);
+        RebuildCardGroup(GameManagement.levelData.plantCards, false);
+    }
+
+    private void RebuildCardGroup(List<string> plantCards, bool initializeSun)
+    {
         List<Card> cards = new List<Card>();
+        for (int i = cardGroup.transform.childCount - 1; i >= 0; i--)
+        {
+            GameObject oldCard = cardGroup.transform.GetChild(i).gameObject;
+            oldCard.SetActive(false);
+            Destroy(oldCard);
+        }
+
+        HorizontalLayoutGroup layout = cardGroup.GetComponent<HorizontalLayoutGroup>();
+        if (layout == null) layout = cardGroup.AddComponent<HorizontalLayoutGroup>();
+        layout.spacing = 2f;
+        layout.padding = new RectOffset(0, 0, 0, 0);
+        layout.childAlignment = TextAnchor.UpperLeft;
+        layout.childControlWidth = layout.childControlHeight = false;
+        layout.childForceExpandWidth = layout.childForceExpandHeight = false;
         foreach (string plant in plantCards)
         {
-            cards.Add((
-                    Instantiate(
-                        Resources.Load<Object>("Prefabs/UI/Card/" + plant + "Card"),
-                        cardGroup.transform
-                    ) as GameObject
-                ).GetComponent<Card>());
+            if (!PlantLoadoutCatalog.TryGet(plant, out var entry))
+            {
+                Debug.LogError("No seed packet definition found for plant: " + plant, this);
+                continue;
+            }
+            Card card = SeedPacketFactory.CreateGameplayCard(entry, cardGroup.transform);
+            if (GameManagement.levelData.isTestMode) { card.sunNeeded = 0; card.coolingTime = 0f; }
+            cards.Add(card);
         }
-        GameObject.Find("Sun Text").GetComponent<SunNumber>().setCardGroup(cards);
-        float cardGroupWidth = plantCards.Count * 43 - 1;
+        GameObject sunObject = GameObject.Find("Sun Text");
+        SunNumber sunNumber = sunObject != null ? sunObject.GetComponent<SunNumber>() : null;
+        if (sunNumber != null)
+        {
+            sunNumber.SetForegroundText(null);
+            if (initializeSun) sunNumber.Initialize(GameManagement.levelData.initialSun, cards);
+            else sunNumber.setCardGroup(cards);
+        }
+        float cardGroupWidth = cards.Count == 0 ? 0f : cards.Count * SeedPacketFactory.GameplaySize.x + (cards.Count - 1) * layout.spacing;
         cardGroup.GetComponent<RectTransform>()
             .SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, cardGroupWidth);
+        cardGroup.GetComponent<RectTransform>()
+            .SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, SeedPacketFactory.GameplaySize.y);
         seedBank.GetComponent<RectTransform>()
             .SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, cardGroupWidth + 78);
         shovelBank.GetComponent<RectTransform>()
             .SetInsetAndSizeFromParentEdge(RectTransform.Edge.Left, cardGroupWidth + 108, 60);
+        CreatePlantGloveButton(cardGroupWidth);
+        // Render the total after the dynamically-created cards so it cannot be hidden.
+        if (sunObject != null) sunObject.transform.SetAsLastSibling();
+        EndlessModifierSystem.ApplyToExistingCards();
+    }
+
+    private void CreatePlantGloveButton(float cardGroupWidth)
+    {
+        Transform parent = shovelBank.transform.parent;
+        Transform existing = parent.Find("Glove Bank");
+        GameObject gloveBank;
+        if (existing != null)
+        {
+            gloveBank = existing.gameObject;
+        }
+        else
+        {
+            gloveBank = new GameObject("Glove Bank", typeof(RectTransform), typeof(Image), typeof(Button));
+            gloveBank.transform.SetParent(parent, false);
+            Image background = gloveBank.GetComponent<Image>();
+            background.sprite = Resources.Load<Sprite>("Sprites/UI/ShovelBank");
+            background.type = Image.Type.Sliced;
+
+            GameObject iconObject = new GameObject("Glove Icon", typeof(RectTransform), typeof(Image));
+            iconObject.transform.SetParent(gloveBank.transform, false);
+            Image icon = iconObject.GetComponent<Image>();
+            icon.sprite = PlantGlove.LoadIcon();
+            icon.preserveAspect = true;
+            icon.raycastTarget = false;
+            RectTransform iconRect = icon.GetComponent<RectTransform>();
+            iconRect.anchorMin = new Vector2(0.12f, 0.10f);
+            iconRect.anchorMax = new Vector2(0.88f, 0.90f);
+            iconRect.offsetMin = Vector2.zero;
+            iconRect.offsetMax = Vector2.zero;
+        }
+
+        RectTransform rect = gloveBank.GetComponent<RectTransform>();
+        rect.anchorMin = rect.anchorMax = new Vector2(0f, 1f);
+        rect.pivot = new Vector2(0f, 1f);
+        rect.anchoredPosition = new Vector2(cardGroupWidth + 174f, 0f);
+        rect.sizeDelta = new Vector2(60f, 60f);
+
+        PlantGlove glove = GetComponent<PlantGlove>();
+        if (glove == null) glove = gameObject.AddComponent<PlantGlove>();
+        Image gloveImage = gloveBank.GetComponent<Image>();
+        glove.Configure(gloveImage);
+        Button button = gloveBank.GetComponent<Button>();
+        button.onClick.RemoveAllListeners();
+        button.onClick.AddListener(glove.SelectGlove);
+    }
+
+    private void PlaceSunCounterAboveSeedBank(GameObject sunObject)
+    {
+        Transform overlayParent = seedBank.transform.parent;
+        Transform obsoleteCounter = overlayParent.Find("Sun Counter Foreground");
+        if (obsoleteCounter != null)
+        {
+            obsoleteCounter.gameObject.SetActive(false);
+            Destroy(obsoleteCounter.gameObject);
+        }
+
+        RectTransform bankRect = seedBank.GetComponent<RectTransform>();
+        RectTransform rect = sunObject.GetComponent<RectTransform>();
+        rect.SetParent(overlayParent, false);
+        rect.anchorMin = rect.anchorMax = new Vector2(0f, 1f);
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.anchoredPosition = bankRect.anchoredPosition + new Vector2(34f, -62.5f);
+        rect.sizeDelta = new Vector2(62f, 23f);
+        rect.SetAsLastSibling();
+
+        Text text = sunObject.GetComponent<Text>();
+        if (text.font == null) text.font = Resources.Load<Font>("Fonts/Baloo2");
+        text.maskable = false;
+        text.canvasRenderer.SetAlpha(1f);
+        text.horizontalOverflow = HorizontalWrapMode.Overflow;
+        text.verticalOverflow = VerticalWrapMode.Overflow;
+        text.SetAllDirty();
     }
 
     public void appear()
     {
-        //ø®≤€»∫◊È±æŒ™≤ªªÓ‘æ£¨“‘±‹√‚æÁ«È∆⁄º‰ø®≤€¿‰»¥ºı…Ÿ
+        //Nh√≥m th·∫ª c√¢y v·ªën ƒë·ªÉ inactive, tr√°nh vi·ªác th·∫ª h·ªìi chi√™u trong l√∫c ƒëang ch·∫°y c·ªët truy·ªán
         cardGroup.SetActive(true);
 
         topMotionPanel.GetComponent<MotionPanel>().startMove();

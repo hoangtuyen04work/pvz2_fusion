@@ -1,20 +1,21 @@
-using System.Collections;
+Ôªøusing System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class StraightBullet : MonoBehaviour
 {
-    public float speed = 4;   //◊”µØÀŸ∂»
-    public int hurt;  //◊”µØ…À∫¶
+    public float speed = 4;   //T·ªëc ƒë·ªô ƒë·∫°n
+    public int hurt;  //S√°t th∆∞∆°ng ƒë·∫°n
     public Sprite boomSprite;
 
-    protected bool boomState = false;  //◊”µØ «∑Ò“—±¨’®
+    protected bool boomState = false;  //ƒê·∫°n ƒë√£ n·ªï ch∆∞a
     protected int row;
+    public int Row => row;
 
     // Update is called once per frame
     void Update()
     {
-        if (boomState == false)  //√ª”–’®ø™£¨‘ÚœÚ«∞∑…
+        if (boomState == false)  //Ch∆∞a n·ªï th√¨ bay ti·∫øp v·ªÅ ph√≠a tr∆∞·ªõc
         {
             transform.Translate(speed * Time.deltaTime, 0, 0);
         }
@@ -22,10 +23,11 @@ public class StraightBullet : MonoBehaviour
 
     protected virtual void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.tag == "Zombie" && boomState == false && row == collision.GetComponent<Zombie>().pos_row)
+        Zombie zombie = collision.GetComponent<Zombie>();
+        if (collision.tag == "Zombie" && zombie != null && !zombie.IsHypnotized && boomState == false && row == zombie.pos_row)
         {
             boom();
-            attack(collision.GetComponent<Zombie>());
+            attack(zombie);
         }
         else if (collision.tag == "BulletDisappearLine")
         {
@@ -37,16 +39,16 @@ public class StraightBullet : MonoBehaviour
     {
         boomState = true;
 
-        //«–ªª’®ø™Õº∆¨
+        //ƒê·ªïi sang ·∫£nh n·ªï
         gameObject.GetComponent<SpriteRenderer>().sprite = boomSprite;
         Invoke("disappear", 0.1f);
     }
 
     protected virtual void attack(Zombie target)
     {
-        //≤•∑≈“Ù–ß
+        //Ph√°t √¢m thanh
         target.playAudioOfBeingAttacked();
-        //Ω© ¨±ªπ•ª˜
+        //Zombie b·ªã t·∫•n c√¥ng
         target.beAttacked(hurt);
     }
 

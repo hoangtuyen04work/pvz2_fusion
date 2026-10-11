@@ -1,20 +1,20 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.U2D.Animation;
 
 public class ChineseZombie : Zombie
 {
-    public bool isCaptain = false;   //ÊÇ·ñÎª¶Ó³¤
-    public ChineseZombie prior;   //¶ÓÖĞÇ°Ò»¸ö½©Ê¬
-    public ChineseZombie next;    //¶ÓÖĞºóÒ»¸ö½©Ê¬
+    public bool isCaptain = false;   //CÃ³ pháº£i Ä‘á»™i trÆ°á»Ÿng khÃ´ng
+    public ChineseZombie prior;   //Zombie phÃ­a trÆ°á»›c trong Ä‘á»™i
+    public ChineseZombie next;    //Zombie phÃ­a sau trong Ä‘á»™i
 
-    bool isAttacking = false;   //ÊÇ·ñÕıÔÚ³Ô£¬ÓÃÓÚ·ûÂäÊ±»»¶¯»­
+    bool isAttacking = false;   //CÃ³ Ä‘ang Äƒn khÃ´ng, dÃ¹ng Ä‘á»ƒ Ä‘á»•i animation khi lÃ¡ bÃ¹a rÆ¡i
 
-    //ÖØĞ´Startº¯Êı£¬²»¸³ÓèËæ»úËÙ¶ÈÔö·ù
+    //Ghi Ä‘Ã¨ hÃ m Start, khÃ´ng cá»™ng thÃªm tá»‘c Ä‘á»™ ngáº«u nhiÃªn
     protected override void Start()
     {
-        //Ò»¶¨¸ÅÂÊÔÚÒ»¶ÎÊ±¼äºó±©×ß
+        //CÃ³ xÃ¡c suáº¥t phÃ¡t cuá»“ng sau má»™t khoáº£ng thá»i gian
         if(Random.Range(0.0f, 10.0f) < 4.0f)
         {
             Invoke("paperDisappear", Random.Range(15.0f, 30.0f));
@@ -27,14 +27,14 @@ public class ChineseZombie : Zombie
         {
             myAnimator.SetBool("Walk", false);
             myAnimator.SetBool("Attack", true);
-            //²»ÊÇ¶Ó³¤£¬ÉıÎª¶Ó³¤
+            //KhÃ´ng pháº£i Ä‘á»™i trÆ°á»Ÿng thÃ¬ thÄƒng lÃªn lÃ m Ä‘á»™i trÆ°á»Ÿng
             if(!isCaptain)
             {
                 isCaptain = true;
                 prior.next = null;
                 prior = null;
             }
-            //¶Ó³¤¿ªÊ¼³Ô£¬¶ÓÔ±¶¼²»Ç°½ø
+            //Äá»™i trÆ°á»Ÿng báº¯t Ä‘áº§u Äƒn, cáº£ Ä‘á»™i dá»«ng tiáº¿n
             stopFollower();
             plant = collision.GetComponent<Plant>();
         }
@@ -50,14 +50,14 @@ public class ChineseZombie : Zombie
         {
             myAnimator.SetBool("Attack", false);
             myAnimator.SetBool("Walk", true);
-            //¶Ó³¤¿ªÊ¼Ç°½ø£¬¶ÓÔ±¶¼Ç°½ø
+            //Äá»™i trÆ°á»Ÿng báº¯t Ä‘áº§u tiáº¿n, cáº£ Ä‘á»™i cÃ¹ng tiáº¿n
             if (isCaptain) startFollower();
         }
     }
 
     private void paperDisappear()
     {
-        //ÇĞ»»¶¯»­
+        //Chuyá»ƒn animation
         if(myAnimator.GetBool("Attack"))
         {
             isAttacking = true;
@@ -72,10 +72,10 @@ public class ChineseZombie : Zombie
 
     private void mad()
     {
-        //·ûÏûÊ§
+        //LÃ¡ bÃ¹a biáº¿n máº¥t
         transform.Find("paper").gameObject.SetActive(false);
 
-        //ÇĞ»»Í·ĞÎÌ¬
+        //Äá»•i hÃ¬nh dáº¡ng Ä‘áº§u
         transform.Find("head").GetComponent<SpriteResolver>()
             .SetCategoryAndLabel("Head", "Mad");
 
@@ -83,21 +83,21 @@ public class ChineseZombie : Zombie
             Resources.Load<AudioClip>("Sounds/Zombies/zombie_angry")
         );
 
-        //»»»Ø¶¯»­
+        //Äá»•i animation trá»Ÿ láº¡i
         if (!isAttacking)
         {
             myAnimator.SetBool("Walk", true);
         }
         myAnimator.SetBool("Mad", false);
 
-        //ĞĞ¶¯¼ÓËÙ
-        float randAmp = Random.Range(1.5f, 2.0f);  //Ëæ»úÔö·ù
+        //TÄƒng tá»‘c di chuyá»ƒn
+        float randAmp = Random.Range(1.5f, 2.0f);  //Má»©c tÄƒng ngáº«u nhiÃªn
         speed *= randAmp;
         myAnimator.speed *= randAmp;
 
         attackPower *= 2;
 
-        //±©×ßÕß×Ô¼º³É¶Ó
+        //Káº» phÃ¡t cuá»“ng tá»± tÃ¡ch thÃ nh Ä‘á»™i riÃªng
         isCaptain = true;
         startFollower();
         if (prior != null) prior.next = null;
@@ -124,7 +124,7 @@ public class ChineseZombie : Zombie
 
     protected override void die()
     {
-        //¶Ó³¤ËÀÁË£¬ºóÃæµÄ½©Ê¬ÉıÎª¶Ó³¤
+        //Äá»™i trÆ°á»Ÿng cháº¿t, zombie phÃ­a sau thÄƒng lÃªn lÃ m Ä‘á»™i trÆ°á»Ÿng
         if(next != null)
         {
             next.isCaptain = true;

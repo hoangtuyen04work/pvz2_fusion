@@ -1,4 +1,4 @@
-using System.Collections;
+Ôªøusing System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,20 +8,27 @@ public class Level1Controller : LevelController
     {
         GameManagement.levelData = new LevelData()
         {
-            level = 1,   //πÿø®–Ú∫≈
-            levelName = "–¬µƒ¬√≥Ã",   //πÿø®√˚
+            level = 1,   //S·ªë th·ª© t·ª± m√†n
+            levelName = "H√†nh Tr√¨nh M·ªõi",   //T√™n m√†n
 
-            mapSuffix = "_Day", //µÿÕºÕº∆¨∫Û◊∫
-            rowCount = 5,       //◊‹π≤º∏––
-            landRowCount = 5,   //º∏––¬Ωµÿ
-            isDay = true,       // «∑Ò∞◊ÃÏ
-            plantingManagementSuffix = "_OriginalLawn",   //∂‘”¶µƒ÷÷÷≤π‹¿Ì◊Èº˛∫Û◊∫
-            backgroundSuffix = "_Day",   //∂‘”¶±≥æ∞“Ù¿÷∫Û◊∫
+            mapResourcePath = "Sprites/BackGround/BG_sanvuon",
+            backgroundWorldSize = new Vector2(14f, 6f),
+            animateBackground = false,
+            rowCount = 5,       //T·ªïng c·ªông bao nhi√™u h√†ng
+            landRowCount = 5,   //Bao nhi√™u h√†ng ƒë·∫•t li·ªÅn
+            isDay = true,       //C√≥ ph·∫£i ban ng√†y kh√¥ng
+            plantingManagementSuffix = "_OriginalLawn",   //H·∫≠u t·ªë component qu·∫£n l√Ω tr·ªìng c√¢y t∆∞∆°ng ·ª©ng
+            backgroundSuffix = "_Day",   //H·∫≠u t·ªë nh·∫°c n·ªÅn t∆∞∆°ng ·ª©ng
 
-            //∏˜––Ω© ¨≥ı ºY÷·Œª÷√
-            zombieInitPosY = new List<float> { -2.3f, -1.25f, -0.35f, 0.7f, 1.7f },
+            //V·ªã tr√≠ tr·ª•c Y ban ƒë·∫ßu c·ªßa zombie t·ª´ng h√†ng
+            zombieInitPosY = new List<float> { -1.97f, -1.17f, -0.36f, 0.44f, 1.25f },
+            plantGridPosX = new List<float>
+            {
+                -2.03f, -1.19f, -0.35f, 0.49f, 1.33f, 2.17f, 3.01f, 3.85f, 4.69f
+            },
+            plantGridPosY = new List<float> { -1.97f, -1.17f, -0.36f, 0.44f, 1.25f },
 
-            //±æπÿ÷≤ŒÔø®≤€–Ú¡–
+            //D√£y th·∫ª c√¢y c·ªßa m√†n n√†y
             plantCards = new List<string>
             {
                 "SunFlower",

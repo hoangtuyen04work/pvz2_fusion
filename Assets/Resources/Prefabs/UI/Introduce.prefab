@@ -155,7 +155,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: ">\u4ED6\u4EEC\u8BDE\u751F\u4E8E\u53E4\u8001\u7684\u4E2D\u56FD\uFF0C\u4E3A\u795E\u79D8\u7684\u6E58\u897F\u8D76\u5C38\u4EBA\u6240\u63A7\u5236\uFF0C\u603B\u662F\u6210\u961F\u51FA\u73B0\u3002\r\t>\u4ED6\u4EEC\u5728\u5730\u4E0B\u6C89\u7761\u767E\u5E74\u540E\u9192\u6765\uFF0C\u50F5\u800C\u4E0D\u8150\uFF0C\u52C7\u5F80\u76F4\u524D\uFF0C\u76F4\u81F3\u7EC8\u7ED3\u3002\n>\u4ED6\u4EEC\u552F\u4E00\u60E7\u6015\u7684\uFF0C\u662F\u5934\u4E0A\u7684\u7075\u7B26\uFF0C\u5343\u4E07\u5C0F\u5FC3\uFF0C\u83AB\u8BA9\u5B83\u98D8\u843D\u4E86\u3002"
+  m_Text: ">Ch\u00FAng sinh ra t\u1EEB Trung Hoa c\u1ED5 x\u01B0a, ch\u1ECBu s\u1EF1 \u0111i\u1EC1u khi\u1EC3n c\u1EE7a nh\u1EEFng th\u1EA7y luy\u1EC7n x\u00E1c T\u01B0\u01A1ng T\u00E2y b\u00ED \u1EA9n, lu\u00F4n xu\u1EA5t hi\u1EC7n th\u00E0nh t\u1EEBng \u0111o\u00E0n.\r\t>Ch\u00FAng ng\u1EE7 v\u00F9i d\u01B0\u1EDBi l\u00F2ng \u0111\u1EA5t h\u00E0ng tr\u0103m n\u0103m r\u1ED3i t\u1EC9nh d\u1EADy, c\u1EE9ng \u0111\u1EDD m\u00E0 kh\u00F4ng r\u1EEFa, c\u1EE9 th\u1EBF lao th\u1EB3ng v\u1EC1 ph\u00EDa tr\u01B0\u1EDBc cho \u0111\u1EBFn khi b\u1ECB ti\u00EAu di\u1EC7t.\n>Th\u1EE9 duy nh\u1EA5t ch\u00FAng s\u1EE3 l\u00E0 l\u00E1 b\u00F9a tr\u00EAn \u0111\u1EA7u, ng\u00E0n v\u1EA1n l\u1EA7n c\u1EA9n th\u1EADn, \u0111\u1EEBng \u0111\u1EC3 n\u00F3 r\u01A1i m\u1EA5t."
 --- !u!1 &1990808120210001904
 GameObject:
   m_ObjectHideFlags: 0
@@ -436,7 +436,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: 4d1972c7417f2134b8559ab38f3d0b7e, type: 3}
+    m_Font: {fileID: 12800000, guid: 7f3c9a2b1d8e4f5a6b0c9d2e3f4a5b6c, type: 3}
     m_FontSize: 24
     m_FontStyle: 0
     m_BestFit: 0
@@ -448,7 +448,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u4E2D\u56FD\u50F5\u5C38"
+  m_Text: "Zombie Trung Hoa"
 --- !u!1 &7380406224993052782
 GameObject:
   m_ObjectHideFlags: 0
@@ -715,7 +715,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: 4d1972c7417f2134b8559ab38f3d0b7e, type: 3}
+    m_Font: {fileID: 12800000, guid: 7f3c9a2b1d8e4f5a6b0c9d2e3f4a5b6c, type: 3}
     m_FontSize: 20
     m_FontStyle: 0
     m_BestFit: 0
@@ -727,7 +727,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u5F00\u59CB\u79CD\u690D"
+  m_Text: "B\u1EAFt \u0111\u1EA7u tr\u1ED3ng"
 --- !u!114 &5661501711284188498
 MonoBehaviour:
   m_ObjectHideFlags: 0

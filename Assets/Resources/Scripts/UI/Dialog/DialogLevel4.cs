@@ -1,26 +1,26 @@
-using System.Collections;
+Ôªøusing System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class DialogLevel4 : MonoBehaviour
 {
-    public SpeechBubble peaSpeechBubble;   //Õ„∂π∂‘ª∞øÚ
-    public SpeechBubble woodAndFlowerSpeechBubble;   //ªæÊ∫ÕœÚ»’ø˚∂‘ª∞øÚ
-    public SpeechBubble kingSpeechBubble;   //—©Õı∂‘ª∞øÚ
-    public GameObject zombieIntroduce1;   //Ω© ¨ΩÈ…‹¿∏1
-    public GameObject zombieIntroduce2;   //Ω© ¨ΩÈ…‹¿∏2
-    public GameObject plantIntroduce;     //÷≤ŒÔΩÈ…‹¿∏
+    public SpeechBubble peaSpeechBubble;   //Khung tho·∫°i c·ªßa ƒê·∫≠u B·∫Øn
+    public SpeechBubble woodAndFlowerSpeechBubble;   //Khung tho·∫°i c·ªßa ƒêu·ªëc v√† H∆∞·ªõng D∆∞∆°ng
+    public SpeechBubble kingSpeechBubble;   //Khung tho·∫°i c·ªßa Vua Tuy·∫øt
+    public GameObject zombieIntroduce1;   //B·∫£ng gi·ªõi thi·ªáu zombie 1
+    public GameObject zombieIntroduce2;   //B·∫£ng gi·ªõi thi·ªáu zombie 2
+    public GameObject plantIntroduce;     //B·∫£ng gi·ªõi thi·ªáu c√¢y
 
     GameObject flower;
     GameObject pea;
     GameObject wood;
     GameObject snowKing;
 
-    int count = 0;  //∂‘ª∞º∆ ˝£¨µ±«∞ «µ⁄º∏Ãı∂‘ª∞
+    int count = 0;  //ƒê·∫øm h·ªôi tho·∫°i, hi·ªán l√† c√¢u th·ª© m·∫•y
     private void Awake()
     {
-        //÷÷÷≤≤Œ”Î∂‘ª∞µƒ÷≤ŒÔ
+        //Tr·ªìng nh·ªØng c√¢y tham gia h·ªôi tho·∫°i
         flower = GameObject.Find("Plant-0-3")
             .GetComponent<PlantGrid>().plantByGod("SunFlowerForDialog");
         pea = GameObject.Find("Plant-1-3")
@@ -30,19 +30,19 @@ public class DialogLevel4 : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        woodAndFlowerSpeechBubble.showDialog("∞¢......∞¢ÃÁ£°");
+        woodAndFlowerSpeechBubble.showDialog("H·∫Øt......h·∫Øt x√¨!");
     }
 
     // Update is called once per frame
     void Update()
     {
-        //µ„ª˜ Û±Í◊Ûº¸£¨Ω¯»Îœ¬“ª ¬º˛
+        //B·∫•m chu·ªôt tr√°i ƒë·ªÉ sang s·ª± ki·ªán ti·∫øp theo
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
             switch (count)
             {
                 case 0:
-                    peaSpeechBubble.showDialog("œÚ»’ø˚÷∏ª”πŸ£¨ƒ„ªπ∫√¬......∞¢ÃÁ£°");
+                    peaSpeechBubble.showDialog("Ch·ªâ huy H∆∞·ªõng D∆∞∆°ng, ng√†i ·ªïn ch·ª©......h·∫Øt x√¨!");
                     count++;
                     break;
                 case 1:
@@ -59,7 +59,7 @@ public class DialogLevel4 : MonoBehaviour
                     woodAndFlowerSpeechBubble.gameObject.GetComponent<Image>().sprite =
                         Resources.Load<Sprite>("Sprites/UI/SpeechBubble/SpeechBubble");
                     woodAndFlowerSpeechBubble.transform.localPosition += new Vector3(0, -71, 0);
-                    woodAndFlowerSpeechBubble.showDialog("≤ª”√µ£–ƒ");
+                    woodAndFlowerSpeechBubble.showDialog("Kh√¥ng c·∫ßn lo ƒë√¢u");
                     count++;
                     break;
                 case 4:
@@ -68,15 +68,15 @@ public class DialogLevel4 : MonoBehaviour
                     woodAndFlowerSpeechBubble.gameObject.GetComponent<Image>().sprite =
                         Resources.Load<Sprite>("Sprites/UI/SpeechBubble/SpeechBubble2");
                     woodAndFlowerSpeechBubble.transform.localPosition += new Vector3(0, 71, 0);
-                    woodAndFlowerSpeechBubble.showDialog("Œ““—æ≠ÀÕ÷∏ª”πŸ»•…Ω∂¥¿Ô–›œ¢¡À");
+                    woodAndFlowerSpeechBubble.showDialog("T√¥i ƒë√£ ƒë∆∞a Ch·ªâ huy v√†o hang ngh·ªâ r·ªìi");
                     count++;
                     break;
                 case 5:
-                    peaSpeechBubble.showDialog("ªæÊ…ŸŒæ£°º˚µΩƒ„Ã´∫√¡À£°");
+                    peaSpeechBubble.showDialog("Thi·∫øu √∫y ƒêu·ªëc! G·∫∑p ƒë∆∞·ª£c c·∫≠u t·ªët qu√°!");
                     count++;
                     break;
                 case 6:
-                    peaSpeechBubble.showDialog("£®øæ ÷ ÷£©");
+                    peaSpeechBubble.showDialog("(h∆° tay h∆° tay)");
                     count++;
                     break;
                 case 7:
@@ -93,15 +93,15 @@ public class DialogLevel4 : MonoBehaviour
                     count = -1;
                     break;
                 case 9:
-                    peaSpeechBubble.showDialog("œ≈£°\nƒ„ «À≠£ø");
+                    peaSpeechBubble.showDialog("√Å!\nNg∆∞∆°i l√† ai?");
                     count++;
                     break;
                 case 10:
-                    woodAndFlowerSpeechBubble.showDialog("’‚ «Œ“‘⁄’‚∂˘»œ ∂µƒ–¬≈Û”—£¨—©Õı°£");
+                    woodAndFlowerSpeechBubble.showDialog("ƒê√¢y l√† ng∆∞·ªùi b·∫°n m·ªõi t√¥i quen ·ªü ƒë√¢y, Vua Tuy·∫øt.");
                     count++;
                     break;
                 case 11:
-                    peaSpeechBubble.showDialog("ƒ„√« «.......≈Û”—£ø");
+                    peaSpeechBubble.showDialog("C√°c c·∫≠u l√†.......b·∫°n b√®?");
                     count++;
                     break;
                 case 12:
@@ -119,25 +119,25 @@ public class DialogLevel4 : MonoBehaviour
 
     private void flowerLastWords()
     {
-        woodAndFlowerSpeechBubble.showDialog("Õ„∂π......œ¬ ø......Œ“......≤ª––¡À......ƒ„......“ª∂®“™......");
+        woodAndFlowerSpeechBubble.showDialog("ƒê·∫≠u B·∫Øn......h·∫° sƒ©......ta......kh√¥ng xong r·ªìi......c·∫≠u......nh·∫•t ƒë·ªãnh ph·∫£i......");
         count = 2;
     }
 
     private void peaShock()
     {
-        peaSpeechBubble.showDialog("œÚ»’ø˚÷∏ª”πŸ£°");
+        peaSpeechBubble.showDialog("Ch·ªâ huy H∆∞·ªõng D∆∞∆°ng!");
         count = 3;
     }
 
     private void woodPrepare()
     {
-        woodAndFlowerSpeechBubble.showDialog("≤ª∫√£¨ƒ«–©∂´Œ˜”÷¿¥¡À£°¥Ûº“–°–ƒ£°");
+        woodAndFlowerSpeechBubble.showDialog("Nguy r·ªìi, l≈© ƒë√≥ l·∫°i ƒë·∫øn! M·ªçi ng∆∞·ªùi c·∫©n th·∫≠n!");
         count = 8;
     }
 
     private void snowKingAppear()
     {
-        kingSpeechBubble.showDialog("≤ª“™≈¬£¨±æÕı¿¥◊£ƒ„√«“ª±€÷Æ¡¶°£");
+        kingSpeechBubble.showDialog("ƒê·ª´ng s·ª£, b·∫£n v∆∞∆°ng ƒë·∫øn tr·ª£ gi√∫p c√°c ng∆∞∆°i m·ªôt tay.");
         snowKing = GameObject.Find("Plant-0-2")
             .GetComponent<PlantGrid>().plantByGod("SnowKing");
         count = 9;

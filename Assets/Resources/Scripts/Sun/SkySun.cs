@@ -1,10 +1,10 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class SkySun : SunBase
 {
-    //供SkySun子类使用
+    //Dành cho lớp con SkySun sử dụng
     const float upperEdge = 2f;
     const float lowerEdge = -2.7f;
     protected float finalY;
@@ -13,7 +13,10 @@ public class SkySun : SunBase
     {
         base.Start();
 
-        finalY = Random.Range(lowerEdge, upperEdge);
+        finalY = netRandom(lowerEdge, upperEdge);
+
+        //Ghi danh với bộ đồng bộ sau khi đã có đủ thông tin ngẫu nhiên
+        NetGameplay.RegisterSun(this);
     }
 
     public override void drop()

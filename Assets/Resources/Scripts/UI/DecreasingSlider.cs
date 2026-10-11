@@ -4,27 +4,37 @@ using UnityEngine;
 
 public class DecreasingSlider : MonoBehaviour
 {
-    UnityEngine.UI.Slider slider;   //Slider×é¼ş
-    float targetValue;   //Ä¿±êÖµ
-    float slidingVelocity = 0.1f;  //½ø¶ÈÌõÖµ¸Ä±äÊ±µÄ»¬¶¯ËÙ¶È
+    UnityEngine.UI.Slider slider;   //Component Slider
+    float targetValue;   //GiÃ¡ trá»‹ má»¥c tiÃªu
+    float slidingVelocity = 0.1f;  //Tá»‘c Ä‘á»™ trÆ°á»£t khi giÃ¡ trá»‹ thanh tiáº¿n trÃ¬nh thay Ä‘á»•i
 
     // Start is called before the first frame update
     void Start()
     {
         slider = transform.GetComponent<UnityEngine.UI.Slider>();
-        slider.value = 1;
-        targetValue = 1;
+        slider.value = 1f;
+        targetValue = 1f;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (targetValue < slider.value)
-            slider.value -= Time.deltaTime * slidingVelocity;
+        if (slider == null) return;
+        if (!Mathf.Approximately(slider.value, targetValue))
+        {
+            slider.value = Mathf.MoveTowards(slider.value, targetValue, Time.deltaTime * slidingVelocity);
+        }
     }
 
     public void setValue(float value)
     {
-        targetValue = value;
+        targetValue = Mathf.Clamp01(value);
+    }
+
+    public void setValueInstant(float value)
+    {
+        if (slider == null) slider = transform.GetComponent<UnityEngine.UI.Slider>();
+        targetValue = Mathf.Clamp01(value);
+        if (slider != null) slider.value = targetValue;
     }
 }

@@ -1,25 +1,25 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Squash : Plant
 {
-    public BoxCollider2D collider_Idle;   //ĞİÏĞÊ±Ì½²â½©Ê¬¿¿½üËùÓÃÅö×²Ìå
-    public Collider2D collider_attack;   //Ñ¹±â½©Ê¬ËùÓÃÅö×²Ìå
+    public BoxCollider2D collider_Idle;   //Collider dÃ¹ng Ä‘á»ƒ dÃ² zombie láº¡i gáº§n lÃºc Ä‘ang nhÃ n rá»—i
+    public Collider2D collider_attack;   //Collider dÃ¹ng Ä‘á»ƒ Ä‘Ã¨ báº¹p zombie
 
-    public GameObject lockedZombie;   //Ëø¶¨µÄ½©Ê¬
+    public GameObject lockedZombie;   //Zombie Ä‘Ã£ khoÃ¡ má»¥c tiÃªu
 
-    public Animator animator;   //×ÔÉíAnimator×é¼ş
+    public Animator animator;   //Component Animator cá»§a chÃ­nh nÃ³
 
-    bool jumpingUp = false;   //ÊÇ·ñÔÚÌøÆğ
-    bool jumpingDown = false;   //ÊÇ·ñÔÚÂäµØ
+    bool jumpingUp = false;   //CÃ³ Ä‘ang nháº£y lÃªn khÃ´ng
+    bool jumpingDown = false;   //CÃ³ Ä‘ang rÆ¡i xuá»‘ng khÃ´ng
     public bool idle = true;
-    Vector3 speed_jumpUp;   //ÌøÆğµÄËÙ¶È
-    Vector3 speed_jumpDown;   //ÂäÏÂµÄËÙ¶È
+    Vector3 speed_jumpUp;   //Tá»‘c Ä‘á»™ nháº£y lÃªn
+    Vector3 speed_jumpDown;   //Tá»‘c Ä‘á»™ rÆ¡i xuá»‘ng
 
     protected override void Awake()
     {
-        //»ñÈ¡×é¼ş
+        //Láº¥y component
         animator = GetComponent<Animator>();
         audioSource = GetComponent<AudioSource>();
     }
@@ -58,12 +58,12 @@ public class Squash : Plant
     {
         Vector3 peak = lockedZombie.transform.position + new Vector3(0, 1.3f, 0);
         Vector3 destination = new Vector3(lockedZombie.transform.position.x, transform.position.y, 0);
-        speed_jumpUp = (peak - transform.position) / 0.133f;   //ÌøÆğ¶¯»­0.133Ãë
-        speed_jumpDown = (destination - peak) / 0.117f;   //ÂäÏÂ¶¯»­0.117Ãë
+        speed_jumpUp = (peak - transform.position) / 0.133f;   //Animation nháº£y lÃªn 0.133 giÃ¢y
+        speed_jumpDown = (destination - peak) / 0.117f;   //Animation rÆ¡i xuá»‘ng 0.117 giÃ¢y
         transform.Find("Shadow").gameObject.SetActive(false);
         transform.Find("Halo").gameObject.SetActive(false);
         GetComponent<SpriteRenderer>().sortingLayerName = "PlantBullet";
-        //ÎÑ¹ÏÅö×²ÌåÊ§Ğ§£¬·ÀÖ¹ÌøÆğÀ´ÁËÓÖ±»³Ôµô
+        //VÃ´ hiá»‡u collider cá»§a BÃ­ NgÃ²i, trÃ¡nh viá»‡c nháº£y lÃªn rá»“i láº¡i bá»‹ Äƒn
         GetComponent<BoxCollider2D>().enabled = false;
         jumpingUp = true;
     }
@@ -97,7 +97,7 @@ public class Squash : Plant
         die("");
     }
 
-    //ÎÑ¹Ïº®ÀäÊ±¶¯»­²»¼õËÙ£¬·ñÔò°´Ô­ËÙ¶ÈÌøÆğ»áÌøºÜÔ¶
+    //Animation cá»§a BÃ­ NgÃ²i khÃ´ng cháº­m láº¡i khi bá»‹ láº¡nh, náº¿u khÃ´ng giá»¯ nguyÃªn tá»‘c Ä‘á»™ nháº£y sáº½ nháº£y ráº¥t xa
     public override void cold()
     {
         if (state == PlantState.Normal)

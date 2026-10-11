@@ -411,7 +411,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u7279\u6027\uFF1A\n\u968F\u673A\u4F4D\u7F6E\u51FA\u73B0\uFF0C\u5438\u5F15\u706B\u529B\u4F46\u4E0D\u4F1A\u4F24\u5BB3\u690D\u7269\uFF0C\u4E5F\u4E0D\u4F1A\u8FDB\u5165\u623F\u95F4\u5403\u8111\u5B50\n\n\u8BDA\u9080\u5341\u7EA7\u5B9D\u5F00\u8BED\u73A9\u5BB6\u4E3A\u5176\u64B0\u5199\u7B80\u4ECB\uFF0C\u9009\u4E2D\u7684\u6211\u4F1A\u5728\u8BC4\u8BBA\u533A\u7F6E\u9876"
+  m_Text: "\u0110\u1EB7c t\u00EDnh:\nXu\u1EA5t hi\u1EC7n \u1EDF v\u1ECB tr\u00ED ng\u1EABu nhi\u00EAn, h\u00FAt h\u1ECFa l\u1EF1c nh\u01B0ng kh\u00F4ng g\u00E2y h\u1EA1i cho c\u00E2y, c\u0169ng kh\u00F4ng v\u00E0o nh\u00E0 \u0103n n\u00E3o\n\nM\u1EDDi c\u00E1c cao th\u1EE7 PopCap vi\u1EBFt ph\u1EA7n gi\u1EDBi thi\u1EC7u cho n\u00F3, b\u00E0i \u0111\u01B0\u1EE3c ch\u1ECDn s\u1EBD \u0111\u01B0\u1EE3c ghim l\u00EAn \u0111\u1EA7u m\u1EE5c b\u00ECnh lu\u1EADn"
 --- !u!1 &377059572
 GameObject:
   m_ObjectHideFlags: 0
@@ -631,7 +631,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: 4d1972c7417f2134b8559ab38f3d0b7e, type: 3}
+    m_Font: {fileID: 12800000, guid: 7f3c9a2b1d8e4f5a6b0c9d2e3f4a5b6c, type: 3}
     m_FontSize: 24
     m_FontStyle: 0
     m_BestFit: 0
@@ -643,7 +643,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u5E7D\u7075"
+  m_Text: "B\u00F3ng Ma"
 --- !u!1 &656327629
 GameObject:
   m_ObjectHideFlags: 0
@@ -999,7 +999,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: 4d1972c7417f2134b8559ab38f3d0b7e, type: 3}
+    m_Font: {fileID: 12800000, guid: 7f3c9a2b1d8e4f5a6b0c9d2e3f4a5b6c, type: 3}
     m_FontSize: 14
     m_FontStyle: 0
     m_BestFit: 0
@@ -1011,7 +1011,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u70B9\u51FB\u5C4F\u5E55\u7EE7\u7EED......"
+  m_Text: "Ch\u1EA1m m\u00E0n h\u00ECnh \u0111\u1EC3 ti\u1EBFp t\u1EE5c......"
 --- !u!1 &1531422699
 GameObject:
   m_ObjectHideFlags: 0
@@ -1079,7 +1079,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: 4d1972c7417f2134b8559ab38f3d0b7e, type: 3}
+    m_Font: {fileID: 12800000, guid: 7f3c9a2b1d8e4f5a6b0c9d2e3f4a5b6c, type: 3}
     m_FontSize: 24
     m_FontStyle: 0
     m_BestFit: 0
@@ -1091,7 +1091,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u767D\u9AA8\u50F5\u5C38"
+  m_Text: "Zombie X\u01B0\u01A1ng Tr\u1EAFng"
 --- !u!1 &1659932271
 GameObject:
   m_ObjectHideFlags: 0
@@ -1159,7 +1159,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: 4d1972c7417f2134b8559ab38f3d0b7e, type: 3}
+    m_Font: {fileID: 12800000, guid: 7f3c9a2b1d8e4f5a6b0c9d2e3f4a5b6c, type: 3}
     m_FontSize: 20
     m_FontStyle: 0
     m_BestFit: 0
@@ -1171,7 +1171,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u7EC8\u4E8E\u627E\u5230\u4F60\u4E86\uFF0C\u575A\u679C\u4E0B\u58EB\uFF01"
+  m_Text: "Cu\u1ED1i c\u00F9ng c\u0169ng t\u00ECm \u0111\u01B0\u1EE3c c\u1EADu, H\u1EA1 s\u0129 H\u1EA1t D\u1EBB!"
 --- !u!1 &1694434225
 GameObject:
   m_ObjectHideFlags: 0
@@ -1251,7 +1251,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u7279\u6027\uFF1A\n\u6B7B\u4EA1\u65F6\u9AA8\u67B6\u5D29\u5F00\uFF0C\u4E00\u6BB5\u65F6\u95F4\u540E\u4F1A\u590D\u6D3B\uFF0C\u590D\u6D3B\u4E09\u6B21\u540E\u5F7B\u5E95\u6B7B\u4EA1\uFF0C\u53EA\u6709\u7A9D\u74DC\u6216\u7070\u70EC\u7C7B\u690D\u7269\u80FD\u4E00\u6B21\u6027\u6D88\u706D\u5B83\n\u8BDA\u9080\u5341\u7EA7\u5B9D\u5F00\u8BED\u73A9\u5BB6\u4E3A\u5176\u64B0\u5199\u7B80\u4ECB\uFF0C\u9009\u4E2D\u7684\u6211\u4F1A\u5728\u8BC4\u8BBA\u533A\u7F6E\u9876"
+  m_Text: "\u0110\u1EB7c t\u00EDnh:\nKhi ch\u1EBFt b\u1ED9 x\u01B0\u01A1ng s\u1EBD r\u00E3 ra, m\u1ED9t l\u00FAc sau s\u1EBD h\u1ED3i sinh, h\u1ED3i sinh ba l\u1EA7n th\u00EC ch\u1EBFt h\u1EB3n, ch\u1EC9 c\u00F3 B\u00ED Ng\u00F2i ho\u1EB7c c\u00E1c lo\u1EA1i c\u00E2y thi\u00EAu \u0111\u1ED1t m\u1EDBi ti\u00EAu di\u1EC7t \u0111\u01B0\u1EE3c n\u00F3 ngay l\u1EADp t\u1EE9c\nM\u1EDDi c\u00E1c cao th\u1EE7 PopCap vi\u1EBFt ph\u1EA7n gi\u1EDBi thi\u1EC7u cho n\u00F3, b\u00E0i \u0111\u01B0\u1EE3c ch\u1ECDn s\u1EBD \u0111\u01B0\u1EE3c ghim l\u00EAn \u0111\u1EA7u m\u1EE5c b\u00ECnh lu\u1EADn"
 --- !u!1 &1870703626
 GameObject:
   m_ObjectHideFlags: 0
@@ -1367,7 +1367,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: 4d1972c7417f2134b8559ab38f3d0b7e, type: 3}
+    m_Font: {fileID: 12800000, guid: 7f3c9a2b1d8e4f5a6b0c9d2e3f4a5b6c, type: 3}
     m_FontSize: 20
     m_FontStyle: 0
     m_BestFit: 0
@@ -1379,7 +1379,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u5F00\u59CB\u79CD\u690D"
+  m_Text: "B\u1EAFt \u0111\u1EA7u tr\u1ED3ng"
 --- !u!114 &2088271853
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1690,7 +1690,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: 4d1972c7417f2134b8559ab38f3d0b7e, type: 3}
+    m_Font: {fileID: 12800000, guid: 7f3c9a2b1d8e4f5a6b0c9d2e3f4a5b6c, type: 3}
     m_FontSize: 20
     m_FontStyle: 0
     m_BestFit: 0
@@ -1702,7 +1702,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "Where is my \u5C0F\u63A8\u8F66\uFF01"
+  m_Text: "Where is my xe \u0111\u1EA9y!"
 --- !u!1 &2052330106788373543
 GameObject:
   m_ObjectHideFlags: 0
@@ -1941,7 +1941,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: 4d1972c7417f2134b8559ab38f3d0b7e, type: 3}
+    m_Font: {fileID: 12800000, guid: 7f3c9a2b1d8e4f5a6b0c9d2e3f4a5b6c, type: 3}
     m_FontSize: 20
     m_FontStyle: 0
     m_BestFit: 0
@@ -1953,7 +1953,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u4E0B\u4E00\u4E2A"
+  m_Text: "Ti\u1EBFp theo"
 --- !u!114 &5375370270972454336
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2051,7 +2051,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: 4d1972c7417f2134b8559ab38f3d0b7e, type: 3}
+    m_Font: {fileID: 12800000, guid: 7f3c9a2b1d8e4f5a6b0c9d2e3f4a5b6c, type: 3}
     m_FontSize: 14
     m_FontStyle: 0
     m_BestFit: 0
@@ -2063,7 +2063,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u70B9\u51FB\u5C4F\u5E55\u7EE7\u7EED......"
+  m_Text: "Ch\u1EA1m m\u00E0n h\u00ECnh \u0111\u1EC3 ti\u1EBFp t\u1EE5c......"
 --- !u!1 &4265970135964111223
 GameObject:
   m_ObjectHideFlags: 0
@@ -2131,7 +2131,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: 4d1972c7417f2134b8559ab38f3d0b7e, type: 3}
+    m_Font: {fileID: 12800000, guid: 7f3c9a2b1d8e4f5a6b0c9d2e3f4a5b6c, type: 3}
     m_FontSize: 20
     m_FontStyle: 0
     m_BestFit: 0
@@ -2143,7 +2143,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u7EC8\u4E8E\u627E\u5230\u4F60\u4E86\uFF0C\u575A\u679C\u4E0B\u58EB\uFF01"
+  m_Text: "Cu\u1ED1i c\u00F9ng c\u0169ng t\u00ECm \u0111\u01B0\u1EE3c c\u1EADu, H\u1EA1 s\u0129 H\u1EA1t D\u1EBB!"
 --- !u!1 &4265970136704180150
 GameObject:
   m_ObjectHideFlags: 0
@@ -2401,7 +2401,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: 4d1972c7417f2134b8559ab38f3d0b7e, type: 3}
+    m_Font: {fileID: 12800000, guid: 7f3c9a2b1d8e4f5a6b0c9d2e3f4a5b6c, type: 3}
     m_FontSize: 14
     m_FontStyle: 0
     m_BestFit: 0
@@ -2413,7 +2413,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u70B9\u51FB\u5C4F\u5E55\u7EE7\u7EED......"
+  m_Text: "Ch\u1EA1m m\u00E0n h\u00ECnh \u0111\u1EC3 ti\u1EBFp t\u1EE5c......"
 --- !u!1 &6398598833631368422
 GameObject:
   m_ObjectHideFlags: 0

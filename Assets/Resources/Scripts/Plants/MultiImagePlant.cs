@@ -1,4 +1,4 @@
-using System.Collections;
+Ôªøusing System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -86,7 +86,7 @@ public class MultiImagePlant : Plant
         row = grid.row;
         myGrid = grid;
 
-        //…Ë÷√À≥–ÚÕº≤„º∞œ‘ æÀ≥–Ú
+        //ƒê·∫∑t sorting layer v√† th·ª© t·ª± hi·ªÉn th·ªã
         SpriteRenderer[] spriteRenderers = gameObject.GetComponentsInChildren<SpriteRenderer>(true);
         foreach (SpriteRenderer spriteRenderer in spriteRenderers)
         {

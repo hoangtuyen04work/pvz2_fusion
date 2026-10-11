@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,7 +11,7 @@ public class SpeechBubble : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //µã»÷Êó±ê×ó¼ü£¬ÏûÊ§
+        //Báº¥m chuá»™t trÃ¡i thÃ¬ biáº¿n máº¥t
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
             gameObject.SetActive(false);

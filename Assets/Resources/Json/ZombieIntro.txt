@@ -1,45 +1,45 @@
-ÖĞ¹ú½©Ê¬
+Zombie Trung Hoa
 
->ËûÃÇµ®ÉúÓÚ¹ÅÀÏµÄÖĞ¹ú£¬ÎªÉñÃØµÄÏæÎ÷¸ÏÊ¬ÈËËù¿ØÖÆ£¬×ÜÊÇ³É¶Ó³öÏÖ¡£
->ËûÃÇÔÚµØÏÂ³ÁË¯°ÙÄêºóĞÑÀ´£¬½©¶ø²»¸¯£¬ÓÂÍùÖ±Ç°£¬Ö±ÖÁÖÕ½á¡£
->ËûÃÇÎ¨Ò»¾åÅÂµÄ£¬ÊÇÍ·ÉÏµÄÁé·û£¬Ç§ÍòĞ¡ĞÄ£¬ÄªÈÃËüÆ®ÂäÁË¡£
-
-----------------
-
-ÓÄÁé
-
-ÌØĞÔ£º
-Ëæ»úÎ»ÖÃ³öÏÖ£¬ÎüÒı»ğÁ¦µ«²»»áÉËº¦Ö²Îï£¬Ò²²»»á½øÈë·¿¼ä³ÔÄÔ×Ó
+>ChÃºng sinh ra tá»« Trung Hoa cá»• xÆ°a, chá»‹u sá»± Ä‘iá»u khiá»ƒn cá»§a nhá»¯ng tháº§y luyá»‡n xÃ¡c TÆ°Æ¡ng TÃ¢y bÃ­ áº©n, luÃ´n xuáº¥t hiá»‡n thÃ nh tá»«ng Ä‘oÃ n.
+>ChÃºng ngá»§ vÃ¹i dÆ°á»›i lÃ²ng Ä‘áº¥t hÃ ng trÄƒm nÄƒm rá»“i tá»‰nh dáº­y, cá»©ng Ä‘á» mÃ  khÃ´ng rá»¯a, cá»© tháº¿ lao tháº³ng vá» phÃ­a trÆ°á»›c cho Ä‘áº¿n khi bá»‹ tiÃªu diá»‡t.
+>Thá»© duy nháº¥t chÃºng sá»£ lÃ  lÃ¡ bÃ¹a trÃªn Ä‘áº§u, ngÃ n váº¡n láº§n cáº©n tháº­n, Ä‘á»«ng Ä‘á»ƒ nÃ³ rÆ¡i máº¥t.
 
 ----------------
 
-°×¹Ç½©Ê¬
+BÃ³ng Ma
 
-ÌØĞÔ£º
-ËÀÍöÊ±¹Ç¼Ü±À¿ª£¬Ò»¶ÎÊ±¼äºó»á¸´»î£¬¸´»îÈı´Îºó³¹µ×ËÀÍö£¬Ö»ÓĞÎÑ¹Ï»ò»Ò½ıÀàÖ²ÎïÄÜÒ»´ÎĞÔÏûÃğËü
-
-----------------
-
-±±¼«Ñ©¹Ö
-
-ÌØĞÔ£ºÆ¤²ÚÈâºñ¡£
-
-¼ò½é£º
-ËÀÈ¥µÄ±±¼«ĞÜ±»½©ÍõÊÕÁô£¬¿ªÊ¼ÁËĞÂµÄÉú»î¡£¡°ÆäÊµÎÒ²¢²»Ï²»¶ÄÔ×Ó£¬¡±±±¼«Ñ©¹ÖÈçÊÇËµ£¬¡°ÎÒÖ»ÊÇÏëÈÃÈËÀàÅãÎÒÍæ»á¡£¡±
+Äáº·c tÃ­nh:
+Xuáº¥t hiá»‡n á»Ÿ vá»‹ trÃ­ ngáº«u nhiÃªn, hÃºt há»a lá»±c nhÆ°ng khÃ´ng gÃ¢y háº¡i cho cÃ¢y, cÅ©ng khÃ´ng vÃ o nhÃ  Äƒn nÃ£o
 
 ----------------
 
-±ù¿é½©Ê¬
+Zombie XÆ°Æ¡ng Tráº¯ng
 
-Èõµã£º»ğ¾æÊ÷×®
-
-¼ò½é£º
-¼áÓ²µÄ±ù¿é´ø¸øËûÎŞÓëÂ×±ÈµÄ·ÀÓùÁ¦¡£µ«Êµ¼ÊÉÏ£¬Ëû²¢²»Ï²»¶±ù¿é£¬ÓÈÆäÊÇÉÏÃæÄÇÌõ³ôÓã¡£ÊÇµÄ£¬ËûÔøÊÇÒ»ÃûË®ÊÖ¡£
+Äáº·c tÃ­nh:
+Khi cháº¿t bá»™ xÆ°Æ¡ng sáº½ rÃ£ ra, má»™t lÃºc sau sáº½ há»“i sinh, há»“i sinh ba láº§n thÃ¬ cháº¿t háº³n, chá»‰ cÃ³ BÃ­ NgÃ²i hoáº·c cÃ¡c loáº¡i cÃ¢y thiÃªu Ä‘á»‘t má»›i tiÃªu diá»‡t Ä‘Æ°á»£c nÃ³ ngay láº­p tá»©c
 
 ----------------
 
-±ùÑ©¹Ö½©Ê¬
+QuÃ¡i Tuyáº¿t Báº¯c Cá»±c
 
-ÌØĞÔ£º
->Ï²»¶ÓÃ±ù°ôÇÃ´òÖ²Îï£¬Å¼¶ûÒ²»áÍÂ³öº®ÆøÊÔÍ¼¶³×¡Ö²Îï¡£
->ÊÜÉËÊ±£¬Ëû»á´´ÔìÒ»¸ö±ù¶Ü±£»¤×Ô¼º£¬²¢¶ãÔÚºóÃæÁÆÉË¡£
+Äáº·c tÃ­nh: da dÃ y thá»‹t cháº¯c.
+
+Giá»›i thiá»‡u:
+ChÃº gáº¥u Báº¯c Cá»±c Ä‘Ã£ cháº¿t Ä‘Æ°á»£c Vua Zombie thu nháº­n, báº¯t Ä‘áº§u má»™t cuá»™c sá»‘ng má»›i. â€œTháº­t ra tÃ´i cháº³ng thÃ­ch nÃ£o Ä‘Ã¢u,â€ QuÃ¡i Tuyáº¿t Báº¯c Cá»±c nÃ³i váº­y, â€œtÃ´i chá»‰ muá»‘n con ngÆ°á»i chÆ¡i vá»›i tÃ´i má»™t lÃ¡t thÃ´i.â€
+
+----------------
+
+Zombie Khá»‘i BÄƒng
+
+Äiá»ƒm yáº¿u: Gá»‘c Äuá»‘c
+
+Giá»›i thiá»‡u:
+Khá»‘i bÄƒng cá»©ng ráº¯n mang láº¡i cho háº¯n kháº£ nÄƒng phÃ²ng thá»§ vÃ´ song. NhÆ°ng tháº­t ra háº¯n cháº³ng thÃ­ch khá»‘i bÄƒng chÃºt nÃ o, nháº¥t lÃ  con cÃ¡ thá»‘i á»Ÿ trÃªn Ä‘Ã³. ÄÃºng váº­y, háº¯n tá»«ng lÃ  má»™t thuá»· thá»§.
+
+----------------
+
+Zombie QuÃ¡i Tuyáº¿t
+
+Äáº·c tÃ­nh:
+>ThÃ­ch dÃ¹ng que kem Ä‘áº­p cÃ¢y, thá»‰nh thoáº£ng cÅ©ng phun hÆ¡i láº¡nh hÃ²ng Ä‘Ã³ng bÄƒng cÃ¢y.
+>Khi bá»‹ thÆ°Æ¡ng, háº¯n sáº½ táº¡o ra má»™t khiÃªn bÄƒng báº£o vá»‡ mÃ¬nh, rá»“i náº¥p phÃ­a sau chá»¯a thÆ°Æ¡ng.

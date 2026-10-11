@@ -1,26 +1,24 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class EndMenu : MonoBehaviour
 {
-    public Text dialogText;   //◊”∂‘œÛDialogTextµƒText◊Èº˛£¨”√”⁄∏¸–¬◊÷ÃÂ
-    public AudioSource backgroundAudio;   //±≥æ∞“Ù¿÷µƒ≤•∑≈◊Èº˛
+    public Text dialogText;   //Component Text c·ªßa ƒë·ªëi t∆∞·ª£ng con DialogText, d√πng ƒë·ªÉ c·∫≠p nh·∫≠t font
+    public AudioSource backgroundAudio;   //Component ph√°t nh·∫°c n·ªÅn
+    private Image resultArtwork;
+    private RectTransform resultRect;
+    private CanvasGroup resultGroup;
+    private bool presentationBuilt;
 
+    //Zombie ch·∫°m v·∫°ch: phe c√¢y thua, phe zombie trong ch·∫ø ƒë·ªô ƒë·ªëi kh√°ng th√¨ th·∫Øng
     public void gameOver()
     {
-        //œ‘ æΩÁ√Ê
-        Time.timeScale = 0;
-        dialogText.text = "Ω© ¨≥‘µÙ¡Àƒ„µƒƒ‘◊”";
-        dialogText.color = new Color(0.06f, 0.79f, 0.11f);
-        gameObject.SetActive(true);
-
-        //≤•∑≈“Ù–ß
-        backgroundAudio.Stop();
-        GetComponent<AudioSource>().clip =
-            Resources.Load<AudioClip>("Sounds/UI/loseMusic");
-        GetComponent<AudioSource>().Play();
+        bool localWins = NetSession.ControlsZombies;
+        show(localWins, localWins
+            ? "Zombie c·ªßa b·∫°n ƒë√£ ƒÉn ƒë∆∞·ª£c n√£o!"
+            : "Zombie ƒë√£ ƒÉn m·∫•t n√£o b·∫°n");
     }
 
     public void win()
@@ -30,21 +28,175 @@ public class EndMenu : MonoBehaviour
 
     private void win_real()
     {
-        //œ‘ æΩÁ√Ê
-        Time.timeScale = 0;
-        dialogText.text = "ƒ„“—≥…π¶ª˜ÕÀ¡ÀΩ© ¨";
-        dialogText.color = new Color(0.89f, 0.76f, 0.37f);
-        gameObject.SetActive(true);
+        bool localWins = !NetSession.ControlsZombies;
+        if (localWins && !NetSession.IsOnline && !EndlessRun.Active && GameSession.SelectedLevel >= 0)
+        {
+            CampaignProgress.UnlockNextLevel(GameSession.SelectedLevel);
+        }
 
-        //≤•∑≈“Ù–ß
+        show(localWins, localWins
+            ? "B·∫°n ƒë√£ ƒë·∫©y l√πi ƒë∆∞·ª£c l≈© zombie"
+            : "H√†ng c√¢y ƒë√£ c·∫ßm c·ª± t·ªõi c√πng, b·∫°n thua");
+    }
+
+    private void show(bool localWins, string message)
+    {
+        //Hi·ªÉn th·ªã giao di·ªán
+        Time.timeScale = 0;
+        BuildPresentation();
+        Sprite artwork = LoadResultSprite(localWins
+            ? "Prefabs/UI/winner"
+            : "Prefabs/UI/over");
+        resultArtwork.sprite = artwork;
+        resultArtwork.preserveAspect = true;
+        if (artwork != null && artwork.rect.height > 0f)
+            FitResultArtwork(artwork);
+
+        // Text c≈© ch·ªâ c√≤n l√† ph∆∞∆°ng √°n d·ª± ph√≤ng n·∫øu asset b·ªã thi·∫øu.
+        if (dialogText != null)
+        {
+            dialogText.text = message;
+            dialogText.gameObject.SetActive(artwork == null);
+        }
+        gameObject.SetActive(true);
+        StopAllCoroutines();
+        StartCoroutine(RevealPresentation());
+
+        //Ph√°t √¢m thanh
         backgroundAudio.Stop();
         GetComponent<AudioSource>().clip =
-            Resources.Load<AudioClip>("Sounds/UI/winMusic");
+            Resources.Load<AudioClip>(localWins ? "Sounds/UI/winMusic" : "Sounds/UI/loseMusic");
         GetComponent<AudioSource>().Play();
+    }
+
+    private static Sprite LoadResultSprite(string resourcePath)
+    {
+        Sprite sprite = Resources.Load<Sprite>(resourcePath);
+        if (sprite != null) return sprite;
+        Sprite[] importedSprites = Resources.LoadAll<Sprite>(resourcePath);
+        return importedSprites != null && importedSprites.Length > 0 ? importedSprites[0] : null;
+    }
+
+    private void BuildPresentation()
+    {
+        if (presentationBuilt) return;
+        presentationBuilt = true;
+
+        // HUD gameplay v√† pause d√πng Canvas ri√™ng; k·∫øt qu·∫£ ph·∫£i n·∫±m tr√™n t·∫•t c·∫£.
+        Canvas resultCanvas = GetComponent<Canvas>();
+        if (resultCanvas == null) resultCanvas = gameObject.AddComponent<Canvas>();
+        resultCanvas.overrideSorting = true;
+        resultCanvas.sortingOrder = 2000;
+        if (GetComponent<GraphicRaycaster>() == null) gameObject.AddComponent<GraphicRaycaster>();
+
+        // Lo·∫°i b·ªè to√†n b·ªô khung k·∫øt qu·∫£ c≈© nh∆∞ng gi·ªØ reference ƒë·ªÉ fallback khi thi·∫øu ·∫£nh.
+        foreach (Transform child in transform)
+            child.gameObject.SetActive(false);
+
+        Image backdrop = GetComponent<Image>();
+        if (backdrop != null)
+        {
+            backdrop.sprite = null;
+            backdrop.color = new Color(0f, 0f, 0f, .78f);
+            backdrop.raycastTarget = true;
+        }
+
+        resultGroup = GetComponent<CanvasGroup>();
+        if (resultGroup == null) resultGroup = gameObject.AddComponent<CanvasGroup>();
+
+        var artworkObject = new GameObject("Result Artwork", typeof(RectTransform),
+            typeof(CanvasRenderer), typeof(Image));
+        artworkObject.transform.SetParent(transform, false);
+        resultArtwork = artworkObject.GetComponent<Image>();
+        resultArtwork.raycastTarget = false;
+        resultRect = artworkObject.GetComponent<RectTransform>();
+        Center(resultRect, new Vector2(280f, 190f), new Vector2(0f, 76f));
+
+        // Ch·ªâ d√πng hai icon g·ªçn b√™n d∆∞·ªõi banner, kh√¥ng th√™m b·∫£ng hay ch·ªØ.
+        CreateResultIcon("Ch∆°i l·∫°i", "confirm", new Vector2(-43f, -89f), restartLevel);
+        CreateResultIcon("V·ªÅ menu", "return", new Vector2(43f, -89f), exitGame);
+    }
+
+    private void FitResultArtwork(Sprite artwork)
+    {
+        const float maxWidth = 280f;
+        const float maxHeight = 190f;
+        float aspect = artwork.rect.width / artwork.rect.height;
+        float width = maxWidth;
+        float height = width / aspect;
+        if (height > maxHeight)
+        {
+            height = maxHeight;
+            width = height * aspect;
+        }
+        resultRect.sizeDelta = new Vector2(width, height);
+    }
+
+    private void CreateResultIcon(string objectName, string iconName, Vector2 position,
+        UnityEngine.Events.UnityAction action)
+    {
+        var buttonObject = new GameObject(objectName, typeof(RectTransform), typeof(CanvasRenderer),
+            typeof(Image), typeof(Button), typeof(PauseTextureButton), typeof(Shadow));
+        buttonObject.transform.SetParent(transform, false);
+        Center(buttonObject.GetComponent<RectTransform>(), new Vector2(58f, 63f), position);
+
+        Image buttonImage = buttonObject.GetComponent<Image>();
+        buttonImage.sprite = Resources.Load<Sprite>("GameUI/" + iconName);
+        buttonImage.preserveAspect = true;
+        Button button = buttonObject.GetComponent<Button>();
+        button.transition = Selectable.Transition.None;
+        button.targetGraphic = buttonImage;
+        button.onClick.AddListener(action);
+        buttonObject.GetComponent<PauseTextureButton>().target = buttonImage;
+        Shadow shadow = buttonObject.GetComponent<Shadow>();
+        shadow.effectColor = new Color(0f, 0f, 0f, .48f);
+        shadow.effectDistance = new Vector2(2f, -3f);
+    }
+
+    private IEnumerator RevealPresentation()
+    {
+        resultGroup.alpha = 0f;
+        resultRect.localScale = Vector3.one * .86f;
+        float elapsed = 0f;
+        const float duration = .38f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float progress = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / duration));
+            resultGroup.alpha = progress;
+            resultRect.localScale = Vector3.one * Mathf.Lerp(.86f, 1f, progress);
+            yield return null;
+        }
+        resultGroup.alpha = 1f;
+        resultRect.localScale = Vector3.one;
+    }
+
+    private static void Center(RectTransform rect, Vector2 size, Vector2 position)
+    {
+        rect.anchorMin = rect.anchorMax = new Vector2(.5f, .5f);
+        rect.pivot = new Vector2(.5f, .5f);
+        rect.sizeDelta = size;
+        rect.anchoredPosition = position;
+    }
+
+    private void restartLevel()
+    {
+        RestoreTime();
+        SceneManager.LoadScene("GameScene");
+    }
+
+    private void RestoreTime()
+    {
+        CancelInvoke();
+        Time.timeScale = 1f;
+        AudioListener.pause = false;
     }
 
     public void exitGame()
     {
-        Application.Quit();
+        // N√∫t "K·∫øt th√∫c" c·ªßa b·∫£ng k·∫øt qu·∫£ ph·∫£i quay v·ªÅ menu, kh√¥ng tho√°t ·ª©ng d·ª•ng.
+        // Kh√¥i ph·ª•c th·ªùi gian tr∆∞·ªõc khi ƒë·ªïi scene v√¨ b·∫£ng k·∫øt qu·∫£ ƒë√£ ƒë·∫∑t timeScale = 0.
+        RestoreTime();
+        SceneManager.LoadScene("MainMenu");
     }
 }

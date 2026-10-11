@@ -1,17 +1,17 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class CrazyDave : MonoBehaviour
 {
-    GameObject speechBubble;   //×Ó¶ÔÏó-´÷·òµÄ¶Ô»°¿ò
+    GameObject speechBubble;   //Äá»‘i tÆ°á»£ng con - khung thoáº¡i cá»§a Dave
 
-    string dialogToBeShowed;   //´ıËµµÄ¶Ô»°
-    AudioSource audioSource;   //×ÔÉíAudioSource×é¼ş
+    string dialogToBeShowed;   //CÃ¢u thoáº¡i chá» nÃ³i
+    AudioSource audioSource;   //Component AudioSource cá»§a chÃ­nh nÃ³
 
     private void Awake()
     {
-        //»ñÈ¡¶ÔÏóÓë×é¼ş
+        //Láº¥y Ä‘á»‘i tÆ°á»£ng vÃ  component
         speechBubble = transform.Find("SpeechBubble").gameObject;
         speechBubble.SetActive(false);
         audioSource = gameObject.GetComponent<AudioSource>();
@@ -29,23 +29,23 @@ public class CrazyDave : MonoBehaviour
         dialogToBeShowed = content;
     }
 
-    //talk¶¯»­¿ªÍ·µ÷ÓÃÊÂ¼ş
+    //Sá»± kiá»‡n gá»i á»Ÿ Ä‘áº§u animation talk
     public void showSpeechBubble_talk()
     {
-        GetComponent<Animator>().SetBool("talk", false);   //±êÖ¾Î»Éè¼Ù£¬¼´Ö»ËµÒ»±é
-        speechBubble.GetComponent<SpeechBubble>().showDialog(dialogToBeShowed);   //Õ¹Ê¾¶Ô»°
-        //²¥·ÅÒôĞ§
+        GetComponent<Animator>().SetBool("talk", false);   //Äáº·t cá» thÃ nh false, tá»©c chá»‰ nÃ³i má»™t láº§n
+        speechBubble.GetComponent<SpeechBubble>().showDialog(dialogToBeShowed);   //Hiá»ƒn thá»‹ há»™i thoáº¡i
+        //PhÃ¡t Ã¢m thanh
         audioSource.clip =
             Resources.Load<AudioClip>("Sounds/CrazyDave/CrazyDave_Talk" + Random.Range(1, 4));
         audioSource.Play();
     }
 
-    //smallTalk¶¯»­¿ªÍ·µ÷ÓÃÊÂ¼ş
+    //Sá»± kiá»‡n gá»i á»Ÿ Ä‘áº§u animation smallTalk
     public void showSpeechBubble_smallTalk()
     {
-        GetComponent<Animator>().SetBool("smallTalk", false);   //±êÖ¾Î»Éè¼Ù£¬¼´Ö»ËµÒ»±é
-        speechBubble.GetComponent<SpeechBubble>().showDialog(dialogToBeShowed);   //Õ¹Ê¾¶Ô»°
-        //²¥·ÅÒôĞ§
+        GetComponent<Animator>().SetBool("smallTalk", false);   //Äáº·t cá» thÃ nh false, tá»©c chá»‰ nÃ³i má»™t láº§n
+        speechBubble.GetComponent<SpeechBubble>().showDialog(dialogToBeShowed);   //Hiá»ƒn thá»‹ há»™i thoáº¡i
+        //PhÃ¡t Ã¢m thanh
         audioSource.clip =
             Resources.Load<AudioClip>("Sounds/CrazyDave/CrazyDave_Short" + Random.Range(1, 4));
         audioSource.Play();

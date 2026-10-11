@@ -1,21 +1,23 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Plant : MonoBehaviour
 {
-    protected PlantGrid myGrid;   //该植物所在Grid
-    public int row;  //该植物在第几行
+    protected PlantGrid myGrid;   //Grid mà cây này đang đứng
+    public int row;  //Cây này ở hàng thứ mấy
 
     public int bloodVolume;
     private int bloodVolumeMax;
+    public int BloodVolumeMax => bloodVolumeMax; // Getter cho GameStateCollector
 
     public PlantState state = PlantState.Normal;
-    protected int warmSource = 0;  //周围有几个温暖源
+    protected int warmSource = 0;  //Xung quanh có mấy nguồn sưởi ấm
 
-    protected bool intensified = false;   //是否处于强化状态
+    protected bool intensified = false;   //Có đang ở trạng thái tăng cường không
+    public bool Intensified => intensified; // Getter cho GameStateCollector
 
-    protected AudioSource audioSource;   //自身AudioSource组件
+    protected AudioSource audioSource;   //Component AudioSource của chính nó
 
     protected virtual void Awake()
     {
@@ -25,6 +27,7 @@ public class Plant : MonoBehaviour
     protected virtual void Start()
     {
         bloodVolumeMax = bloodVolume;
+        EndlessModifierSystem.ApplyToPlant(this);
         if(SnowKingSong.play)
         {
             intensify();
@@ -33,6 +36,9 @@ public class Plant : MonoBehaviour
 
     public virtual int beAttacked(int hurt, string form)
     {
+        //Chơi mạng: chỉ máy chủ tính máu, máy khách đợi máy chủ báo cây chết
+        if (!NetSession.IsAuthority) return bloodVolume;
+
         bloodVolume -= hurt;
         if (bloodVolume <= 0)
         {
@@ -95,7 +101,17 @@ public class Plant : MonoBehaviour
         if(bloodVolume > bloodVolumeMax) bloodVolume = bloodVolumeMax;
     }
 
-    //强化函数，执行公共操作并调用特定操作函数
+    public void ScaleHealthForEndless(float relativeMultiplier)
+    {
+        if (!EndlessRun.Active) return;
+        relativeMultiplier = Mathf.Clamp(relativeMultiplier, 0.25f, 4f);
+        int previousMaximum = Mathf.Max(1, bloodVolumeMax);
+        float healthRatio = Mathf.Clamp01(bloodVolume / (float)previousMaximum);
+        bloodVolumeMax = Mathf.Max(1, Mathf.RoundToInt(previousMaximum * relativeMultiplier));
+        bloodVolume = Mathf.Clamp(Mathf.RoundToInt(bloodVolumeMax * healthRatio), 1, bloodVolumeMax);
+    }
+
+    //Hàm tăng cường, chạy thao tác chung rồi gọi hàm thao tác riêng
     public void intensify()
     {
         if(!intensified)
@@ -107,13 +123,13 @@ public class Plant : MonoBehaviour
         }
     }
 
-    //强化特定操作
+    //Thao tác tăng cường riêng
     protected virtual void intensify_specific()
     {
         GetComponent<Animator>().speed = 1.5f;
     }
 
-    //取消强化函数，执行公共操作并调用特定操作函数
+    //Hàm huỷ tăng cường, chạy thao tác chung rồi gọi hàm thao tác riêng
     public void cancelIntensify()
     {
         if(intensified)
@@ -126,7 +142,7 @@ public class Plant : MonoBehaviour
         }
     }
 
-    //取消强化特定操作
+    //Thao tác huỷ tăng cường riêng
     protected virtual void cancelIntensify_specific()
     {
         GetComponent<Animator>().speed = 1f;
@@ -162,7 +178,14 @@ public class Plant : MonoBehaviour
         Destroy(gameObject);
     }
 
-    //死前需要处理的事，由具体植物实现
+    // Loai cay khoi o de thay bang cay lai, khong danh dau o la trong.
+    public void removeForFusion()
+    {
+        beforeDie();
+        Destroy(gameObject);
+    }
+
+    //Việc cần xử lý trước khi chết, do từng loại cây tự cài đặt
     protected virtual void beforeDie()
     {
 

@@ -1,20 +1,28 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class LevelData
 {
-    public int level;  //¹Ø¿¨ĞòºÅ
-    public string levelName;   //¹Ø¿¨Ãû
+    public int level;  //Sá»‘ thá»© tá»± mÃ n
+    public string levelName;   //TÃªn mÃ n
 
-    public string mapSuffix;  //µØÍ¼Í¼Æ¬ºó×º
-    public int rowCount;   //×Ü¹²¼¸ĞĞ
-    public int landRowCount;   //¼¸ĞĞÂ½µØ
-    public bool isDay;   //ÊÇ·ñ°×Ìì
-    public string plantingManagementSuffix;   //¶ÔÓ¦µÄÖÖÖ²¹ÜÀí×é¼şºó×º
-    public string backgroundSuffix;   //¶ÔÓ¦±³¾°ÒôÀÖºó×º
+    public string mapSuffix;  //Háº­u tá»‘ áº£nh báº£n Ä‘á»“
+    public string mapResourcePath; //ÄÆ°á»ng dáº«n Resources Ä‘áº§y Ä‘á»§ cho map tÃ¹y biáº¿n
+    public Vector2 backgroundWorldSize; //KÃ­ch thÆ°á»›c ná»n trong world; zero giá»¯ nguyÃªn scale
+    public bool animateBackground = true; //Ná»n cÃ³ Ä‘Æ°á»£c phÃ©p trÃ´i nháº¹ hay khÃ´ng
+    public int rowCount;   //Tá»•ng cá»™ng bao nhiÃªu hÃ ng
+    public int landRowCount;   //Bao nhiÃªu hÃ ng Ä‘áº¥t liá»n
+    public bool isDay;   //CÃ³ pháº£i ban ngÃ y khÃ´ng
+    public string plantingManagementSuffix;   //Háº­u tá»‘ component quáº£n lÃ½ trá»“ng cÃ¢y tÆ°Æ¡ng á»©ng
+    public string backgroundSuffix;   //Háº­u tá»‘ nháº¡c ná»n tÆ°Æ¡ng á»©ng
 
-    public List<float> zombieInitPosY;   //¸÷ĞĞ½©Ê¬³õÊ¼YÖáÎ»ÖÃ
+    public List<float> zombieInitPosY;   //Vá»‹ trÃ­ trá»¥c Y ban Ä‘áº§u cá»§a zombie tá»«ng hÃ ng
+    public List<float> plantGridPosX; //TÃ¢m cÃ¡c cá»™t trá»“ng cÃ¢y; rá»—ng thÃ¬ dÃ¹ng prefab gá»‘c
+    public List<float> plantGridPosY; //TÃ¢m cÃ¡c hÃ ng, tá»« hÃ ng 0 á»Ÿ dÆ°á»›i lÃªn
 
-    public List<string> plantCards;   //±¾¹ØÖ²Îï¿¨²ÛĞòÁĞ
+    public List<string> plantCards;   //DÃ£y tháº» cÃ¢y cá»§a mÃ n nÃ y
+    public int initialSun = 50;       //LÆ°á»£ng náº¯ng khi báº¯t Ä‘áº§u mÃ n
+    public bool skipIntro = false;    //MÃ n chÆ¡i khÃ´ng cÃ³ há»™i thoáº¡i má»Ÿ Ä‘áº§u
+    public bool isTestMode = false;
 }

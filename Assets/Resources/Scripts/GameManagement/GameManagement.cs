@@ -6,31 +6,73 @@ using UnityEngine.UI;
 
 public class GameManagement : MonoBehaviour
 {
-    public int level;   //µ±«∞πÿø®–Ú∫≈
+    public int level;   //S·ªë th·ª© t·ª± m√†n hi·ªán t·∫°i
     private LevelController levelController;
-    public static LevelData levelData;   //µ±«∞πÿø® ˝æ›
+    private bool startWithoutDialog;
+    private UnityEngine.Object introDialogPrefab;
+    private bool gameplayStarted;
+    private bool gameEnding;
+    private GameObject zombiePreviewRoot;
+    public static LevelData levelData;   //D·ªØ li·ªáu m√†n hi·ªán t·∫°i
 
-    public List<GameObject> awakeList;  //¥˝ªΩ–—¡–±Ì£¨”√”⁄ø™≥°æÁ«ÈΩ· ¯∫ÛªΩ–—∏√ªΩ–—µƒ∂‘œÛ
+    private const float ZombiePreviewHold = 1.25f;
+    private const float CameraReturnDuration = 2.1f;
+    private const float GameOverCameraPanDuration = 1.35f;
+    private const float GameOverHouseHold = 0.8f;
 
-    public GameObject endMenuPanel;   //”Œœ∑Ω· ¯√Ê∞Â
-    public GameObject background;   //±≥æ∞∂‘œÛ
-    public GameObject zombieManagement;   //Ω© ¨π‹¿Ì∂‘œÛ
-    public GameObject uiManagement;   //UIπ‹¿Ì∂‘œÛ
+    public List<GameObject> awakeList;  //Danh s√°ch ch·ªù ƒë√°nh th·ª©c, d√πng ƒë·ªÉ ƒë√°nh th·ª©c c√°c ƒë·ªëi t∆∞·ª£ng sau khi k·∫øt th√∫c c·ªët truy·ªán m·ªü m√†n
+
+    public GameObject endMenuPanel;   //B·∫£ng k·∫øt th√∫c tr√≤ ch∆°i
+    public GameObject background;   //ƒê·ªëi t∆∞·ª£ng n·ªÅn
+    public GameObject zombieManagement;   //ƒê·ªëi t∆∞·ª£ng qu·∫£n l√Ω zombie
+    public GameObject uiManagement;   //ƒê·ªëi t∆∞·ª£ng qu·∫£n l√Ω UI
 
     private void Awake()
     {
+        // Ch∆°i m·∫°ng th√¨ m√†n do ch·ªß ph√≤ng quy·∫øt ƒë·ªãnh, sau ƒë√≥ m·ªõi t·ªõi b·∫£ng ch·ªçn m√†n.
+        if (NetSession.IsOnline && NetSession.Level >= 0)
+            level = NetSession.Level;
+        else if (GameSession.SelectedLevel >= 0)
+            level = GameSession.SelectedLevel;
+
         levelController = 
             (LevelController)gameObject.AddComponent(Type.GetType("Level" + level + "Controller"));
         levelController.init();
 
-        //º”‘ÿ±≥æ∞Õº∆¨
-        background.GetComponent<SpriteRenderer>().sprite =
-            Resources.Load<Sprite>("Sprites/Background/Background" + levelData.mapSuffix);
-        //…Ë÷√±≥æ∞“Ù¿÷
+        // Endless ch·ªâ m∆∞·ª£n s√¢n v√† prefab c·ªßa m√†n ng√†y; lu·∫≠t ch∆°i do h·ªá th·ªëng ri√™ng qu·∫£n l√Ω.
+        if (EndlessRun.Active)
+        {
+            levelData.levelName = "Sinh T·ªìn V√¥ H·∫°n";
+            levelData.initialSun = 150 + EndlessRun.StartingSunBonus;
+            levelData.skipIntro = true;
+        }
+
+        // A selection made in the main menu overrides the level's legacy
+        // default deck. Direct scene launches still keep the old defaults.
+        if (GameSession.SelectedPlants.Count > 0)
+            levelData.plantCards = new List<string>(GameSession.SelectedPlants);
+
+        //T·∫£i ·∫£nh n·ªÅn
+        string mapPath = string.IsNullOrEmpty(levelData.mapResourcePath)
+            ? "Sprites/BackGround/Background" + levelData.mapSuffix
+            : levelData.mapResourcePath;
+        Sprite mapSprite = Resources.Load<Sprite>(mapPath);
+        background.GetComponent<SpriteRenderer>().sprite = mapSprite;
+        if (mapSprite == null)
+            Debug.LogError("Missing level background: " + mapPath, this);
+        else if (levelData.backgroundWorldSize.x > 0f && levelData.backgroundWorldSize.y > 0f)
+        {
+            Vector2 spriteSize = mapSprite.bounds.size;
+            background.transform.localScale = new Vector3(
+                levelData.backgroundWorldSize.x / spriteSize.x,
+                levelData.backgroundWorldSize.y / spriteSize.y,
+                1f);
+        }
+        //ƒê·∫∑t nh·∫°c n·ªÅn
         background.GetComponent<BGMusicControl>()
             .changeMusic("Music" + levelData.backgroundSuffix);
 
-        //º”‘ÿ∂‘”¶µƒ÷÷÷≤π‹¿Ì◊Èº˛
+        //T·∫£i component qu·∫£n l√Ω tr·ªìng c√¢y t∆∞∆°ng ·ª©ng
         GameObject pm = Instantiate(
             Resources.Load<GameObject>(
                 "Prefabs/PlantingManagement/PlantingManagement" + levelData.plantingManagementSuffix),
@@ -38,35 +80,246 @@ public class GameManagement : MonoBehaviour
             Quaternion.Euler(0, 0, 0)
         );
         pm.name = "Planting Management";
+        applyCustomGridLayout(pm);
 
-        //º”‘ÿUI
+        //T·∫£i UI
         uiManagement.GetComponent<UIManagement>().initUI();
 
-        //º”‘ÿ∂‘ª∞√Ê∞Â
-        Instantiate(Resources.Load<UnityEngine.Object>("Prefabs/UI/DialogPanel/DialogPanel-Level" + level),
-                    new Vector3(0, 0, 0),
-                    Quaternion.Euler(0, 0, 0),
-                    GameObject.Find("TopCanvas").transform);
+        //M√†n test ho·∫∑c m√†n kh√¥ng c√≥ prefab h·ªôi tho·∫°i s·∫Ω v√†o gameplay tr·ª±c ti·∫øp.
+        introDialogPrefab = Resources.Load<UnityEngine.Object>("Prefabs/UI/DialogPanel/DialogPanel-Level" + level);
+        //Ch∆°i m·∫°ng th√¨ b·ªè h·ªôi tho·∫°i m·ªü m√†n, tr√°nh hai m√°y l·ªách nh·ªãp
+        if (levelData.skipIntro || NetSession.SkipIntroDialog || introDialogPrefab == null)
+            startWithoutDialog = true;
+    }
+
+    private void applyCustomGridLayout(GameObject plantingRoot)
+    {
+        if (levelData.plantGridPosX == null || levelData.plantGridPosY == null ||
+            levelData.plantGridPosX.Count == 0 || levelData.plantGridPosY.Count == 0) return;
+
+        foreach (PlantGrid grid in plantingRoot.GetComponentsInChildren<PlantGrid>(true))
+        {
+            string[] parts = grid.gameObject.name.Split('-');
+            if (parts.Length != 3 || !int.TryParse(parts[1], out int column) ||
+                !int.TryParse(parts[2], out int row)) continue;
+            if (column < 0 || column >= levelData.plantGridPosX.Count ||
+                row < 0 || row >= levelData.plantGridPosY.Count) continue;
+
+            Vector3 local = grid.transform.localPosition;
+            grid.transform.localPosition = new Vector3(
+                levelData.plantGridPosX[column], levelData.plantGridPosY[row], local.z);
+        }
+    }
+
+    private void Start()
+    {
+        StartCoroutine(playOpeningCamera());
+    }
+
+    // Xem tr∆∞·ªõc ƒë·ªôi zombie ·ªü m√©p ph·∫£i, sau ƒë√≥ tr∆∞·ª£t camera v·ªÅ s√¢n b√™n tr√°i.
+    // C√°c zombie preview kh√¥ng ƒëƒÉng k√Ω v√†o ZombieManagement n√™n kh√¥ng ·∫£nh h∆∞·ªüng th·∫Øng/thua.
+    private IEnumerator playOpeningCamera()
+    {
+        yield return null;
+
+        Camera mainCamera = Camera.main;
+        SpriteRenderer backgroundRenderer = background != null
+            ? background.GetComponent<SpriteRenderer>()
+            : null;
+        if (mainCamera != null && backgroundRenderer != null && backgroundRenderer.sprite != null)
+        {
+            Vector3 gameplayPosition = mainCamera.transform.position;
+            float halfCameraWidth = mainCamera.orthographicSize * mainCamera.aspect;
+            float rightPreviewX = Mathf.Max(gameplayPosition.x,
+                backgroundRenderer.bounds.max.x - halfCameraWidth);
+            Vector3 previewPosition = new Vector3(rightPreviewX,
+                gameplayPosition.y, gameplayPosition.z);
+
+            mainCamera.transform.position = previewPosition;
+            createZombiePreview();
+
+            float hold = 0f;
+            while (hold < ZombiePreviewHold)
+            {
+                hold += Time.unscaledDeltaTime;
+                yield return null;
+            }
+
+            float elapsed = 0f;
+            while (elapsed < CameraReturnDuration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float progress = Mathf.Clamp01(elapsed / CameraReturnDuration);
+                progress = progress * progress * (3f - 2f * progress);
+                mainCamera.transform.position = Vector3.Lerp(previewPosition, gameplayPosition, progress);
+                yield return null;
+            }
+            mainCamera.transform.position = gameplayPosition;
+        }
+
+        clearZombiePreview();
+
+        if (!startWithoutDialog && introDialogPrefab != null)
+        {
+            GameObject topCanvas = GameObject.Find("TopCanvas");
+            Instantiate(introDialogPrefab, Vector3.zero, Quaternion.identity,
+                topCanvas != null ? topCanvas.transform : null);
+        }
+        else
+        {
+            awakeAll();
+        }
+    }
+
+    private void createZombiePreview()
+    {
+        ZombieManagement manager = zombieManagement != null
+            ? zombieManagement.GetComponent<ZombieManagement>()
+            : null;
+        if (manager == null || manager.zombies == null) return;
+
+        var zombieTypes = new List<string>();
+        TextAsset json = Resources.Load<TextAsset>("Json/ZombieData/Level" + levelData.level);
+        TimeNodes nodes = json != null ? JsonUtility.FromJson<TimeNodes>(json.text) : null;
+        if (nodes != null && nodes.info != null)
+        {
+            foreach (TimeNode node in nodes.info)
+                if (!string.IsNullOrEmpty(node.zombie) && !zombieTypes.Contains(node.zombie))
+                    zombieTypes.Add(node.zombie);
+        }
+        if (levelData.level == 3 && !zombieTypes.Contains("Ghost")) zombieTypes.Add("Ghost");
+        if (zombieTypes.Count == 0) zombieTypes.Add("ZombieNormal");
+
+        zombiePreviewRoot = new GameObject("Zombie Preview");
+        int previewCount = Mathf.Clamp(zombieTypes.Count * 2, 5, 8);
+        for (int i = 0; i < previewCount; i++)
+        {
+            string zombieName = zombieTypes[i % zombieTypes.Count];
+            int row = i % levelData.zombieInitPosY.Count;
+            Vector3 position = new Vector3(5.45f + (i / levelData.rowCount) * 0.62f,
+                levelData.zombieInitPosY[row], 0f);
+
+            GameObject prefab = null;
+            foreach (GameObject candidate in manager.zombies)
+                if (candidate != null && candidate.name == zombieName)
+                {
+                    prefab = candidate;
+                    break;
+                }
+
+            GameObject preview = prefab != null
+                ? Instantiate(prefab, position, Quaternion.identity, zombiePreviewRoot.transform)
+                : ImportedZombieRuntime.Create(zombieName, position, zombiePreviewRoot.transform);
+            if (preview == null) continue;
+
+            preview.name = "Preview - " + zombieName;
+            Zombie zombie = preview.GetComponent<Zombie>();
+            if (zombie != null)
+            {
+                zombie.pos_row = row;
+                zombie.enabled = false;
+            }
+            foreach (Collider2D collider in preview.GetComponentsInChildren<Collider2D>(true))
+                collider.enabled = false;
+            foreach (Rigidbody2D body in preview.GetComponentsInChildren<Rigidbody2D>(true))
+                body.simulated = false;
+            foreach (AudioSource source in preview.GetComponentsInChildren<AudioSource>(true))
+            {
+                source.playOnAwake = false;
+                source.Stop();
+            }
+            foreach (Animator animator in preview.GetComponentsInChildren<Animator>(true))
+            {
+                foreach (AnimatorControllerParameter parameter in animator.parameters)
+                    if (parameter.type == AnimatorControllerParameterType.Bool && parameter.name == "Walk")
+                        animator.SetBool("Walk", true);
+            }
+        }
+    }
+
+    private void clearZombiePreview()
+    {
+        if (zombiePreviewRoot != null) Destroy(zombiePreviewRoot);
+        zombiePreviewRoot = null;
     }
 
     public void awakeAll()
     {
+        if (gameplayStarted) return;
+        gameplayStarted = true;
+
+        // H·ªôi tho·∫°i m·ªü ƒë·∫ßu ƒë√£ k·∫øt th√∫c, ·∫©n n√∫t b·ªè qua tr∆∞·ªõc khi gameplay b·∫Øt ƒë·∫ßu.
+        StartupSkipController.HideForGameplay();
+
         foreach (GameObject gameObject in awakeList)
         {
             gameObject.SetActive(true);
         }
         uiManagement.GetComponent<UIManagement>().appear();
-        zombieManagement.GetComponent<ZombieManagement>().activate();
         levelController.activate();
+        StartCoroutine(activateZombiesNextFrame());
+    }
+
+    private IEnumerator activateZombiesNextFrame()
+    {
+        //ƒê·ª£i Start c·ªßa ZombieManagement ƒë·ªçc xong JSON sau khi object v·ª´a ƒë∆∞·ª£c b·∫≠t.
+        yield return null;
+        zombieManagement.GetComponent<ZombieManagement>().activate();
     }
 
     public void gameOver()
     {
-        endMenuPanel.GetComponent<EndMenu>().gameOver();
+        if (EndlessRun.HandleGameOver()) return;
+        if (gameEnding) return;
+        gameEnding = true;
+        //M√°y ch·ªß b√°o k·∫øt qu·∫£ cho m√°y kh√°ch tr∆∞·ªõc khi hi·ªán b·∫£ng k·∫øt th√∫c
+        NetGameplay.NotifyGameEnd(true);
+        StartCoroutine(playGameOverCamera());
+    }
+
+    private IEnumerator playGameOverCamera()
+    {
+        Camera mainCamera = Camera.main;
+        SpriteRenderer backgroundRenderer = background != null
+            ? background.GetComponent<SpriteRenderer>()
+            : null;
+        if (mainCamera != null && backgroundRenderer != null)
+        {
+            Vector3 start = mainCamera.transform.position;
+            float halfCameraWidth = mainCamera.orthographicSize * mainCamera.aspect;
+            float leftEdgeX = backgroundRenderer.bounds.min.x + halfCameraWidth;
+            Vector3 target = new Vector3(Mathf.Min(start.x, leftEdgeX), start.y, start.z);
+            float elapsed = 0f;
+            while (elapsed < GameOverCameraPanDuration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                float progress = Mathf.SmoothStep(0f, 1f,
+                    Mathf.Clamp01(elapsed / GameOverCameraPanDuration));
+                mainCamera.transform.position = Vector3.Lerp(start, target, progress);
+                yield return null;
+            }
+            mainCamera.transform.position = target;
+        }
+
+        float hold = 0f;
+        while (hold < GameOverHouseHold)
+        {
+            hold += Time.unscaledDeltaTime;
+            yield return null;
+        }
+        if (endMenuPanel != null) endMenuPanel.GetComponent<EndMenu>()?.gameOver();
     }
 
     public void win()
     {
+        if (gameEnding) return;
+        gameEnding = true;
+        NetGameplay.NotifyGameEnd(false);
         endMenuPanel.GetComponent<EndMenu>().win();
+    }
+
+    private void OnDestroy()
+    {
+        clearZombiePreview();
     }
 }

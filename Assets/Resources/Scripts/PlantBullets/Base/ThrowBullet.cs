@@ -1,11 +1,11 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class ThrowBullet : MonoBehaviour
 {
-    public float speed = 4;   //×Óµ¯ËÙ¶È
-    public float rotateSpeed = 4;  //¿ÕÖĞĞı×ªËÙ¶È
+    public float speed = 4;   //Tá»‘c Ä‘á»™ Ä‘áº¡n
+    public float rotateSpeed = 4;  //Tá»‘c Ä‘á»™ xoay trÃªn khÃ´ng
     public int hurt;
     public Sprite boomSprite;
     protected Plant myPlant;
@@ -38,10 +38,11 @@ public class ThrowBullet : MonoBehaviour
 
     protected virtual void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.tag == "Zombie" && boom == false && row == collision.GetComponent<Zombie>().pos_row)
+        Zombie zombie = collision.GetComponent<Zombie>();
+        if (collision.tag == "Zombie" && zombie != null && !zombie.IsHypnotized && boom == false && row == zombie.pos_row)
         {
             blast();
-            attack(collision.GetComponent<Zombie>());
+            attack(zombie);
         }
         else if (collision.tag == "BulletDisappearLine")
         {
@@ -54,7 +55,7 @@ public class ThrowBullet : MonoBehaviour
         boom = true;
         moving = false;
 
-        //ÇĞ»»Õ¨¿ªÍ¼Æ¬
+        //Äá»•i sang áº£nh ná»•
         gameObject.GetComponent<SpriteRenderer>().sprite = boomSprite;
         Invoke("disappear", 0.1f);
     }
@@ -76,7 +77,7 @@ public class ThrowBullet : MonoBehaviour
         this.row = row;
         this.myPlant = myPlant;
 
-        //¼ÆËãÅ×ÎïÏß²ÎÊı
+        //TÃ­nh tham sá»‘ Ä‘Æ°á»ng parabol
         initialPos = transform.position;
         float distance = targetZombie.transform.position.x - initialPos.x;
         float y = distance / 3;
@@ -92,7 +93,7 @@ public class ThrowBullet : MonoBehaviour
         this.myPlant = myPlant;
         this.hurt = hurt;
 
-        //¼ÆËãÅ×ÎïÏß²ÎÊı
+        //TÃ­nh tham sá»‘ Ä‘Æ°á»ng parabol
         initialPos = transform.position;
         float distance = targetZombie.transform.position.x - initialPos.x;
         float y = distance / 3;

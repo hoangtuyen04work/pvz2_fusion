@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,7 +6,7 @@ public class Level4Controller : LevelController
 {
     protected override void Start()
     {
-        //¼ÓÔØÏÂÑ©Ğ§¹û
+        //Táº£i hiá»‡u á»©ng tuyáº¿t rÆ¡i
         Instantiate(Resources.Load<Object>("Prefabs/Effects/Weather/Snow"),
                     new Vector3(0, 4, 0),
                     Quaternion.Euler(-90, 0, 0));
@@ -16,20 +16,20 @@ public class Level4Controller : LevelController
     {
         GameManagement.levelData = new LevelData()
         {
-            level = 4,   //¹Ø¿¨ĞòºÅ
-            levelName = "¼«µØ±ù´¨",   //¹Ø¿¨Ãû
+            level = 4,   //Sá»‘ thá»© tá»± mÃ n
+            levelName = "SÃ´ng BÄƒng Äá»‹a Cá»±c",   //TÃªn mÃ n
 
-            mapSuffix = "_Ice", //µØÍ¼Í¼Æ¬ºó×º
-            rowCount = 5,       //×Ü¹²¼¸ĞĞ
-            landRowCount = 5,   //¼¸ĞĞÂ½µØ
-            isDay = true,       //ÊÇ·ñ°×Ìì
-            plantingManagementSuffix = "_Ice",   //¶ÔÓ¦µÄÖÖÖ²¹ÜÀí×é¼şºó×º
-            backgroundSuffix = "_Ice",   //¶ÔÓ¦±³¾°ÒôÀÖºó×º
+            mapSuffix = "_Ice", //Háº­u tá»‘ áº£nh báº£n Ä‘á»“
+            rowCount = 5,       //Tá»•ng cá»™ng bao nhiÃªu hÃ ng
+            landRowCount = 5,   //Bao nhiÃªu hÃ ng Ä‘áº¥t liá»n
+            isDay = true,       //CÃ³ pháº£i ban ngÃ y khÃ´ng
+            plantingManagementSuffix = "_Ice",   //Háº­u tá»‘ component quáº£n lÃ½ trá»“ng cÃ¢y tÆ°Æ¡ng á»©ng
+            backgroundSuffix = "_Ice",   //Háº­u tá»‘ nháº¡c ná»n tÆ°Æ¡ng á»©ng
 
-            //¸÷ĞĞ½©Ê¬³õÊ¼YÖáÎ»ÖÃ
+            //Vá»‹ trÃ­ trá»¥c Y ban Ä‘áº§u cá»§a zombie tá»«ng hÃ ng
             zombieInitPosY = new List<float> { -2.168f, -1.24f, -0.2f, 0.85f, 1.82f },
 
-            //±¾¹ØÖ²Îï¿¨²ÛĞòÁĞ
+            //DÃ£y tháº» cÃ¢y cá»§a mÃ n nÃ y
             plantCards = new List<string>
             {
                 "SunFlower",

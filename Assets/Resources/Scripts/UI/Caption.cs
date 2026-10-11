@@ -1,33 +1,33 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class Caption : MonoBehaviour
 {
-    Queue<CaptionNode> captionQueue = new Queue<CaptionNode>();   //´ıÕ¹Ê¾×ÖÄ»¶ÓÁĞ
-    SpriteRenderer spriteRenderer;   //×ÔÉíµÄSpriteRenderer×é¼ş
-    AudioSource audioSource;   //×ÔÉíAudioSource×é¼ş
+    Queue<CaptionNode> captionQueue = new Queue<CaptionNode>();   //HÃ ng Ä‘á»£i phá»¥ Ä‘á» chá» hiá»ƒn thá»‹
+    SpriteRenderer spriteRenderer;   //Component SpriteRenderer cá»§a chÃ­nh nÃ³
+    AudioSource audioSource;   //Component AudioSource cá»§a chÃ­nh nÃ³
 
-    //×ÖÄ»ËõĞ¡¶¯»­
-    bool haveShrinked = false;  //×ÖÄ»ÊÇ·ñÒÑ¾­ËõĞ¡Íê³É
-    Vector3 shrinkVelocity = new Vector3(1000, 1000, 0);  //×ÖÄ»ËõĞ¡ËÙ¶È
-    Vector3 captionMaxScale = new Vector3(200, 200, 0);   //×ÖÄ»×î´ó¹æÄ£
-    int x_MinScale = 80;   //×ÖÄ»×îĞ¡¹æÄ£µÄx·ÖÁ¿
+    //Animation thu nhá» phá»¥ Ä‘á»
+    bool haveShrinked = false;  //Phá»¥ Ä‘á» Ä‘Ã£ thu nhá» xong chÆ°a
+    Vector3 shrinkVelocity = new Vector3(1000, 1000, 0);  //Tá»‘c Ä‘á»™ thu nhá» phá»¥ Ä‘á»
+    Vector3 captionMaxScale = new Vector3(200, 200, 0);   //Tá»‰ lá»‡ lá»›n nháº¥t cá»§a phá»¥ Ä‘á»
+    int x_MinScale = 80;   //ThÃ nh pháº§n x cá»§a tá»‰ lá»‡ nhá» nháº¥t cá»§a phá»¥ Ä‘á»
 
-    //×ÖÄ¸¾²Ö¹Õ¹Ê¾
-    bool isShowing = false;   //ÊÇ·ñÕıÔÚÕ¹Ê¾×ÖÄ»
-    float showTimer = 0;    //×ÖÄ»Õ¹Ê¾Ê±¼ä¼ÆÊ±Æ÷
+    //Hiá»ƒn thá»‹ phá»¥ Ä‘á» Ä‘á»©ng yÃªn
+    bool isShowing = false;   //CÃ³ Ä‘ang hiá»ƒn thá»‹ phá»¥ Ä‘á» khÃ´ng
+    float showTimer = 0;    //Bá»™ Ä‘áº¿m thá»i gian hiá»ƒn thá»‹ phá»¥ Ä‘á»
 
-    CaptionNode nowNode;  //µ±Ç°ÕıÔÚÕ¹Ê¾µÄ×ÖÄ»
+    CaptionNode nowNode;  //Phá»¥ Ä‘á» Ä‘ang hiá»ƒn thá»‹ hiá»‡n táº¡i
 
     // Start is called before the first frame update
     void Start()
     {
-        //³õÊ¼¾²Ö¹£¬Ô¤·À¿ªÊ¼Ê±Ö¡ÂÊ¹ıµÍÓ°ÏìÕ¹Ê¾Ğ§¹û
+        //Äá»©ng yÃªn lÃºc Ä‘áº§u, phÃ²ng khi FPS tháº¥p lÃºc má»›i báº¯t Ä‘áº§u lÃ m há»ng hiá»‡u á»©ng hiá»ƒn thá»‹
         gameObject.SetActive(false);
         Invoke("activate", 2f);
 
-        //»ñÈ¡×é¼ş
+        //Láº¥y component
         spriteRenderer = GetComponent<SpriteRenderer>();
         spriteRenderer.enabled = false;
         audioSource = GetComponent<AudioSource>();
@@ -53,7 +53,7 @@ public class Caption : MonoBehaviour
         gameObject.SetActive(true);
     }
 
-    //¸üĞÂ×ÖÄ¸×´Ì¬
+    //Cáº­p nháº­t tráº¡ng thÃ¡i phá»¥ Ä‘á»
     private void updateCaption()
     {
         if (haveShrinked == false)
@@ -75,12 +75,12 @@ public class Caption : MonoBehaviour
         }
     }
 
-    //¸ü»»Õ¹Ê¾µÄ×ÖÄ»
+    //Äá»•i phá»¥ Ä‘á» Ä‘ang hiá»ƒn thá»‹
     private void changeCaption()
     {
         nowNode = captionQueue.Dequeue();
 
-        //¸üĞÂÍ¼Æ¬
+        //Cáº­p nháº­t áº£nh
         spriteRenderer.sprite =
                     Resources.Load<Sprite>("Sprites/UI/Caption/" + nowNode.caption);
         transform.localScale = captionMaxScale;
@@ -89,13 +89,13 @@ public class Caption : MonoBehaviour
         haveShrinked = false;
         showTimer = 0;
 
-        //²¥·ÅÒôĞ§
+        //PhÃ¡t Ã¢m thanh
         audioSource.clip = 
             Resources.Load<AudioClip>("Sounds/UI/Caption/" + nowNode.caption);
         audioSource.Play();
     }
 
-    //×¼±¸Õ¹Ê¾ÓÎÏ·¿ªÊ¼×ÖÄ»
+    //Chuáº©n bá»‹ hiá»‡n phá»¥ Ä‘á» báº¯t Ä‘áº§u trÃ² chÆ¡i
     public void showGameStart()
     {
         captionQueue.Enqueue(new CaptionNode("StartReady", 0.5f));
@@ -103,13 +103,13 @@ public class Caption : MonoBehaviour
         captionQueue.Enqueue(new CaptionNode("StartPlant", 0.75f));
     }
 
-    //×¼±¸Õ¹Ê¾Ò»´ó²¨½©Ê¬×ÖÄ»
+    //Chuáº©n bá»‹ hiá»‡n phá»¥ Ä‘á» má»™t Ä‘á»£t zombie lá»›n
     public void showWave()
     {
         captionQueue.Enqueue(new CaptionNode("HugeWave", 3f));
     }
 
-    //×¼±¸Õ¹Ê¾×îºóÒ»²¨×ÖÄ»
+    //Chuáº©n bá»‹ hiá»‡n phá»¥ Ä‘á» Ä‘á»£t cuá»‘i cÃ¹ng
     public void showFinalWave()
     {
         captionQueue.Enqueue(new CaptionNode("HugeWave", 3f));

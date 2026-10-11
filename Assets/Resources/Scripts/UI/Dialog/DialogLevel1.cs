@@ -1,16 +1,16 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class DialogLevel1 : MonoBehaviour
 {
-    public CrazyDave crazyDave;   //·è¿ñ´÷·òµÄ½Å±¾×é¼ş
-    public SpeechBubble peaSpeechBubble;    //Íã¶¹¶Ô»°¿ò
-    public SpeechBubble daveSpeechBubble;   //·è¿ñ´÷·ò¶Ô»°¿ò
+    public CrazyDave crazyDave;   //Component script cá»§a Dave ÄiÃªn
+    public SpeechBubble peaSpeechBubble;    //Khung thoáº¡i cá»§a Äáº­u Báº¯n
+    public SpeechBubble daveSpeechBubble;   //Khung thoáº¡i cá»§a Dave ÄiÃªn
 
-    SpriteRenderer pea_spriteRenderer;   //Éú³ÉµÄÍã¶¹ÉäÊÖµÄSpriteRenderer£¬ÓÃÓÚ·­×ªËü
+    SpriteRenderer pea_spriteRenderer;   //SpriteRenderer cá»§a Äáº­u Báº¯n Ä‘Æ°á»£c sinh ra, dÃ¹ng Ä‘á»ƒ láº­t nÃ³
 
-    int count = 0;  //¶Ô»°¼ÆÊı£¬µ±Ç°ÊÇµÚ¼¸Ìõ¶Ô»°
+    int count = 0;  //Äáº¿m há»™i thoáº¡i, hiá»‡n lÃ  cÃ¢u thá»© máº¥y
 
     private void Awake()
     {
@@ -29,34 +29,34 @@ public class DialogLevel1 : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //µã»÷Êó±ê×ó¼ü£¬½øÈëÏÂÒ»ÊÂ¼ş
+        //Báº¥m chuá»™t trÃ¡i Ä‘á»ƒ sang sá»± kiá»‡n tiáº¿p theo
         if (Input.GetKeyDown(KeyCode.Mouse0))
         {
             switch(count)
             {
                 case 1:
                     crazyDave.gameObject.SetActive(true);
-                    crazyDave.talk("Å¶~ÎÒµÄ³ı²İ»ú»µÁË");
+                    crazyDave.talk("Ã”i~ mÃ¡y cáº¯t cá» cá»§a tÃ´i há»ng rá»“i");
                     count++;
                     break;
                 case 2:
-                    crazyDave.talk("You know......ÎÒ²»ÄÜÃ»ÓĞËü");
+                    crazyDave.talk("You know......tÃ´i khÃ´ng thá»ƒ thiáº¿u nÃ³");
                     count++;
                     break;
                 case 3:
-                    peaSpeechBubble.showDialog("ÌıÎÒËµ£¬Ğ»Ğ»Äã£¡");
+                    peaSpeechBubble.showDialog("Nghe tÃ´i nÃ³i nÃ y, cáº£m Æ¡n cáº­u!");
                     count++;
                     break;
                 case 4:
-                    crazyDave.smallTalk("²»¿ÍÆø£¡");
+                    crazyDave.smallTalk("KhÃ´ng cÃ³ gÃ¬ Ä‘Ã¢u!");
                     count++;
                     break;
                 case 5:
                     crazyDave.leave();
                     flipPea();
                     Invoke("showPeaDialog", 2f);
-                    count = -1;   //ÕâÑùÖ´ĞĞÏÂÃæµİÔöÓï¾äºócountÎª0
-                                  //´ËÊ±µã»÷²»´¥·¢ÊÂ¼ş£¬InvokeÖ´ĞĞºó²Å½øÈëÏÂÒ»ÊÂ¼ş
+                    count = -1;   //NhÆ° váº­y sau khi cháº¡y cÃ¢u lá»‡nh tÄƒng bÃªn dÆ°á»›i thÃ¬ count báº±ng 0
+                                  //LÃºc nÃ y báº¥m chuá»™t khÃ´ng kÃ­ch hoáº¡t sá»± kiá»‡n, pháº£i sau khi Invoke cháº¡y má»›i sang sá»± kiá»‡n tiáº¿p theo
                     break;
                 case 6:
                     GameObject.Find("Game Management").GetComponent<GameManagement>().awakeAll();
@@ -75,15 +75,15 @@ public class DialogLevel1 : MonoBehaviour
 
     private void showFirstDialog()
     {
-        peaSpeechBubble.showDialog("Where is my Ğ¡ÍÆ³µ£¡"); //Õ¹Ê¾¶Ô»°
-        count++;   //¼ÆÊıµİÔö
+        peaSpeechBubble.showDialog("Where is my xe Ä‘áº©y!"); //Hiá»ƒn thá»‹ há»™i thoáº¡i
+        count++;   //TÄƒng bá»™ Ä‘áº¿m
     }
 
-    //ÕâÊÇ´÷·òÀë¿ªºóÍã¶¹µÄµÚÒ»¾ä»°
+    //ÄÃ¢y lÃ  cÃ¢u Ä‘áº§u tiÃªn cá»§a Äáº­u Báº¯n sau khi Dave rá»i Ä‘i
     private void showPeaDialog()
     {
-        peaSpeechBubble.showDialog("ºß~¾ÍÕâĞ©»õÉ«£¬¸ù±¾ÓÃ²»×ÅĞ¡ÍÆ³µ"); //Õ¹Ê¾¶Ô»°
+        peaSpeechBubble.showDialog("Há»«~ Ä‘Ã¡m tÃ©p riu nÃ y thÃ¬ cáº§n gÃ¬ Ä‘áº¿n xe Ä‘áº©y"); //Hiá»ƒn thá»‹ há»™i thoáº¡i
 
-        count = 6;   //¼ÆÊıµİÔö
+        count = 6;   //TÄƒng bá»™ Ä‘áº¿m
     }
 }

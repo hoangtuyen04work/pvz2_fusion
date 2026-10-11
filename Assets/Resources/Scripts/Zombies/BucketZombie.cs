@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.U2D.Animation;
@@ -15,8 +15,8 @@ public class BucketZombie : Zombie
         audioOfBeingAttacked = "Sounds/Zombies/buckethit";
     }
 
-    //±»¹¥»÷
-    //×´Ì¬±¸×¢£º1300ÂúÑª£¬950ÌúÍ°ËğÉË1,600ÌúÍ°ËğÉË2,200ÌúÍ°µôÂä£¬100¸ì²²µôÂä
+    //Bá»‹ táº¥n cÃ´ng
+    //Ghi chÃº tráº¡ng thÃ¡i: 1300 Ä‘áº§y mÃ¡u, 950 thÃ¹ng sáº¯t há»ng 1, 600 thÃ¹ng sáº¯t há»ng 2, 200 thÃ¹ng sáº¯t rÆ¡i, 100 rá»¥ng tay
     public override void beAttacked(int hurt)
     {
         base.beAttacked(hurt);

@@ -6,40 +6,42 @@ public class DetectZombieRegion : MonoBehaviour
 {
     public GameObject myPlant;
     public BoxCollider2D myCollider;
-    private int zombieNum = 0;
+    private readonly List<Zombie> zombies = new List<Zombie>();
 
     private void Start()
     {
+        configureCollider();
+    }
+
+    private void configureCollider()
+    {
         float rightEdge = 5.3f;
         float leftEdge = myPlant.transform.position.x;
-        myCollider.size = new Vector2(rightEdge - leftEdge, myCollider.size.y);
-        myCollider.offset = new Vector2((rightEdge - leftEdge) / 2, 0);
+        float width = Mathf.Max(0.1f, rightEdge - leftEdge);
+        myCollider.size = new Vector2(width, myCollider.size.y);
+        myCollider.offset = new Vector2(width / 2f, 0f);
         myCollider.enabled = true;
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if(collision.tag == "Zombie" 
-            && collision.GetComponent<Zombie>().pos_row == myPlant.GetComponent<Plant>().row)
-        {
-            if(zombieNum == 0)
-            {
-                myPlant.GetComponent<Animator>().SetBool("Attack", true);
-            }
-            zombieNum++;
-        }
+        Zombie zombie = collision.GetComponent<Zombie>();
+        if(collision.tag == "Zombie" && zombie != null && !zombie.IsHypnotized &&
+            zombie.pos_row == myPlant.GetComponent<Plant>().row && !zombies.Contains(zombie))
+            zombies.Add(zombie);
     }
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        if (collision.tag == "Zombie"
-            && collision.GetComponent<Zombie>().pos_row == myPlant.GetComponent<Plant>().row)
-        {
-            zombieNum--;
-            if (zombieNum == 0)
-            {
-                myPlant.GetComponent<Animator>().SetBool("Attack", false);
-            }
-        }
+        Zombie zombie = collision.GetComponent<Zombie>();
+        if (zombie != null) zombies.Remove(zombie);
+    }
+
+    private void Update()
+    {
+        for(int i=zombies.Count-1;i>=0;i--)
+            if(zombies[i]==null || zombies[i].IsHypnotized || !zombies[i].gameObject.activeInHierarchy)
+                zombies.RemoveAt(i);
+        myPlant.GetComponent<Animator>().SetBool("Attack", zombies.Count>0);
     }
 }

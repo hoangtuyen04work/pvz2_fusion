@@ -67,7 +67,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: 4d1972c7417f2134b8559ab38f3d0b7e, type: 3}
+    m_Font: {fileID: 12800000, guid: 7f3c9a2b1d8e4f5a6b0c9d2e3f4a5b6c, type: 3}
     m_FontSize: 20
     m_FontStyle: 0
     m_BestFit: 0
@@ -79,7 +79,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "Where is my \u5C0F\u63A8\u8F66\uFF01"
+  m_Text: "Where is my xe \u0111\u1EA9y!"
 --- !u!1 &8309195127596179853
 GameObject:
   m_ObjectHideFlags: 0
@@ -147,7 +147,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_FontData:
-    m_Font: {fileID: 12800000, guid: 4d1972c7417f2134b8559ab38f3d0b7e, type: 3}
+    m_Font: {fileID: 12800000, guid: 7f3c9a2b1d8e4f5a6b0c9d2e3f4a5b6c, type: 3}
     m_FontSize: 14
     m_FontStyle: 0
     m_BestFit: 0
@@ -159,7 +159,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\u70B9\u51FB\u5C4F\u5E55\u7EE7\u7EED......"
+  m_Text: "Ch\u1EA1m m\u00E0n h\u00ECnh \u0111\u1EC3 ti\u1EBFp t\u1EE5c......"
 --- !u!1 &8598051311211585528
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,4 +1,4 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -14,20 +14,20 @@ public class Level2Controller : LevelController
     {
         GameManagement.levelData = new LevelData()
         {
-            level = 2,   //¹Ø¿¨ĞòºÅ
-            levelName = "¸ÏÊ¬½³",   //¹Ø¿¨Ãû
+            level = 2,   //Sá»‘ thá»© tá»± mÃ n
+            levelName = "Tháº§y Luyá»‡n XÃ¡c",   //TÃªn mÃ n
 
-            mapSuffix = "_Night_Wall", //µØÍ¼Í¼Æ¬ºó×º
-            rowCount = 5,       //×Ü¹²¼¸ĞĞ
-            landRowCount = 5,   //¼¸ĞĞÂ½µØ
-            isDay = false,       //ÊÇ·ñ°×Ìì
-            plantingManagementSuffix = "_Wall",   //¶ÔÓ¦µÄÖÖÖ²¹ÜÀí×é¼şºó×º
-            backgroundSuffix = "_Night_Wall",   //¶ÔÓ¦±³¾°ÒôÀÖºó×º
+            mapSuffix = "_Night_Wall", //Háº­u tá»‘ áº£nh báº£n Ä‘á»“
+            rowCount = 5,       //Tá»•ng cá»™ng bao nhiÃªu hÃ ng
+            landRowCount = 5,   //Bao nhiÃªu hÃ ng Ä‘áº¥t liá»n
+            isDay = false,       //CÃ³ pháº£i ban ngÃ y khÃ´ng
+            plantingManagementSuffix = "_Wall",   //Háº­u tá»‘ component quáº£n lÃ½ trá»“ng cÃ¢y tÆ°Æ¡ng á»©ng
+            backgroundSuffix = "_Night_Wall",   //Háº­u tá»‘ nháº¡c ná»n tÆ°Æ¡ng á»©ng
 
-            //¸÷ĞĞ½©Ê¬³õÊ¼YÖáÎ»ÖÃ
+            //Vá»‹ trÃ­ trá»¥c Y ban Ä‘áº§u cá»§a zombie tá»«ng hÃ ng
             zombieInitPosY = new List<float> { -2.45f, -1.5f, -0.5f, 0.55f, 1.55f },
 
-            //±¾¹ØÖ²Îï¿¨²ÛĞòÁĞ
+            //DÃ£y tháº» cÃ¢y cá»§a mÃ n nÃ y
             plantCards = new List<string>
             {
                 "SunFlower",

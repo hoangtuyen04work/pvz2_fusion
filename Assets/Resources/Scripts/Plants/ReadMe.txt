@@ -1,6 +1,6 @@
-Plant为植物基类，所有植物都应是其子类。
-MultiImagePlant继承于Plant，多图片骨骼动画制作的植物应继承此类，单图片序列帧动画植物继承Plant即可。
+Plant là lớp cơ sở của cây, mọi loại cây đều phải là lớp con của nó.
+MultiImagePlant kế thừa từ Plant; cây làm bằng animation xương nhiều ảnh thì kế thừa lớp này, còn cây dùng animation chuỗi khung hình một ảnh chỉ cần kế thừa Plant.
 
-继承Plant必须考虑的事：
-1.考虑强化操作intensify_specific函数是否需重写，并注意在植物中包含强化后的能力。
-2.考虑cold函数是否需重写，如窝瓜cold后行动不能减速，就需重写。
+Những điều bắt buộc phải cân nhắc khi kế thừa Plant:
+1. Cân nhắc xem hàm intensify_specific có cần ghi đè không, và nhớ cài đặt năng lực sau khi được tăng cường vào cây.
+2. Cân nhắc xem hàm cold có cần ghi đè không, ví dụ Bí Ngòi khi bị lạnh thì không được chậm lại nên phải ghi đè.

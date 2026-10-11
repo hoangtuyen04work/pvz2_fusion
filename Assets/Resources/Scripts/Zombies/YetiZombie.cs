@@ -1,4 +1,4 @@
-using System.Collections;
+Ôªøusing System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -22,14 +22,14 @@ public class YetiZombie : Zombie
         transform.Find("jaw").gameObject.SetActive(false);
     }
 
-    //≤•∑≈Ω© ¨µπœ¬µƒ“Ù–ß
+    //Ph√°t √¢m thanh zombie ng√£ xu·ªëng
     public override void fallDown()
     {
         audioSource.clip = Resources.Load<AudioClip>("Sounds/Zombies/yetifall");
         audioSource.Play();
     }
 
-    //≤•∑≈Ω© ¨ø–“ßµƒ“Ù–ß
+    //Ph√°t √¢m thanh zombie g·∫∑m
     public override void PlayEatAudio()
     {
         audioSource.clip = Resources.Load<AudioClip>("Sounds/Zombies/chomp_yeti");
