@@ -36,7 +36,7 @@ public class NetGameplay : MonoBehaviour
     public static NetGameplay Instance { get { return instance; } }
 
     private const float SyncInterval = 0.1f;    //Mười lần mỗi giây
-    private const float BrainInterval = 1f;     //Nhịp hồi não của phe zombie
+    private const float PvpClockInterval = 1f;
 
     private readonly Dictionary<string, PlantGrid> grids = new Dictionary<string, PlantGrid>();
     private readonly Dictionary<int, Zombie> zombies = new Dictionary<int, Zombie>();
@@ -44,14 +44,13 @@ public class NetGameplay : MonoBehaviour
 
     private int nextNetId = 1;
     private float nextSyncTime;
-    private float nextBrainTime;
+    private float nextPvpClockTime;
     private bool gridsReady;
     private bool ended;
 
     //Tài nguyên của phe zombie trong chế độ đối kháng
     public int Brains { get; private set; }
     public const int BrainMax = 500;
-    public const int BrainPerTick = 10;
     public const int BrainStart = 100;
 
     //Độ dài một trận đối kháng. Phe cây trụ được hết giờ là thắng.
@@ -91,7 +90,7 @@ public class NetGameplay : MonoBehaviour
             new GameObject("Zombie Commander", typeof(ZombieCommanderUI));
 
         nextSyncTime = Time.time + SyncInterval;
-        nextBrainTime = Time.time + BrainInterval;
+        nextPvpClockTime = Time.time + PvpClockInterval;
         pvpDeadline = Time.time + PvpMatchSeconds;
 
         //Xử lý nốt các gói tin đã tới trong lúc màn chơi còn đang nạp
@@ -118,9 +117,9 @@ public class NetGameplay : MonoBehaviour
                 SendZombieBatch();
             }
 
-            if (NetSession.Mode == NetGameMode.Pvp && Time.time >= nextBrainTime)
+            if (NetSession.Mode == NetGameMode.Pvp && Time.time >= nextPvpClockTime)
             {
-                nextBrainTime = Time.time + BrainInterval;
+                nextPvpClockTime = Time.time + PvpClockInterval;
                 TickPvpMatch();
             }
         }
@@ -299,7 +298,7 @@ public class NetGameplay : MonoBehaviour
     /// <summary>Người chơi bấm vào một mặt trời hoặc mặt trăng.</summary>
     public static void RequestSunPickup(SunBase sun)
     {
-        if (sun == null) return;
+        if (sun == null || sun.IsBeingCollected) return;
 
         if (!NetSession.IsOnline)
         {
@@ -307,15 +306,14 @@ public class NetGameplay : MonoBehaviour
             return;
         }
 
-        // Kiểm tra quyền nhặt: Phe Zombie chỉ được nhặt Mặt Trăng
-        bool isMoon = sun.name.Contains("Moon") || sun.gameObject.name.Contains("Moon");
-        if (NetSession.ControlsZombies && !isMoon) return;
         if (!NetSession.ControlsPlants && !NetSession.ControlsZombies) return;
 
         bool byZombie = NetSession.ControlsZombies;
+        if (NetSession.Mode == NetGameMode.Pvp && byZombie != sun.IsMoonResource) return;
 
         if (NetSession.IsAuthority)
         {
+            if (instance != null) instance.suns.Remove(sun.netId);
             sun.bePickedUp(byZombie);
             if (byZombie && instance != null)
             {
@@ -455,10 +453,9 @@ public class NetGameplay : MonoBehaviour
         NetManager.Broadcast(NetMessage.Of(NetMsg.ZombieCmdReq).Str(zombieName).Int(0, row));
     }
 
-    //Mỗi giây: hồi não cho phe zombie, đếm ngược đồng hồ trận đấu, rồi báo cho máy khách
+    //Mỗi giây chỉ đếm ngược đồng hồ trận đấu; não chỉ có từ việc nhặt Mặt Trăng.
     private void TickPvpMatch()
     {
-        Brains = Mathf.Clamp(Brains + BrainPerTick, 0, BrainMax);
         PvpSecondsLeft = Mathf.Max(0, Mathf.CeilToInt(pvpDeadline - Time.time));
 
         NetManager.Broadcast(NetMessage.Of(NetMsg.BrainSet).Int(Brains, PvpSecondsLeft));
@@ -674,7 +671,15 @@ public class NetGameplay : MonoBehaviour
     private void ApplySunPickRequest(int netId, bool byZombie)
     {
         SunBase sun;
-        if (!suns.TryGetValue(netId, out sun) || sun == null) return;
+        if (!suns.TryGetValue(netId, out sun) || sun == null || sun.IsBeingCollected) return;
+
+        // Trong PvP máy khách luôn là phe Zombie. Không tin cờ phe do client gửi
+        // và không cho yêu cầu nhặt nhầm tài nguyên đi qua máy chủ.
+        bool requesterIsZombie = NetSession.Mode == NetGameMode.Pvp;
+        if (byZombie != requesterIsZombie) return;
+        if (NetSession.Mode == NetGameMode.Pvp && requesterIsZombie != sun.IsMoonResource) return;
+
+        suns.Remove(netId);
         sun.bePickedUp(byZombie);
 
         if (byZombie && NetSession.Mode == NetGameMode.Pvp)
@@ -689,7 +694,8 @@ public class NetGameplay : MonoBehaviour
     {
         if (NetSession.IsAuthority) return;
         SunBase sun;
-        if (!suns.TryGetValue(netId, out sun) || sun == null) return;
+        if (!suns.TryGetValue(netId, out sun) || sun == null || sun.IsBeingCollected) return;
+        suns.Remove(netId);
         sun.bePickedUp(byZombie);
     }
 
@@ -812,13 +818,12 @@ public class NetGameplay : MonoBehaviour
             TextAnchor.UpperRight, new Color(0.85f, 1f, 0.7f, 0.85f),
             0.60f, 0.85f, 0.985f, 0.91f);
 
-        // Khung hiển thị đếm thời gian PvP riêng biệt:
-        // Đặt ở vị trí trung tâm phía trên màn hình (0.41f đến 0.59f, 0.925f đến 0.99f), không che bãi cỏ và không vướng Pause
+        // Khung đếm giờ ở góc dưới trái, tách khỏi khu vực nút đào cây.
         pvpTimerPanel = new GameObject("PvPTimerPanel", typeof(RectTransform), typeof(Image));
         pvpTimerPanel.transform.SetParent(canvasObject.transform, false);
         RectTransform timerPanelRect = pvpTimerPanel.GetComponent<RectTransform>();
-        timerPanelRect.anchorMin = new Vector2(0.42f, 0.925f);
-        timerPanelRect.anchorMax = new Vector2(0.58f, 0.988f);
+        timerPanelRect.anchorMin = new Vector2(0.015f, 0.018f);
+        timerPanelRect.anchorMax = new Vector2(0.175f, 0.082f);
         timerPanelRect.offsetMin = Vector2.zero;
         timerPanelRect.offsetMax = Vector2.zero;
         Image panelImg = pvpTimerPanel.GetComponent<Image>();

@@ -20,6 +20,15 @@ public abstract class SunBase : MonoBehaviour
     [HideInInspector] public float netParam;
     [HideInInspector] public bool netParamSet;
 
+    // Mặt Trăng dùng cùng lớp rơi với Mặt Trời, nên phân loại theo prefab gốc.
+    // Tên được giữ nguyên khi đồng bộ mạng (chỉ bỏ hậu tố Clone).
+    public bool IsMoonResource
+    {
+        get { return gameObject.name.IndexOf("Moon", System.StringComparison.OrdinalIgnoreCase) >= 0; }
+    }
+
+    public bool IsBeingCollected { get { return pickState; } }
+
     // Start is called before the first frame update
     protected virtual void Start()
     {
@@ -62,6 +71,8 @@ public abstract class SunBase : MonoBehaviour
 
     public void bePickedUp(bool byZombie)
     {
+        if (pickState) return;
+
         dropState = false;
         pickState = true;
         pickedByZombie = byZombie;

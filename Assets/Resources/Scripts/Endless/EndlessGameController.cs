@@ -643,7 +643,7 @@ public sealed class EndlessGameController : MonoBehaviour
             gameVersion = Application.version
         };
         EndlessLeaderboard.Add(record);
-        FirebaseAuthService.Instance.RecordEndlessResult(finalScore, completedStages, finalKills);
+        FirebaseAuthService.Instance.RecordEndlessResult(finalScore, completedStages, finalKills, duration);
         EndlessRun.DeleteProgress();
 
         int minutes = Mathf.FloorToInt(duration / 60f);

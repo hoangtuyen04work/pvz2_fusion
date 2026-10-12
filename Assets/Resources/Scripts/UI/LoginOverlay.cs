@@ -168,7 +168,7 @@ public class LoginOverlay : MonoBehaviour
         profileInfoText = CreateText("ProfileInfo", profileContainer.transform, "", font, 18, TextAnchor.MiddleCenter, new Color(0.95f, 0.95f, 0.85f));
         CenterRect(profileInfoText.rectTransform, new Vector2(480f, 160f), new Vector2(0f, 50f));
 
-        var syncObj = CreateButton("SyncBtn", profileContainer.transform, "ĐỒNG BỘ TIẾN TRÌNH LÊN CLOUD", font, 18, new Vector2(320f, 46f), new Vector2(0f, -40f), OnClickSyncCloud);
+        var syncObj = CreateButton("SyncBtn", profileContainer.transform, "ĐỒNG BỘ HAI CHIỀU CLOUD", font, 18, new Vector2(320f, 46f), new Vector2(0f, -40f), OnClickSyncCloud);
         syncBtn = syncObj.GetComponent<Button>();
 
         var outObj = CreateButton("SignOutBtn", profileContainer.transform, "ĐĂNG XUẤT", font, 18, new Vector2(180f, 40f), new Vector2(0f, -100f), OnClickSignOut);
@@ -262,27 +262,54 @@ public class LoginOverlay : MonoBehaviour
                 {
                     if (loadOk && profile != null)
                     {
-                        FirebaseAuthService.ApplyCloudProgress(profile);
+                        bool replaceLocal = !FirebaseAuthService.IsCurrentUserProgressOwner;
+                        FirebaseAuthService.ApplyCloudProgress(profile, replaceLocal);
 
                         // Đồng bộ kỷ lục Sinh tồn từ Cloud về Leaderboard cục bộ
                         if (profile.endlessBestScore > 0 || profile.endlessBestWave > 0)
                         {
                             var existing = EndlessLeaderboard.GetPlayerTopRecords(FirebaseAuthService.GetCurrentPlayerName(), 1);
-                            if (existing.Count == 0 || profile.endlessBestScore > existing[0].score)
+                            if (existing.Count == 0 ||
+                                profile.endlessBestWave > existing[0].wave ||
+                                (profile.endlessBestWave == existing[0].wave && profile.endlessBestScore > existing[0].score))
                             {
-                                EndlessLeaderboard.Add(new EndlessScoreRecord
+                                var cloudRecord = new EndlessScoreRecord
                                 {
                                     playerName = FirebaseAuthService.GetCurrentPlayerName(),
                                     score = profile.endlessBestScore,
                                     wave = profile.endlessBestWave,
-                                    kills = profile.endlessTotalKills,
-                                    durationSeconds = 0f,
+                                    kills = profile.endlessBestKills > 0 ? profile.endlessBestKills : profile.endlessTotalKills,
+                                    durationSeconds = profile.endlessBestDuration,
                                     seed = 0,
-                                    playedAtUtc = DateTime.UtcNow.ToString("o"),
+                                    playedAtUtc = string.IsNullOrEmpty(profile.endlessBestPlayedAtUtc)
+                                        ? DateTime.UtcNow.ToString("o")
+                                        : profile.endlessBestPlayedAtUtc,
                                     gameVersion = Application.version
-                                });
+                                };
+                                EndlessLeaderboard.Add(cloudRecord);
+                                FirebaseAuthService.Instance.SaveGlobalLeaderboardRecord(cloudRecord, null);
                             }
                         }
+                    }
+                    else if (!loadOk)
+                    {
+                        messageText.color = new Color(1f, 0.4f, 0.3f);
+                        messageText.text = loadMsg;
+                        return;
+                    }
+                    else
+                    {
+                        var emptyProfile = new FirebaseAuthService.PlayerProfileData
+                        {
+                            progressVersion = 2,
+                            username = FirebaseAuthService.GetCurrentPlayerName(),
+                            email = FirebaseAuthService.CurrentUserEmail,
+                            unlockedLevelsCount = 2,
+                            campaignCheckpointHealth = 100,
+                            mapClears = new int[3],
+                            mapLastClears = new string[3]
+                        };
+                        FirebaseAuthService.ApplyCloudProgress(emptyProfile, true);
                     }
                     RefreshView();
                     onLoginSuccessCallback?.Invoke();
@@ -309,10 +336,6 @@ public class LoginOverlay : MonoBehaviour
 
             if (success)
             {
-                // Tài khoản vừa tạo phải bắt đầu như bản cài mới, không kế thừa
-                // tiến trình khách đang có trên thiết bị.
-                CampaignProgress.ResetForNewAccount();
-
                 var freshProfile = new FirebaseAuthService.PlayerProfileData
                 {
                     progressVersion = 2,
@@ -335,8 +358,13 @@ public class LoginOverlay : MonoBehaviour
                     messageText.text = saveOk
                         ? "Đăng ký thành công! Tiến trình đã được bắt đầu lại."
                         : saveMsg;
+                    if (saveOk)
+                    {
+                        CampaignProgress.ResetForNewAccount();
+                        FirebaseAuthService.ApplyCloudProgress(freshProfile, true);
+                    }
                     RefreshView();
-                    onLoginSuccessCallback?.Invoke();
+                    if (saveOk) onLoginSuccessCallback?.Invoke();
                 });
             }
         });
@@ -365,7 +393,7 @@ public class LoginOverlay : MonoBehaviour
         int endlessWave = topEndless.Count > 0 ? topEndless[0].wave : 0;
         int endlessKills = topEndless.Count > 0 ? topEndless[0].kills : 0;
 
-        var profile = new FirebaseAuthService.PlayerProfileData
+        var localProfile = new FirebaseAuthService.PlayerProfileData
         {
             username = playerName,
             email = FirebaseAuthService.CurrentUserEmail,
@@ -375,15 +403,41 @@ public class LoginOverlay : MonoBehaviour
             losses = CampaignProgress.Losses,
             endlessBestScore = endlessScore,
             endlessBestWave = endlessWave,
+            endlessBestKills = endlessKills,
+            endlessBestDuration = topEndless.Count > 0 ? topEndless[0].durationSeconds : 0f,
+            endlessBestPlayedAtUtc = topEndless.Count > 0 ? topEndless[0].playedAtUtc : string.Empty,
             endlessTotalKills = endlessKills
         };
 
-        FirebaseAuthService.MergeLocalProgress(profile);
-
-        FirebaseAuthService.Instance.SavePlayerDataToCloud(profile, (success, msg) =>
+        FirebaseAuthService.MergeLocalProgress(localProfile);
+        SetInteractable(false);
+        FirebaseAuthService.Instance.SyncPlayerDataWithCloud(localProfile, (success, merged, msg) =>
         {
+            SetInteractable(true);
             messageText.color = success ? new Color(0.4f, 1f, 0.4f) : new Color(1f, 0.4f, 0.3f);
             messageText.text = msg;
+            if (!success || merged == null)
+            {
+                RefreshView();
+                return;
+            }
+
+            FirebaseAuthService.ApplyCloudProgress(merged);
+            if (merged.endlessBestScore > 0 || merged.endlessBestWave > 0)
+            {
+                var mergedRecord = new EndlessScoreRecord
+                {
+                    playerName = playerName,
+                    score = merged.endlessBestScore,
+                    wave = merged.endlessBestWave,
+                    kills = merged.endlessBestKills > 0 ? merged.endlessBestKills : merged.endlessTotalKills,
+                    durationSeconds = merged.endlessBestDuration,
+                    playedAtUtc = merged.endlessBestPlayedAtUtc,
+                    gameVersion = Application.version
+                };
+                EndlessLeaderboard.Add(mergedRecord);
+                FirebaseAuthService.Instance.SaveGlobalLeaderboardRecord(mergedRecord, null);
+            }
             RefreshView();
         });
     }

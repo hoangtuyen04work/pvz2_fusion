@@ -10,6 +10,15 @@ using UnityEngine.UI;
 /// </summary>
 public sealed class EndlessLeaderboardOverlay : MonoBehaviour
 {
+    private const float DialogWidth = 880f;
+    private const float DialogHeight = 620f;
+    private const float ListWidth = 800f;
+    private const float ListHorizontalInset = 54f;
+    private const float RowContentInset = 38f;
+
+    // One shared grid keeps header labels and record values pixel-perfect aligned.
+    private static readonly float[] ColumnEdges = { 0f, 0.105f, 0.42f, 0.555f, 0.735f, 1f };
+
     private static Font cachedFont;
     private static Sprite cachedDialogMain;
     private static Sprite cachedDialogChild;
@@ -29,8 +38,8 @@ public sealed class EndlessLeaderboardOverlay : MonoBehaviour
         var scaler = root.GetComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1000f, 750f);
-        scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
-        scaler.matchWidthOrHeight = 0.5f;
+        // Keep the whole board visible on wide, narrow and portrait displays.
+        scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
 
         root.GetComponent<EndlessLeaderboardOverlay>().Build();
     }
@@ -43,10 +52,10 @@ public sealed class EndlessLeaderboardOverlay : MonoBehaviour
     private static void LoadAssets()
     {
         if (cachedFont == null) cachedFont = Resources.Load<Font>("Fonts/Baloo2") ?? Resources.GetBuiltinResource<Font>("Arial.ttf");
-        if (cachedDialogMain == null) cachedDialogMain = Resources.Load<Sprite>("GameUI/dialog_main");
-        if (cachedDialogChild == null) cachedDialogChild = Resources.Load<Sprite>("GameUI/dialog_child");
-        if (cachedButton1 == null) cachedButton1 = Resources.Load<Sprite>("GameUI/button1");
-        if (cachedButton2 == null) cachedButton2 = Resources.Load<Sprite>("GameUI/button2");
+        if (cachedDialogMain == null) cachedDialogMain = CreateSlicedSprite(Resources.Load<Sprite>("GameUI/dialog_main"), 0.12f, 0.14f);
+        if (cachedDialogChild == null) cachedDialogChild = CreateSlicedSprite(Resources.Load<Sprite>("GameUI/dialog_child"), 0.12f, 0.20f);
+        if (cachedButton1 == null) cachedButton1 = CreateSlicedSprite(Resources.Load<Sprite>("GameUI/button1"), 0.14f, 0.30f);
+        if (cachedButton2 == null) cachedButton2 = CreateSlicedSprite(Resources.Load<Sprite>("GameUI/button2"), 0.18f, 0.28f);
         if (cachedCancel == null) cachedCancel = Resources.Load<Sprite>("GameUI/cancel");
     }
 
@@ -66,7 +75,7 @@ public sealed class EndlessLeaderboardOverlay : MonoBehaviour
         var dialogObject = new GameObject("Leaderboard Board", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         dialogObject.transform.SetParent(transform, false);
         var dialogRect = dialogObject.GetComponent<RectTransform>();
-        CenterRect(dialogRect, new Vector2(880f, 620f), Vector2.zero);
+        CenterRect(dialogRect, new Vector2(DialogWidth, DialogHeight), Vector2.zero);
 
         var dialogImage = dialogObject.GetComponent<Image>();
         dialogImage.sprite = cachedDialogMain;
@@ -76,14 +85,16 @@ public sealed class EndlessLeaderboardOverlay : MonoBehaviour
         AddSoftShadow(dialogObject, new Vector2(4f, -5f));
 
         // 3. Tiêu đề
-        var titleText = CreateText("Tiêu đề", dialogObject.transform, "BẢNG XẾP HẠNG SINH TỒN", 32, TextAnchor.MiddleCenter, new Color(1f, 0.90f, 0.40f, 1f));
-        CenterRect(titleText.rectTransform, new Vector2(500f, 48f), new Vector2(0f, 276f));
+        var titleText = CreateText("Tiêu đề", dialogObject.transform, "BẢNG XẾP HẠNG THẾ GIỚI", 32, TextAnchor.MiddleCenter, new Color(1f, 0.90f, 0.40f, 1f));
+        CenterRect(titleText.rectTransform, new Vector2(620f, 48f), new Vector2(0f, 276f));
         titleText.fontStyle = FontStyle.Bold;
+        ConfigureSingleLineText(titleText, 24);
         AddTextOutline(titleText.gameObject, new Color(0.24f, 0.08f, 0.02f, 0.98f), new Vector2(1.8f, -1.8f));
 
-        var subTitleText = CreateText("Phụ đề", dialogObject.transform, "TOP 50 NGƯỜI CHƠI XUẤT SẮC NHẤT", 18, TextAnchor.MiddleCenter, new Color(0.92f, 0.95f, 0.80f, 1f));
-        CenterRect(subTitleText.rectTransform, new Vector2(400f, 30f), new Vector2(0f, 240f));
+        var subTitleText = CreateText("Phụ đề", dialogObject.transform, "SINH TỒN VÔ HẠN  •  TOP 50", 18, TextAnchor.MiddleCenter, new Color(0.92f, 0.95f, 0.80f, 1f));
+        CenterRect(subTitleText.rectTransform, new Vector2(460f, 30f), new Vector2(0f, 240f));
         subTitleText.fontStyle = FontStyle.Bold;
+        ConfigureSingleLineText(subTitleText, 15);
         AddTextOutline(subTitleText.gameObject, new Color(0.18f, 0.08f, 0.02f, 0.95f), new Vector2(1.2f, -1.2f));
 
         // Nút Đóng (X) góc trên phải
@@ -102,7 +113,7 @@ public sealed class EndlessLeaderboardOverlay : MonoBehaviour
         var listFrame = new GameObject("List Frame", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         listFrame.transform.SetParent(parent, false);
         var frameRect = listFrame.GetComponent<RectTransform>();
-        CenterRect(frameRect, new Vector2(800f, 440f), new Vector2(0f, -10f));
+        CenterRect(frameRect, new Vector2(ListWidth, 440f), new Vector2(0f, -10f));
 
         var frameImg = listFrame.GetComponent<Image>();
         frameImg.sprite = cachedDialogChild;
@@ -118,20 +129,21 @@ public sealed class EndlessLeaderboardOverlay : MonoBehaviour
         headerRect.anchorMax = new Vector2(1f, 1f);
         headerRect.pivot = new Vector2(0.5f, 1f);
         headerRect.anchoredPosition = new Vector2(0f, -10f);
-        headerRect.sizeDelta = new Vector2(-28f, 36f);
+        headerRect.sizeDelta = new Vector2(-ListHorizontalInset * 2f, 40f);
 
         var headerImg = headerObj.GetComponent<Image>();
         headerImg.sprite = cachedButton1;
         headerImg.type = Image.Type.Sliced;
         headerImg.color = new Color(0.88f, 0.78f, 0.62f, 0.90f);
 
+        Transform headerGrid = CreateColumnGrid(headerObj.transform);
         BuildRowColumns(
-            headerObj.transform,
+            headerGrid,
             rankText: "HẠNG",
-            nameText: "TÊN NGƯỜI CHƠI",
-            waveText: "MÀN ĐẠT",
-            scoreText: "ĐIỂM SỐ",
-            statsText: "DIỆT / THỜI GIAN",
+            nameText: "NGƯỜI CHƠI",
+            waveText: "MÀN",
+            scoreText: "ĐIỂM",
+            statsText: "HẠ GỤC  •  THỜI GIAN",
             isHeader: true,
             rankColor: new Color(0.38f, 0.18f, 0.05f),
             nameColor: new Color(0.38f, 0.18f, 0.05f),
@@ -146,8 +158,8 @@ public sealed class EndlessLeaderboardOverlay : MonoBehaviour
         var scrollRectTransform = scrollObj.GetComponent<RectTransform>();
         scrollRectTransform.anchorMin = new Vector2(0f, 0f);
         scrollRectTransform.anchorMax = new Vector2(1f, 1f);
-        scrollRectTransform.offsetMin = new Vector2(14f, 12f);
-        scrollRectTransform.offsetMax = new Vector2(-14f, -52f);
+        scrollRectTransform.offsetMin = new Vector2(ListHorizontalInset, 14f);
+        scrollRectTransform.offsetMax = new Vector2(-ListHorizontalInset, -56f);
 
         var scrollBg = scrollObj.GetComponent<Image>();
         scrollBg.color = Color.clear;
@@ -187,22 +199,58 @@ public sealed class EndlessLeaderboardOverlay : MonoBehaviour
         scrollRect.viewport = viewport.GetComponent<RectTransform>();
         scrollRect.content = contentRect;
 
-        // Tải danh sách top 50
-        List<EndlessScoreRecord> records = EndlessLeaderboard.Load();
+        List<EndlessScoreRecord> localRecords = EndlessLeaderboard.Load();
+        if (FirebaseAuthService.IsLoggedIn && FirebaseConfig.IsConfigured &&
+            !FirebaseAuthService.CurrentUserId.StartsWith("guest_"))
+        {
+            ShowStatus(content.transform, "Đang tải bảng xếp hạng thế giới…");
+            FirebaseAuthService.Instance.LoadGlobalLeaderboard((ok, cloudRecords, message) =>
+            {
+                if (this == null || content == null) return;
+                ClearContent(content.transform);
+                PopulateRecords(content.transform, ok ? cloudRecords : localRecords,
+                    ok ? null : message + "\nĐang hiển thị dữ liệu cục bộ.");
+            });
+        }
+        else
+        {
+            PopulateRecords(content.transform, localRecords, null);
+        }
+    }
+
+    private void PopulateRecords(Transform content, List<EndlessScoreRecord> records, string statusMessage)
+    {
         if (records == null || records.Count == 0)
         {
-            var emptyText = CreateText("Empty", content.transform, "Chưa có thành tích Sinh tồn nào được ghi nhận.\nHãy tham gia chế độ Sinh Tồn để ghi tên vào bảng vàng!", 20, TextAnchor.MiddleCenter, new Color(0.45f, 0.25f, 0.10f));
-            var emptyElement = emptyText.GetComponent<LayoutElement>() ?? emptyText.gameObject.AddComponent<LayoutElement>();
-            emptyElement.preferredHeight = 160f;
-            emptyText.fontStyle = FontStyle.Bold;
+            ShowStatus(content, string.IsNullOrEmpty(statusMessage)
+                ? "Chưa có thành tích Sinh tồn nào được ghi nhận.\nHãy tham gia chế độ Sinh Tồn để ghi tên vào bảng vàng!"
+                : statusMessage);
             return;
         }
 
-        int count = Mathf.Min(50, records.Count);
-        for (int i = 0; i < count; i++)
+        if (!string.IsNullOrEmpty(statusMessage))
         {
-            CreateRecordRow(content.transform, i + 1, records[i]);
+            var notice = CreateText("Cloud Status", content, statusMessage, 13, TextAnchor.MiddleCenter, new Color(0.55f, 0.25f, 0.08f));
+            var noticeElement = notice.gameObject.AddComponent<LayoutElement>();
+            noticeElement.preferredHeight = 40f;
         }
+
+        int count = Mathf.Min(50, records.Count);
+        for (int i = 0; i < count; i++) CreateRecordRow(content, i + 1, records[i]);
+    }
+
+    private static void ShowStatus(Transform content, string message)
+    {
+            var emptyText = CreateText("Status", content, message, 18, TextAnchor.MiddleCenter, new Color(0.45f, 0.25f, 0.10f));
+            var emptyElement = emptyText.GetComponent<LayoutElement>() ?? emptyText.gameObject.AddComponent<LayoutElement>();
+            emptyElement.preferredHeight = 160f;
+            emptyText.fontStyle = FontStyle.Bold;
+    }
+
+    private static void ClearContent(Transform content)
+    {
+        for (int i = content.childCount - 1; i >= 0; i--)
+            Destroy(content.GetChild(i).gameObject);
     }
 
     private void CreateRecordRow(Transform parent, int rank, EndlessScoreRecord record)
@@ -212,6 +260,7 @@ public sealed class EndlessLeaderboardOverlay : MonoBehaviour
 
         var layoutElement = rowObj.GetComponent<LayoutElement>();
         layoutElement.preferredHeight = 44f;
+        layoutElement.minHeight = 44f;
         layoutElement.flexibleWidth = 1f;
 
         var rowImg = rowObj.GetComponent<Image>();
@@ -246,22 +295,35 @@ public sealed class EndlessLeaderboardOverlay : MonoBehaviour
             rankColor = new Color(0.35f, 0.20f, 0.10f);
         }
 
+        if (rank <= 3)
+        {
+            var accent = CreateImage("Top Accent", rowObj.transform, null, rankColor);
+            var accentRect = accent.rectTransform;
+            accentRect.anchorMin = new Vector2(0f, 0.12f);
+            accentRect.anchorMax = new Vector2(0f, 0.88f);
+            accentRect.pivot = new Vector2(0f, 0.5f);
+            accentRect.anchoredPosition = new Vector2(3f, 0f);
+            accentRect.sizeDelta = new Vector2(4f, 0f);
+            accent.raycastTarget = false;
+        }
+
         string rankStr = rank.ToString();
         if (rank == 1) rankStr = "★ 1 ★";
         else if (rank == 2) rankStr = "2";
         else if (rank == 3) rankStr = "3";
 
-        string displayName = string.IsNullOrWhiteSpace(record.playerName) ? "Người chơi" : record.playerName;
-        string waveStr = "Màn " + record.wave;
+        string displayName = FormatPlayerName(record.playerName);
+        string waveStr = record.wave.ToString();
         string scoreStr = record.score.ToString("N0");
 
         int minutes = Mathf.FloorToInt(record.durationSeconds / 60f);
         int seconds = Mathf.FloorToInt(record.durationSeconds % 60f);
         string timeStr = minutes.ToString("00") + ":" + seconds.ToString("00");
-        string statStr = record.kills + " zmb • " + timeStr;
+        string statStr = record.kills.ToString("N0") + "  •  " + timeStr;
 
+        Transform rowGrid = CreateColumnGrid(rowObj.transform);
         BuildRowColumns(
-            rowObj.transform,
+            rowGrid,
             rankText: rankStr,
             nameText: displayName,
             waveText: waveStr,
@@ -290,23 +352,32 @@ public sealed class EndlessLeaderboardOverlay : MonoBehaviour
         Color scoreColor,
         Color statsColor)
     {
-        int mainSize = isHeader ? 16 : 17;
-        int statSize = isHeader ? 16 : 15;
+        int mainSize = isHeader ? 15 : 17;
+        int statSize = isHeader ? 14 : 15;
 
-        // Cột 1: Hạng (0% -> 12%) - Canh giữa
-        CreateCell(parent, "Cell_Rank", rankText, 0.00f, 0.12f, TextAnchor.MiddleCenter, rankColor, mainSize, true, 4f, 4f);
+        CreateCell(parent, "Cell_Rank", rankText, ColumnEdges[0], ColumnEdges[1], TextAnchor.MiddleCenter, rankColor, mainSize, true, 8f, 6f);
 
-        // Cột 2: Tên người chơi (12% -> 44%) - Canh trái
-        CreateCell(parent, "Cell_Name", nameText, 0.12f, 0.44f, TextAnchor.MiddleLeft, nameColor, mainSize, true, 10f, 6f);
+        CreateCell(parent, "Cell_Name", nameText, ColumnEdges[1], ColumnEdges[2], TextAnchor.MiddleLeft, nameColor, mainSize, true, 14f, 10f);
 
-        // Cột 3: Màn đạt (44% -> 58%) - Canh giữa
-        CreateCell(parent, "Cell_Wave", waveText, 0.44f, 0.58f, TextAnchor.MiddleCenter, waveColor, mainSize, true, 4f, 4f);
+        CreateCell(parent, "Cell_Wave", waveText, ColumnEdges[2], ColumnEdges[3], TextAnchor.MiddleCenter, waveColor, mainSize, true, 8f, 8f);
 
-        // Cột 4: Điểm số (58% -> 76%) - Canh phải
-        CreateCell(parent, "Cell_Score", scoreText, 0.58f, 0.76f, TextAnchor.MiddleRight, scoreColor, isHeader ? mainSize : 18, true, 4f, 8f);
+        CreateCell(parent, "Cell_Score", scoreText, ColumnEdges[3], ColumnEdges[4], TextAnchor.MiddleRight, scoreColor, isHeader ? mainSize : 18, true, 8f, 12f);
 
-        // Cột 5: Diệt/Thời gian (76% -> 100%) - Canh phải
-        CreateCell(parent, "Cell_Stats", statsText, 0.76f, 1.00f, TextAnchor.MiddleRight, statsColor, statSize, isHeader, 4f, 12f);
+        CreateCell(parent, "Cell_Stats", statsText, ColumnEdges[4], ColumnEdges[5], TextAnchor.MiddleRight, statsColor, statSize, isHeader, 12f, 14f);
+
+        for (int i = 1; i < ColumnEdges.Length - 1; i++)
+            CreateColumnDivider(parent, ColumnEdges[i], isHeader);
+    }
+
+    private static Transform CreateColumnGrid(Transform parent)
+    {
+        var grid = new GameObject("Column Grid", typeof(RectTransform));
+        grid.transform.SetParent(parent, false);
+        var rect = grid.GetComponent<RectTransform>();
+        Stretch(rect);
+        rect.offsetMin = new Vector2(RowContentInset, 3f);
+        rect.offsetMax = new Vector2(-RowContentInset, -3f);
+        return grid.transform;
     }
 
     private static Text CreateCell(Transform parent, string name, string value, float xMin, float xMax, TextAnchor alignment, Color color, int fontSize, bool isBold, float padLeft = 4f, float padRight = 4f)
@@ -331,8 +402,58 @@ public sealed class EndlessLeaderboardOverlay : MonoBehaviour
         text.resizeTextForBestFit = true;
         text.resizeTextMinSize = 11;
         text.resizeTextMaxSize = fontSize;
+        text.horizontalOverflow = HorizontalWrapMode.Wrap;
+        text.verticalOverflow = VerticalWrapMode.Truncate;
+        text.lineSpacing = 0.9f;
 
         return text;
+    }
+
+    private static void CreateColumnDivider(Transform parent, float anchorX, bool isHeader)
+    {
+        var divider = CreateImage("Column Divider", parent, null,
+            isHeader ? new Color(0.28f, 0.13f, 0.04f, 0.35f) : new Color(0.35f, 0.22f, 0.10f, 0.16f));
+        var rect = divider.rectTransform;
+        rect.anchorMin = new Vector2(anchorX, 0.18f);
+        rect.anchorMax = new Vector2(anchorX, 0.82f);
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.anchoredPosition = Vector2.zero;
+        rect.sizeDelta = new Vector2(1f, 0f);
+        divider.raycastTarget = false;
+    }
+
+    private static string FormatPlayerName(string playerName)
+    {
+        string value = string.IsNullOrWhiteSpace(playerName) ? "Người chơi" : playerName.Trim();
+        value = value.Replace('\r', ' ').Replace('\n', ' ').Replace('\t', ' ');
+        while (value.Contains("  ")) value = value.Replace("  ", " ");
+        return value.Length > 28 ? value.Substring(0, 27) + "…" : value;
+    }
+
+    private static void ConfigureSingleLineText(Text text, int minSize)
+    {
+        text.resizeTextForBestFit = true;
+        text.resizeTextMinSize = minSize;
+        text.resizeTextMaxSize = text.fontSize;
+        text.horizontalOverflow = HorizontalWrapMode.Wrap;
+        text.verticalOverflow = VerticalWrapMode.Truncate;
+    }
+
+    private static Sprite CreateSlicedSprite(Sprite source, float horizontalBorderRatio, float verticalBorderRatio)
+    {
+        if (source == null) return null;
+        Rect rect = source.rect;
+        Vector4 border = new Vector4(
+            rect.width * horizontalBorderRatio,
+            rect.height * verticalBorderRatio,
+            rect.width * horizontalBorderRatio,
+            rect.height * verticalBorderRatio);
+
+        Vector2 normalizedPivot = new Vector2(source.pivot.x / rect.width, source.pivot.y / rect.height);
+        var sliced = Sprite.Create(source.texture, rect, normalizedPivot,
+            source.pixelsPerUnit, 0, SpriteMeshType.FullRect, border);
+        sliced.name = source.name + "_Sliced";
+        return sliced;
     }
 
     private void CreateStyledButton(string name, Transform parent, string label, int fontSize, Vector2 size, Vector2 position, UnityEngine.Events.UnityAction action)

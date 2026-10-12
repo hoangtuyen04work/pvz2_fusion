@@ -41,7 +41,17 @@ public class SunManagement : MonoBehaviour
         //Máy khách không tự sinh mặt trời, nó nhận lệnh sinh từ máy chủ
         if (!NetSession.IsAuthority) return;
 
-        Invoke(createFunc, Random.Range(minInterval, maxInterval));
+        // Đối kháng luôn cần đồng thời đúng một loại Mặt Trời cho phe Plant
+        // và Mặt Trăng cho phe Zombie, không phụ thuộc bản đồ ngày hay đêm.
+        if (NetSession.Mode == NetGameMode.Pvp)
+        {
+            Invoke(nameof(createSun), Random.Range(minInterval, maxInterval));
+            Invoke(nameof(createMoon), Random.Range(minInterval, maxInterval));
+        }
+        else
+        {
+            Invoke(createFunc, Random.Range(minInterval, maxInterval));
+        }
     }
 
     // Update is called once per frame
@@ -62,14 +72,16 @@ public class SunManagement : MonoBehaviour
             );
         }
 
-        Invoke(createFunc, Random.Range(minInterval, maxInterval));
+        Invoke(NetSession.Mode == NetGameMode.Pvp ? nameof(createSun) : createFunc,
+            Random.Range(minInterval, maxInterval));
     }
 
     private void createMoon()
     {
         if (spawningPaused)
         {
-            Invoke(createFunc, Random.Range(minInterval, maxInterval));
+            Invoke(NetSession.Mode == NetGameMode.Pvp ? nameof(createMoon) : createFunc,
+                Random.Range(minInterval, maxInterval));
             return;
         }
 
@@ -84,7 +96,8 @@ public class SunManagement : MonoBehaviour
             transform
         );
 
-        Invoke(createFunc, Random.Range(minInterval, maxInterval));
+        Invoke(NetSession.Mode == NetGameMode.Pvp ? nameof(createMoon) : createFunc,
+            Random.Range(minInterval, maxInterval));
     }
 
     private void clickSun()
@@ -96,14 +109,12 @@ public class SunManagement : MonoBehaviour
             SunBase sun = allSun[allSun.Length - 1].gameObject.GetComponent<SunBase>();
             if (sun == null) return;
 
-            // Kiểm tra quyền nhặt trong chế độ chơi mạng:
-            // Phe cây nhặt được mọi loại nắng/mặt trăng.
-            // Phe zombie trong đối kháng chỉ được nhặt Mặt Trăng (FullMoon / CrescentMoon).
+            // Đối kháng: Plant chỉ nhặt Mặt Trời, Zombie chỉ nhặt Mặt Trăng.
             if (NetSession.IsOnline)
             {
-                bool isMoon = sun.name.Contains("Moon") || sun.gameObject.name.Contains("Moon");
-                if (NetSession.ControlsZombies && !isMoon) return;
                 if (!NetSession.ControlsPlants && !NetSession.ControlsZombies) return;
+                if (NetSession.Mode == NetGameMode.Pvp &&
+                    NetSession.ControlsZombies != sun.IsMoonResource) return;
 
                 NetGameplay.RequestSunPickup(sun);
             }

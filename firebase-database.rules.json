@@ -1,0 +1,19 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "users": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid",
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    },
+    "leaderboard": {
+      ".read": "auth != null",
+      "$uid": {
+        ".write": "auth != null && auth.uid === $uid",
+        ".validate": "newData.hasChildren(['playerName', 'score', 'wave', 'kills']) && newData.child('playerName').isString() && newData.child('playerName').val().length <= 40 && newData.child('score').isNumber() && newData.child('score').val() >= 0 && newData.child('wave').isNumber() && newData.child('wave').val() >= 0 && newData.child('kills').isNumber() && newData.child('kills').val() >= 0"
+      }
+    }
+  }
+}
