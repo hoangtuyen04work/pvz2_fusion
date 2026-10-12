@@ -21,7 +21,7 @@ public class AIServiceConnector : MonoBehaviour
     // ---- Cấu hình server ----
     [Header("Cấu hình Server AI")]
     [Tooltip("Địa chỉ endpoint của server AI (để localhost khi demo)")]
-    public string serverUrl = "http://localhost:8000/analyze";
+    public string serverUrl = "http://10.190.124.205:8000/analyze";
 
     [Tooltip("Thời gian tối đa chờ phản hồi từ server (giây)")]
     public float timeoutSeconds = 20f;
@@ -83,7 +83,7 @@ public class AIServiceConnector : MonoBehaviour
                 string responseBody = request.downloadHandler != null ? request.downloadHandler.text : "";
                 Debug.LogError($"[AIAdvisor] Lỗi từ server ({request.responseCode}): {responseBody}");
                 string errorMsg = request.result == UnityWebRequest.Result.ConnectionError
-                    ? "Không thể kết nối server AI. Hãy đảm bảo server đang chạy trên localhost:8000."
+                    ? $"Không thể kết nối server AI tại {serverUrl}. Hãy kiểm tra server và kết nối mạng."
                     : $"Lỗi từ server: {request.responseCode} - {request.error}";
                 OnError?.Invoke(errorMsg);
             }

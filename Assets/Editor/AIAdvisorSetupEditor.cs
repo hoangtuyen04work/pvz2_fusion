@@ -48,7 +48,7 @@ public static class AIAdvisorSetupEditor
         AIServiceConnector connector = advisorObj.GetComponent<AIServiceConnector>() ?? advisorObj.AddComponent<AIServiceConnector>();
         AIAdvisorUI advisorUI = advisorObj.GetComponent<AIAdvisorUI>() ?? advisorObj.AddComponent<AIAdvisorUI>();
 
-        connector.serverUrl = "http://localhost:8000/analyze";
+        connector.serverUrl = "http://10.190.124.205:8000/analyze";
         connector.useMockMode = false;
         connector.timeoutSeconds = 20f;
 

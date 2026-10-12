@@ -1172,7 +1172,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6c3256672a53ba948ab5ed6072119c81, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AIServiceConnector
-  serverUrl: http://localhost:8000/analyze
+  serverUrl: http://10.190.124.205:8000/analyze
   timeoutSeconds: 20
   useMockMode: 0
 --- !u!114 &668537401

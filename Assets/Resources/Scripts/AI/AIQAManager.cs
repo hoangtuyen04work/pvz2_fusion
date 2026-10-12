@@ -26,7 +26,7 @@ public class AIQAManager : MonoBehaviour
     }
 
     [Header("Cấu hình Endpoint")]
-    public string qaEndpointUrl = "http://localhost:8000/qa";
+    public string qaEndpointUrl = "http://10.190.124.205:8000/qa";
     public float timeoutSeconds = 15f;
     public bool useMockFallback = true;
 
