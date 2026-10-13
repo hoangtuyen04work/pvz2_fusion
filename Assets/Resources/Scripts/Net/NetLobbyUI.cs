@@ -68,6 +68,10 @@ public class NetLobbyUI : MonoBehaviour
     private Button connectButton;
     private Image coopFrame;
     private Image pvpFrame;
+    private RectTransform lobbyFrameRect;
+    private int lastLayoutScreenWidth;
+    private int lastLayoutScreenHeight;
+    private Rect lastLayoutSafeArea;
 
     private InputField ipInput;
     private GameObject chooseZombieButton;
@@ -456,6 +460,11 @@ public class NetLobbyUI : MonoBehaviour
 
     private void Update()
     {
+        if (lobbyFrameRect != null &&
+            (lastLayoutScreenWidth != Screen.width || lastLayoutScreenHeight != Screen.height ||
+             lastLayoutSafeArea != Screen.safeArea))
+            FitLobbyToSafeArea();
+
         NetDiscovery.Update();
         if (root == null || !root.activeSelf) return;
 
@@ -516,10 +525,12 @@ public class NetLobbyUI : MonoBehaviour
 
         GameObject frame = new GameObject("Khung 4x3", typeof(RectTransform), typeof(AspectRatioFitter));
         frame.transform.SetParent(root.transform, false);
-        Stretch(frame.GetComponent<RectTransform>());
+        lobbyFrameRect = frame.GetComponent<RectTransform>();
+        Stretch(lobbyFrameRect);
         AspectRatioFitter fitter = frame.GetComponent<AspectRatioFitter>();
         fitter.aspectMode = AspectRatioFitter.AspectMode.FitInParent;
         fitter.aspectRatio = 4f / 3f;
+        FitLobbyToSafeArea();
 
         GameObject panel = CreatePanel("Bảng sảnh chờ", frame.transform,
             0.11f, 0.10f, 0.89f, 0.90f, new Color(0.075f, 0.10f, 0.055f, 0.98f));
@@ -547,19 +558,20 @@ public class NetLobbyUI : MonoBehaviour
         SetAnchors(hint.rectTransform, 0.06f, 0.795f, 0.94f, 0.875f);
 
         //Hai ô chọn chế độ
-        coopFrame = BuildModeCard(homePage.transform, 0.06f, 0.45f, 0.485f, 0.78f,
+        coopFrame = BuildModeCard(homePage.transform, 0.06f, 0.47f, 0.485f, 0.785f,
             "ĐỒNG ĐỘI",
             "Hai người cùng một phe.\nChung kho nắng, chung dãy thẻ cây,\ncùng chống lại các đợt zombie.",
             NetGameMode.Coop);
 
-        pvpFrame = BuildModeCard(homePage.transform, 0.515f, 0.45f, 0.94f, 0.78f,
+        pvpFrame = BuildModeCard(homePage.transform, 0.515f, 0.47f, 0.94f, 0.785f,
             "ĐỐI KHÁNG",
             "Một người trồng cây phòng thủ.\nNgười kia làm chỉ huy zombie,\ndùng não để thả quân theo từng hàng.",
             NetGameMode.Pvp);
 
         modeDescriptionText = CreateText("Mô tả chế độ", homePage.transform, "", 20,
             TextAnchor.MiddleCenter, new Color(0.75f, 0.95f, 0.60f));
-        SetAnchors(modeDescriptionText.rectTransform, 0.06f, 0.355f, 0.94f, 0.43f);
+        SetAnchors(modeDescriptionText.rectTransform, 0.06f, 0.375f, 0.94f, 0.445f);
+        modeDescriptionText.verticalOverflow = VerticalWrapMode.Truncate;
 
         CreateButton("Tạo phòng", homePage.transform, "TẠO PHÒNG", 27,
             0.09f, 0.20f, 0.47f, 0.33f, HostRoom);
@@ -589,13 +601,17 @@ public class NetLobbyUI : MonoBehaviour
         button.onClick.AddListener(delegate { SelectMode(captured); });
 
         Text head = CreateText("Tên", card.transform, title, 28, TextAnchor.MiddleCenter, Color.white);
-        SetAnchors(head.rectTransform, 0.05f, 0.72f, 0.95f, 0.95f);
+        SetAnchors(head.rectTransform, 0.05f, 0.70f, 0.95f, 0.94f);
         head.raycastTarget = false;
+        head.verticalOverflow = VerticalWrapMode.Truncate;
 
         Text description = CreateText("Mô tả", card.transform, body, 19,
-            TextAnchor.UpperCenter, new Color(0.88f, 0.92f, 0.84f));
-        SetAnchors(description.rectTransform, 0.07f, 0.08f, 0.93f, 0.70f);
+            TextAnchor.MiddleCenter, new Color(0.88f, 0.92f, 0.84f));
+        SetAnchors(description.rectTransform, 0.08f, 0.12f, 0.92f, 0.68f);
         description.raycastTarget = false;
+        description.resizeTextMinSize = 10;
+        description.verticalOverflow = VerticalWrapMode.Truncate;
+        description.lineSpacing = 0.86f;
 
         return frame;
     }
@@ -808,6 +824,33 @@ public class NetLobbyUI : MonoBehaviour
         rect.anchorMax = new Vector2(xMax, yMax);
         rect.offsetMin = Vector2.zero;
         rect.offsetMax = Vector2.zero;
+    }
+
+    private void FitLobbyToSafeArea()
+    {
+        if (lobbyFrameRect == null || root == null || Screen.width <= 0 || Screen.height <= 0) return;
+
+        RectTransform rootRect = root.GetComponent<RectTransform>();
+        if (rootRect.rect.width <= 0f || rootRect.rect.height <= 0f) return;
+
+        Rect safeArea = Screen.safeArea;
+        float safeWidth = rootRect.rect.width * safeArea.width / Screen.width;
+        float safeHeight = rootRect.rect.height * safeArea.height / Screen.height;
+        float frameWidth = Mathf.Max(1f, lobbyFrameRect.rect.width);
+        float frameHeight = Mathf.Max(1f, lobbyFrameRect.rect.height);
+        const float margin = 10f;
+        float fitScale = Mathf.Clamp(
+            Mathf.Min((safeWidth - margin * 2f) / frameWidth, (safeHeight - margin * 2f) / frameHeight),
+            0.55f, 1f);
+
+        lobbyFrameRect.localScale = Vector3.one * fitScale;
+        lobbyFrameRect.anchoredPosition = new Vector2(
+            (safeArea.center.x / Screen.width - 0.5f) * rootRect.rect.width,
+            (safeArea.center.y / Screen.height - 0.5f) * rootRect.rect.height);
+
+        lastLayoutScreenWidth = Screen.width;
+        lastLayoutScreenHeight = Screen.height;
+        lastLayoutSafeArea = safeArea;
     }
 
     #endregion

@@ -58,7 +58,6 @@ public sealed class EndlessGameController : MonoBehaviour
     private Text stageText;
     private Text scoreText;
     private Text statusText;
-    private Text modifierText;
     private Text bossHealthText;
     private Text announcementText;
     private Text speedButtonText;
@@ -643,7 +642,6 @@ public sealed class EndlessGameController : MonoBehaviour
             gameVersion = Application.version
         };
         EndlessLeaderboard.Add(record);
-        FirebaseAuthService.Instance.RecordEndlessResult(finalScore, completedStages, finalKills, duration);
         EndlessRun.DeleteProgress();
 
         int minutes = Mathf.FloorToInt(duration / 60f);
@@ -652,9 +650,18 @@ public sealed class EndlessGameController : MonoBehaviour
             (completedStages / EndlessRules.StagesPerCycle) + " boss\n" +
             finalScore.ToString("N0") + " điểm  •  " + finalKills + " zombie\n" +
             "Thời gian " + minutes.ToString("00") + ":" + seconds.ToString("00");
+        string resultSummary = resultText.text;
         resultBoardText.text = EndlessLeaderboard.Format(5);
         resultOverlay.SetActive(true);
         PauseForChoice();
+
+        FirebaseAuthService.Instance.RecordEndlessResult(finalScore, completedStages, finalKills, duration,
+            (uploaded, cloudMessage) =>
+            {
+                if (this == null || resultText == null) return;
+                resultText.text = resultSummary + "\n" +
+                    (uploaded ? "✓ Đã đồng bộ kết quả lên Cloud." : "⚠ " + cloudMessage);
+            });
     }
 
     private void Restart()
@@ -692,20 +699,6 @@ public sealed class EndlessGameController : MonoBehaviour
         int totalKills = (session != null ? session.kills : 0) + stageKills;
         scoreText.text = "ĐIỂM: " + totalScore.ToString("N0") + "  •  HẠ: " + totalKills;
 
-        string cycleName = session != null ? ChoiceName(session.activeCycleDebuffId) : string.Empty;
-        string stageName = session != null ? ChoiceName(session.activeStageDebuffId) : string.Empty;
-        modifierText.text = "CHU KỲ: " + (string.IsNullOrEmpty(cycleName) ? "—" : cycleName) +
-            "\nMÀN: " + (string.IsNullOrEmpty(stageName) ? "—" : stageName) +
-            "\nBUFF: " + CountStacks(session != null ? session.buffs : null) + "  •  DEBUFF: " +
-            CountStacks(session != null ? session.tradeoffDebuffs : null);
-    }
-
-    private static int CountStacks(List<EndlessModifierStack> values)
-    {
-        int total = 0;
-        if (values == null) return total;
-        for (int index = 0; index < values.Count; index++) total += Mathf.Max(0, values[index].stacks);
-        return total;
     }
 
     private static string ChoiceName(string id)
@@ -750,23 +743,7 @@ public sealed class EndlessGameController : MonoBehaviour
         scoreText.raycastTarget = false;
         AddTextOutline(scoreText.gameObject, new Color(0.20f, 0.10f, 0.02f, 0.95f), new Vector2(1f, -1f));
 
-        // 2. Modifiers Panel (Bảng gỗ thông tin hiệu ứng bên dưới Shovel & Glove, góc trái)
-        Image modifierPanel = EndlessMenuOverlay.ImageObject("Modifiers", canvasObject.transform, new Color(1f, 1f, 1f, 0.94f));
-        modifierPanel.sprite = woodBanner;
-        modifierPanel.type = woodBanner != null ? Image.Type.Sliced : Image.Type.Simple;
-        modifierPanel.raycastTarget = false;
-        AddSoftShadow(modifierPanel.gameObject, new Vector2(2f, -3f));
-        // Đặt an toàn ở góc trái bên dưới thanh thẻ hạt giống
-        EndlessMenuOverlay.Anchor(modifierPanel.rectTransform, 0.015f, 0.730f, 0.260f, 0.875f);
-
-        modifierText = EndlessMenuOverlay.TextObject("Modifier Text", modifierPanel.transform, string.Empty, 14,
-            TextAnchor.MiddleLeft, new Color(1f, 0.96f, 0.82f));
-        modifierText.fontStyle = FontStyle.Bold;
-        EndlessMenuOverlay.Anchor(modifierText.rectTransform, 0.08f, 0.08f, 0.92f, 0.92f);
-        modifierText.raycastTarget = false;
-        AddTextOutline(modifierText.gameObject, new Color(0.18f, 0.08f, 0.02f, 0.92f), new Vector2(1f, -1f));
-
-        // 3. Nút Điều chỉnh Tốc độ (gỗ PvZ có biểu tượng tua nhanh/play)
+        // 2. Nút Điều chỉnh Tốc độ (gỗ PvZ có biểu tượng tua nhanh/play)
         Sprite btnSprite = Resources.Load<Sprite>("GameUI/button1");
         GameObject speedButton = CreateThemedButton(canvasObject.transform, "TỐC ĐỘ  x1", btnSprite,
             new Color(0.96f, 0.92f, 0.65f), ToggleSpeed);

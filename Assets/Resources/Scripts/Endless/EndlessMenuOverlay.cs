@@ -7,10 +7,16 @@ using UnityEngine.UI;
 public sealed class EndlessMenuOverlay : MonoBehaviour
 {
     private const string PlayerNameKey = "Endless.PlayerName";
+    private const float DialogWidth = 820f;
+    private const float DialogHeight = 660f;
     private InputField playerNameInput;
     private Text subtitle;
     private Button playButton;
     private bool newRunArmed;
+    private RectTransform dialogRect;
+    private int lastLayoutScreenWidth;
+    private int lastLayoutScreenHeight;
+    private Rect lastLayoutSafeArea;
 
     private static Sprite cachedDialogMain;
     private static Sprite cachedDialogChild;
@@ -33,6 +39,14 @@ public sealed class EndlessMenuOverlay : MonoBehaviour
         if (cachedButton1 == null) cachedButton1 = Resources.Load<Sprite>("GameUI/button1");
         if (cachedButton2 == null) cachedButton2 = Resources.Load<Sprite>("GameUI/button2");
         if (cachedCancel == null) cachedCancel = Resources.Load<Sprite>("GameUI/cancel");
+    }
+
+    private void Update()
+    {
+        if (dialogRect == null) return;
+        if (lastLayoutScreenWidth == Screen.width && lastLayoutScreenHeight == Screen.height &&
+            lastLayoutSafeArea == Screen.safeArea) return;
+        FitDialogToSafeArea();
     }
 
     private void Build()
@@ -60,8 +74,9 @@ public sealed class EndlessMenuOverlay : MonoBehaviour
         // 2. Bảng gỗ đá PvZ chính
         var dialogObject = new GameObject("Endless Board Panel", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         dialogObject.transform.SetParent(transform, false);
-        var dialogRect = dialogObject.GetComponent<RectTransform>();
-        Anchor(dialogRect, 0.12f, 0.06f, 0.88f, 0.94f);
+        dialogRect = dialogObject.GetComponent<RectTransform>();
+        CenterRect(dialogRect, new Vector2(DialogWidth, DialogHeight));
+        FitDialogToSafeArea();
 
         Image panel = dialogObject.GetComponent<Image>();
         panel.sprite = cachedDialogMain;
@@ -96,6 +111,7 @@ public sealed class EndlessMenuOverlay : MonoBehaviour
             TextAnchor.MiddleCenter, new Color(1f, 0.92f, 0.38f, 1f));
         title.fontStyle = FontStyle.Bold;
         Anchor(title.rectTransform, 0.08f, 0.865f, 0.92f, 0.965f);
+        ConfigureSingleLine(title, 24);
         AddTextOutline(title.gameObject, new Color(0.24f, 0.08f, 0.02f, 0.98f), new Vector2(1.8f, -1.8f));
 
         subtitle = TextObject("Subtitle", panel.transform,
@@ -103,6 +119,7 @@ public sealed class EndlessMenuOverlay : MonoBehaviour
             TextAnchor.MiddleCenter, new Color(0.96f, 0.94f, 0.82f, 1f));
         subtitle.fontStyle = FontStyle.Bold;
         Anchor(subtitle.rectTransform, 0.08f, 0.795f, 0.92f, 0.860f);
+        ConfigureSingleLine(subtitle, 13);
         AddTextOutline(subtitle.gameObject, new Color(0.18f, 0.08f, 0.02f, 0.95f), new Vector2(1.2f, -1.2f));
 
         // 4. Nhập tên người chơi với khung gỗ nhỏ hài hòa
@@ -110,6 +127,7 @@ public sealed class EndlessMenuOverlay : MonoBehaviour
             TextAnchor.MiddleRight, new Color(1f, 0.88f, 0.45f, 1f));
         nameLabel.fontStyle = FontStyle.Bold;
         Anchor(nameLabel.rectTransform, 0.08f, 0.710f, 0.36f, 0.780f);
+        ConfigureSingleLine(nameLabel, 12);
         AddTextOutline(nameLabel.gameObject, new Color(0.20f, 0.08f, 0.02f, 0.95f), new Vector2(1.2f, -1.2f));
 
         playerNameInput = InputObject(panel.transform);
@@ -132,6 +150,7 @@ public sealed class EndlessMenuOverlay : MonoBehaviour
             TextAnchor.MiddleCenter, new Color(0.36f, 0.16f, 0.04f, 1f));
         boardTitle.fontStyle = FontStyle.Bold;
         Anchor(boardTitle.rectTransform, 0.04f, 0.86f, 0.96f, 0.97f);
+        ConfigureSingleLine(boardTitle, 14);
 
         // Header các cột
         var headerRow = new GameObject("Header Row", typeof(RectTransform), typeof(Image));
@@ -336,10 +355,54 @@ public sealed class EndlessMenuOverlay : MonoBehaviour
         text.color = color;
         text.raycastTarget = false;
         text.resizeTextForBestFit = true;
-        text.resizeTextMinSize = 11;
+        text.resizeTextMinSize = 9;
         text.resizeTextMaxSize = fontSize;
+        text.horizontalOverflow = HorizontalWrapMode.Wrap;
+        text.verticalOverflow = VerticalWrapMode.Truncate;
+        text.lineSpacing = 0.9f;
 
         return text;
+    }
+
+    private void FitDialogToSafeArea()
+    {
+        if (dialogRect == null || Screen.width <= 0 || Screen.height <= 0) return;
+        RectTransform canvasRect = transform as RectTransform;
+        if (canvasRect == null || canvasRect.rect.width <= 0f || canvasRect.rect.height <= 0f) return;
+
+        Rect safeArea = Screen.safeArea;
+        float safeWidth = canvasRect.rect.width * safeArea.width / Screen.width;
+        float safeHeight = canvasRect.rect.height * safeArea.height / Screen.height;
+        const float margin = 16f;
+        float fitScale = Mathf.Clamp(
+            Mathf.Min((safeWidth - margin * 2f) / DialogWidth, (safeHeight - margin * 2f) / DialogHeight),
+            0.45f, 1f);
+
+        dialogRect.localScale = Vector3.one * fitScale;
+        dialogRect.anchoredPosition = new Vector2(
+            (safeArea.center.x / Screen.width - 0.5f) * canvasRect.rect.width,
+            (safeArea.center.y / Screen.height - 0.5f) * canvasRect.rect.height);
+
+        lastLayoutScreenWidth = Screen.width;
+        lastLayoutScreenHeight = Screen.height;
+        lastLayoutSafeArea = safeArea;
+    }
+
+    private static void ConfigureSingleLine(Text text, int minimumSize)
+    {
+        text.resizeTextForBestFit = true;
+        text.resizeTextMinSize = minimumSize;
+        text.resizeTextMaxSize = text.fontSize;
+        text.horizontalOverflow = HorizontalWrapMode.Wrap;
+        text.verticalOverflow = VerticalWrapMode.Truncate;
+    }
+
+    private static void CenterRect(RectTransform rect, Vector2 size)
+    {
+        rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
+        rect.pivot = new Vector2(0.5f, 0.5f);
+        rect.sizeDelta = size;
+        rect.anchoredPosition = Vector2.zero;
     }
 
     private void Close() => Destroy(gameObject);

@@ -1,0 +1,223 @@
+[debug] [2026-10-12T16:28:54.942Z] ----------------------------------------------------------------------
+[debug] [2026-10-12T16:28:54.945Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\hoang\AppData\Local\npm-cache\_npx\7750544ccf494d8b\node_modules\firebase-tools\lib\bin\firebase.js deploy --only database --project pvz2-5c9ed
+[debug] [2026-10-12T16:28:54.945Z] CLI Version:   15.33.0
+[debug] [2026-10-12T16:28:54.946Z] Platform:      win32
+[debug] [2026-10-12T16:28:54.946Z] Node Version:  v22.21.0
+[debug] [2026-10-12T16:28:54.946Z] Detected Agent: codex_cli
+[debug] [2026-10-12T16:28:54.946Z] Time:          Mon Oct 12 2026 23:28:54 GMT+0700 (Giờ Đông Dương)
+[debug] [2026-10-12T16:28:54.947Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-10-12T16:28:54.958Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[debug] [2026-10-12T16:28:57.549Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-10-12T16:28:57.568Z] Error: Could not load the default credentials. Browse to https://cloud.google.com/docs/authentication/getting-started for more information.
+    at GoogleAuth.getApplicationDefaultAsync (C:\Users\hoang\AppData\Local\npm-cache\_npx\7750544ccf494d8b\node_modules\google-auth-library\build\src\auth\googleauth.js:287:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async GoogleAuth._GoogleAuth_determineClient (C:\Users\hoang\AppData\Local\npm-cache\_npx\7750544ccf494d8b\node_modules\google-auth-library\build\src\auth\googleauth.js:834:32)
+    at async GoogleAuth.getClient (C:\Users\hoang\AppData\Local\npm-cache\_npx\7750544ccf494d8b\node_modules\google-auth-library\build\src\auth\googleauth.js:698:20)
+    at async GoogleAuth.getAccessToken (C:\Users\hoang\AppData\Local\npm-cache\_npx\7750544ccf494d8b\node_modules\google-auth-library\build\src\auth\googleauth.js:722:24)
+    at async autoAuth (C:\Users\hoang\AppData\Local\npm-cache\_npx\7750544ccf494d8b\node_modules\firebase-tools\lib\requireAuth.js:38:19)
+    at async requireAuth (C:\Users\hoang\AppData\Local\npm-cache\_npx\7750544ccf494d8b\node_modules\firebase-tools\lib\requireAuth.js:100:20)
+    at async requirePermissions (C:\Users\hoang\AppData\Local\npm-cache\_npx\7750544ccf494d8b\node_modules\firebase-tools\lib\requirePermissions.js:12:5)
+    at async C:\Users\hoang\AppData\Local\npm-cache\_npx\7750544ccf494d8b\node_modules\firebase-tools\lib\command.js:278:17
+[error] 
+[error] Error: Failed to authenticate, have you run firebase login?
+[debug] [2026-10-12T16:29:12.821Z] ----------------------------------------------------------------------
+[debug] [2026-10-12T16:29:12.824Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\hoang\AppData\Local\npm-cache\_npx\7750544ccf494d8b\node_modules\firebase-tools\lib\bin\firebase.js login --no-localhost
+[debug] [2026-10-12T16:29:12.825Z] CLI Version:   15.33.0
+[debug] [2026-10-12T16:29:12.826Z] Platform:      win32
+[debug] [2026-10-12T16:29:12.826Z] Node Version:  v22.21.0
+[debug] [2026-10-12T16:29:12.827Z] Detected Agent: codex_cli
+[debug] [2026-10-12T16:29:12.827Z] Time:          Mon Oct 12 2026 23:29:12 GMT+0700 (Giờ Đông Dương)
+[debug] [2026-10-12T16:29:12.828Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-10-12T16:29:12.842Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[debug] [2026-10-12T16:29:13.080Z] >>> [apiv2][query] POST https://auth.firebase.tools/attest [none]
+[debug] [2026-10-12T16:29:13.080Z] >>> [apiv2][body] POST https://auth.firebase.tools/attest {"session_id":"7944d2c2-1cab-459f-9e01-2020f5bb5ef6"}
+[debug] [2026-10-12T16:29:13.562Z] <<< [apiv2][status] GET https://firebase-public.firebaseio.com/cli.json 200
+[debug] [2026-10-12T16:29:13.562Z] <<< [apiv2][body] GET https://firebase-public.firebaseio.com/cli.json {"cloudBuildErrorAfter":1594252800000,"cloudBuildWarnAfter":1590019200000,"defaultNode10After":1594252800000,"minVersion":"3.0.5","node8DeploysDisabledAfter":1613390400000,"node8RuntimeDisabledAfter":1615809600000,"node8WarnAfter":1600128000000}
+[debug] [2026-10-12T16:29:13.922Z] <<< [apiv2][status] POST https://auth.firebase.tools/attest 200
+[debug] [2026-10-12T16:31:45.347Z] ----------------------------------------------------------------------
+[debug] [2026-10-12T16:31:45.351Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\hoang\AppData\Local\npm-cache\_npx\7750544ccf494d8b\node_modules\firebase-tools\lib\bin\firebase.js login 4/0AXlqoi6oluThd8TEnCYB7Uyn8ni2-vMT_r07nKyEIgPURlunN0037SsXwoONEaEo2VT6-w
+[debug] [2026-10-12T16:31:45.351Z] CLI Version:   15.33.0
+[debug] [2026-10-12T16:31:45.351Z] Platform:      win32
+[debug] [2026-10-12T16:31:45.351Z] Node Version:  v22.21.0
+[debug] [2026-10-12T16:31:45.352Z] Detected Agent: codex_cli
+[debug] [2026-10-12T16:31:45.352Z] Time:          Mon Oct 12 2026 23:31:45 GMT+0700 (Giờ Đông Dương)
+[debug] [2026-10-12T16:31:45.353Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-10-12T16:31:45.572Z] >>> [apiv2][query] POST https://accounts.google.com/o/oauth2/token [none]
+[debug] [2026-10-12T16:31:45.573Z] >>> [apiv2][body] POST https://accounts.google.com/o/oauth2/token [omitted]
+[debug] [2026-10-12T16:31:45.757Z] <<< [apiv2][status] POST https://accounts.google.com/o/oauth2/token 400
+[debug] [2026-10-12T16:31:45.758Z] <<< [apiv2][body] POST https://accounts.google.com/o/oauth2/token [omitted]
+[debug] [2026-10-12T16:31:45.759Z] Token Fetch Error: FirebaseError: Request to https://accounts.google.com/o/oauth2/token had HTTP Error: 400, invalid_grant
+    at responseToError (C:\Users\hoang\AppData\Local\npm-cache\_npx\7750544ccf494d8b\node_modules\firebase-tools\lib\responseToError.js:53:12)
+    at RetryOperation._fn (C:\Users\hoang\AppData\Local\npm-cache\_npx\7750544ccf494d8b\node_modules\firebase-tools\lib\apiv2.js:415:77)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+[error] Authentication Error: Your credentials are no longer valid. Please run firebase login --reauth
+
+For CI servers and headless environments, generate a new token with firebase login:ci
+[error] 
+[error] Error: Login failed: Unable to authenticate using the provided code. Please try again.
+[debug] [2026-10-12T16:32:05.537Z] ----------------------------------------------------------------------
+[debug] [2026-10-12T16:32:05.541Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\hoang\AppData\Local\npm-cache\_npx\7750544ccf494d8b\node_modules\firebase-tools\lib\bin\firebase.js login:ci --no-localhost
+[debug] [2026-10-12T16:32:05.542Z] CLI Version:   15.33.0
+[debug] [2026-10-12T16:32:05.543Z] Platform:      win32
+[debug] [2026-10-12T16:32:05.543Z] Node Version:  v22.21.0
+[debug] [2026-10-12T16:32:05.543Z] Detected Agent: codex_cli
+[debug] [2026-10-12T16:32:05.544Z] Time:          Mon Oct 12 2026 23:32:05 GMT+0700 (Giờ Đông Dương)
+[debug] [2026-10-12T16:32:05.544Z] ----------------------------------------------------------------------
+[debug] 
+[error] 
+[error] Error: Cannot run login:ci in non-interactive mode.
+[debug] [2026-10-12T16:32:19.737Z] ----------------------------------------------------------------------
+[debug] [2026-10-12T16:32:19.740Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\hoang\AppData\Local\npm-cache\_npx\7750544ccf494d8b\node_modules\firebase-tools\lib\bin\firebase.js login --no-localhost
+[debug] [2026-10-12T16:32:19.740Z] CLI Version:   15.33.0
+[debug] [2026-10-12T16:32:19.741Z] Platform:      win32
+[debug] [2026-10-12T16:32:19.741Z] Node Version:  v22.21.0
+[debug] [2026-10-12T16:32:19.741Z] Detected Agent: codex_cli
+[debug] [2026-10-12T16:32:19.742Z] Time:          Mon Oct 12 2026 23:32:19 GMT+0700 (Giờ Đông Dương)
+[debug] [2026-10-12T16:32:19.742Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-10-12T16:32:19.990Z] >>> [apiv2][query] POST https://auth.firebase.tools/attest [none]
+[debug] [2026-10-12T16:32:19.990Z] >>> [apiv2][body] POST https://auth.firebase.tools/attest {"session_id":"2efbfb79-3a50-4208-bed6-b15ca4502745"}
+[debug] [2026-10-12T16:32:20.452Z] <<< [apiv2][status] POST https://auth.firebase.tools/attest 200
+[debug] [2026-10-12T16:32:54.481Z] ----------------------------------------------------------------------
+[debug] [2026-10-12T16:32:54.485Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\hoang\AppData\Local\npm-cache\_npx\7750544ccf494d8b\node_modules\firebase-tools\lib\bin\firebase.js login 4/0AXlqoi6wC5KHE0IkOyEM7mIVsxTwjIKmNzLmVILGn6F02KoBzdtiDpdb5xGrw9hbs-NOdQ
+[debug] [2026-10-12T16:32:54.485Z] CLI Version:   15.33.0
+[debug] [2026-10-12T16:32:54.485Z] Platform:      win32
+[debug] [2026-10-12T16:32:54.485Z] Node Version:  v22.21.0
+[debug] [2026-10-12T16:32:54.486Z] Detected Agent: codex_cli
+[debug] [2026-10-12T16:32:54.486Z] Time:          Mon Oct 12 2026 23:32:54 GMT+0700 (Giờ Đông Dương)
+[debug] [2026-10-12T16:32:54.486Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-10-12T16:32:54.700Z] >>> [apiv2][query] POST https://accounts.google.com/o/oauth2/token [none]
+[debug] [2026-10-12T16:32:54.700Z] >>> [apiv2][body] POST https://accounts.google.com/o/oauth2/token [omitted]
+[debug] [2026-10-12T16:32:54.923Z] <<< [apiv2][status] POST https://accounts.google.com/o/oauth2/token 200
+[debug] [2026-10-12T16:33:06.730Z] ----------------------------------------------------------------------
+[debug] [2026-10-12T16:33:06.733Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\hoang\AppData\Local\npm-cache\_npx\7750544ccf494d8b\node_modules\firebase-tools\lib\bin\firebase.js deploy --only database --project pvz2-5c9ed
+[debug] [2026-10-12T16:33:06.733Z] CLI Version:   15.33.0
+[debug] [2026-10-12T16:33:06.733Z] Platform:      win32
+[debug] [2026-10-12T16:33:06.734Z] Node Version:  v22.21.0
+[debug] [2026-10-12T16:33:06.734Z] Detected Agent: codex_cli
+[debug] [2026-10-12T16:33:06.734Z] Time:          Mon Oct 12 2026 23:33:06 GMT+0700 (Giờ Đông Dương)
+[debug] [2026-10-12T16:33:06.735Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-10-12T16:33:08.640Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-10-12T16:33:08.640Z] > authorizing via signed-in user (hoanghuutuyen06022004@gmail.com)
+[debug] [2026-10-12T16:33:08.640Z] [iam] checking project pvz2-5c9ed for permissions ["firebase.projects.get","firebasedatabase.instances.update"]
+[debug] [2026-10-12T16:33:08.654Z] Checked if tokens are valid: true, expires at: 1791826373923
+[debug] [2026-10-12T16:33:08.654Z] Checked if tokens are valid: true, expires at: 1791826373923
+[debug] [2026-10-12T16:33:08.656Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/pvz2-5c9ed:testIamPermissions [none]
+[debug] [2026-10-12T16:33:08.656Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/pvz2-5c9ed:testIamPermissions  x-goog-user-project=pvz2-5c9ed
+[debug] [2026-10-12T16:33:08.656Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/pvz2-5c9ed:testIamPermissions {"permissions":["firebase.projects.get","firebasedatabase.instances.update"]}
+[debug] [2026-10-12T16:33:10.058Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/pvz2-5c9ed:testIamPermissions 403
+[debug] [2026-10-12T16:33:10.059Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/pvz2-5c9ed:testIamPermissions {"error":{"code":403,"message":"Caller does not have required permission to use project pvz2-5c9ed. Grant the caller the roles/serviceusage.serviceUsageConsumer role, or a custom role with the serviceusage.services.use permission, by visiting https://console.developers.google.com/iam-admin/iam?project=pvz2-5c9ed and then retry. Propagation of the new permission may take a few minutes.","status":"PERMISSION_DENIED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"USER_PROJECT_DENIED","domain":"googleapis.com","metadata":{"containerInfo":"pvz2-5c9ed","consoleUrl":"https://console.developers.google.com/iam-admin/iam?project=pvz2-5c9ed","service":"cloudresourcemanager.googleapis.com","consumer":"projects/pvz2-5c9ed"}},{"@type":"type.googleapis.com/google.rpc.LocalizedMessage","locale":"en-US","message":"Caller does not have required permission to use project pvz2-5c9ed. Grant the caller the roles/serviceusage.serviceUsageConsumer role, or a custom role with the serviceusage.services.use permission, by visiting https://console.developers.google.com/iam-admin/iam?project=pvz2-5c9ed and then retry. Propagation of the new permission may take a few minutes."},{"@type":"type.googleapis.com/google.rpc.Help","links":[{"description":"Google developer console IAM admin","url":"https://console.developers.google.com/iam-admin/iam?project=pvz2-5c9ed"}]}]}}
+[debug] [2026-10-12T16:33:10.060Z] [iam] error while checking permissions, command may fail: Request to https://cloudresourcemanager.googleapis.com/v1/projects/pvz2-5c9ed:testIamPermissions had HTTP Error: 403, Caller does not have required permission to use project pvz2-5c9ed. Grant the caller the roles/serviceusage.serviceUsageConsumer role, or a custom role with the serviceusage.services.use permission, by visiting https://console.developers.google.com/iam-admin/iam?project=pvz2-5c9ed and then retry. Propagation of the new permission may take a few minutes.
+[debug] [2026-10-12T16:33:10.061Z] Checked if tokens are valid: true, expires at: 1791826373923
+[debug] [2026-10-12T16:33:10.061Z] Checked if tokens are valid: true, expires at: 1791826373923
+[debug] [2026-10-12T16:33:10.061Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/pvz2-5c9ed [none]
+[debug] [2026-10-12T16:33:10.441Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/pvz2-5c9ed 403
+[debug] [2026-10-12T16:33:10.441Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/pvz2-5c9ed {"error":{"code":403,"message":"The caller does not have permission","status":"PERMISSION_DENIED"}}
+[debug] [2026-10-12T16:33:10.442Z] Request to https://firebase.googleapis.com/v1beta1/projects/pvz2-5c9ed had HTTP Error: 403, The caller does not have permission
+[debug] [2026-10-12T16:33:10.443Z] FirebaseError: Failed to get Firebase project pvz2-5c9ed. Please make sure the project exists and your account has permission to access it.
+    at getFirebaseProject (C:\Users\hoang\AppData\Local\npm-cache\_npx\7750544ccf494d8b\node_modules\firebase-tools\lib\management\projects.js:398:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async getDefaultDatabaseInstance (C:\Users\hoang\AppData\Local\npm-cache\_npx\7750544ccf494d8b\node_modules\firebase-tools\lib\getDefaultDatabaseInstance.js:6:28)
+    at async requireDatabaseInstance (C:\Users\hoang\AppData\Local\npm-cache\_npx\7750544ccf494d8b\node_modules\firebase-tools\lib\requireDatabaseInstance.js:15:20)
+    at async Object.fn (C:\Users\hoang\AppData\Local\npm-cache\_npx\7750544ccf494d8b\node_modules\firebase-tools\lib\commands\deploy.js:82:9)
+    at async C:\Users\hoang\AppData\Local\npm-cache\_npx\7750544ccf494d8b\node_modules\firebase-tools\lib\command.js:278:17
+[error] 
+[error] Error: Failed to get details for project: pvz2-5c9ed.
+[debug] [2026-10-12T16:36:12.115Z] ----------------------------------------------------------------------
+[debug] [2026-10-12T16:36:12.119Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\hoang\AppData\Local\npm-cache\_npx\7750544ccf494d8b\node_modules\firebase-tools\lib\bin\firebase.js deploy --only database --project pvz2-5c9ed
+[debug] [2026-10-12T16:36:12.119Z] CLI Version:   15.33.0
+[debug] [2026-10-12T16:36:12.119Z] Platform:      win32
+[debug] [2026-10-12T16:36:12.120Z] Node Version:  v22.21.0
+[debug] [2026-10-12T16:36:12.120Z] Detected Agent: codex_cli
+[debug] [2026-10-12T16:36:12.120Z] Time:          Mon Oct 12 2026 23:36:12 GMT+0700 (Giờ Đông Dương)
+[debug] [2026-10-12T16:36:12.121Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-10-12T16:36:14.093Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-10-12T16:36:14.093Z] > authorizing via signed-in user (hoanghuutuyen06022004@gmail.com)
+[debug] [2026-10-12T16:36:14.094Z] [iam] checking project pvz2-5c9ed for permissions ["firebase.projects.get","firebasedatabase.instances.update"]
+[debug] [2026-10-12T16:36:14.104Z] Checked if tokens are valid: true, expires at: 1791826373923
+[debug] [2026-10-12T16:36:14.105Z] Checked if tokens are valid: true, expires at: 1791826373923
+[debug] [2026-10-12T16:36:14.106Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/pvz2-5c9ed:testIamPermissions [none]
+[debug] [2026-10-12T16:36:14.106Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/pvz2-5c9ed:testIamPermissions  x-goog-user-project=pvz2-5c9ed
+[debug] [2026-10-12T16:36:14.106Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/pvz2-5c9ed:testIamPermissions {"permissions":["firebase.projects.get","firebasedatabase.instances.update"]}
+[debug] [2026-10-12T16:36:15.612Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/pvz2-5c9ed:testIamPermissions 200
+[debug] [2026-10-12T16:36:15.613Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/pvz2-5c9ed:testIamPermissions {"permissions":["firebase.projects.get","firebasedatabase.instances.update"]}
+[debug] [2026-10-12T16:36:15.613Z] Checked if tokens are valid: true, expires at: 1791826373923
+[debug] [2026-10-12T16:36:15.614Z] Checked if tokens are valid: true, expires at: 1791826373923
+[debug] [2026-10-12T16:36:15.614Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/pvz2-5c9ed [none]
+[debug] [2026-10-12T16:36:16.972Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/pvz2-5c9ed 200
+[debug] [2026-10-12T16:36:16.973Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/pvz2-5c9ed {"projectId":"pvz2-5c9ed","projectNumber":"558858829268","displayName":"pvz2","name":"projects/pvz2-5c9ed","resources":{"hostingSite":"pvz2-5c9ed","realtimeDatabaseInstance":"pvz2-5c9ed-default-rtdb"},"state":"ACTIVE","labels":{"firebase":"enabled"},"etag":"1_0903087a-a4dd-4387-a00e-78c8885fb3e0"}
+[info] 
+[info] === Deploying to 'pvz2-5c9ed'...
+[info] 
+[info] i  deploying database 
+[info] i  database: checking rules syntax... 
+[debug] [2026-10-12T16:36:16.976Z] Checked if tokens are valid: true, expires at: 1791826373923
+[debug] [2026-10-12T16:36:16.976Z] Checked if tokens are valid: true, expires at: 1791826373923
+[debug] [2026-10-12T16:36:16.976Z] >>> [apiv2][query] GET https://firebasedatabase.googleapis.com/v1beta/projects/pvz2-5c9ed/locations/-/instances/pvz2-5c9ed-default-rtdb [none]
+[debug] [2026-10-12T16:36:18.253Z] <<< [apiv2][status] GET https://firebasedatabase.googleapis.com/v1beta/projects/pvz2-5c9ed/locations/-/instances/pvz2-5c9ed-default-rtdb 403
+[debug] [2026-10-12T16:36:18.254Z] <<< [apiv2][body] GET https://firebasedatabase.googleapis.com/v1beta/projects/pvz2-5c9ed/locations/-/instances/pvz2-5c9ed-default-rtdb {"error":{"code":403,"message":"Permission 'firebasedatabase.instances.get' denied on resource '//firebasedatabase.googleapis.com/projects/pvz2-5c9ed/locations/-/instances/pvz2-5c9ed-default-rtdb' (or it may not exist). Remediate access with this Troubleshooter URL or share it with your administrator - https://console.cloud.google.com/iam-admin/troubleshooter/summary;errorId=CiQwMWExMzBmYS0wNDBiLTcyN2YtYWI1Yi1kMGM2ZTAzMDkwZTESQXByb2plY3RzL3B2ejItNWM5ZWQvbG9jYXRpb25zLy0vaW5zdGFuY2VzL3B2ejItNWM5ZWQtZGVmYXVsdC1ydGRi .","status":"PERMISSION_DENIED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"IAM_PERMISSION_DENIED","domain":"firebasedatabase.googleapis.com","metadata":{"troubleshooter_url":"https://console.cloud.google.com/iam-admin/troubleshooter/summary;errorId=CiQwMWExMzBmYS0wNDBiLTcyN2YtYWI1Yi1kMGM2ZTAzMDkwZTESQXByb2plY3RzL3B2ejItNWM5ZWQvbG9jYXRpb25zLy0vaW5zdGFuY2VzL3B2ejItNWM5ZWQtZGVmYXVsdC1ydGRi","error_info_id":"CiQwMWExMzBmYS0wNDBiLTcyN2YtYWI1Yi1kMGM2ZTAzMDkwZTESQXByb2plY3RzL3B2ejItNWM5ZWQvbG9jYXRpb25zLy0vaW5zdGFuY2VzL3B2ejItNWM5ZWQtZGVmYXVsdC1ydGRi","permission":"firebasedatabase.instances.get","resource":"projects/pvz2-5c9ed/locations/-/instances/pvz2-5c9ed-default-rtdb"}}]}}
+[debug] [2026-10-12T16:36:18.254Z] Request to https://firebasedatabase.googleapis.com/v1beta/projects/pvz2-5c9ed/locations/-/instances/pvz2-5c9ed-default-rtdb had HTTP Error: 403, Permission 'firebasedatabase.instances.get' denied on resource '//firebasedatabase.googleapis.com/projects/pvz2-5c9ed/locations/-/instances/pvz2-5c9ed-default-rtdb' (or it may not exist). Remediate access with this Troubleshooter URL or share it with your administrator - https://console.cloud.google.com/iam-admin/troubleshooter/summary;errorId=CiQwMWExMzBmYS0wNDBiLTcyN2YtYWI1Yi1kMGM2ZTAzMDkwZTESQXByb2plY3RzL3B2ejItNWM5ZWQvbG9jYXRpb25zLy0vaW5zdGFuY2VzL3B2ejItNWM5ZWQtZGVmYXVsdC1ydGRi .
+[debug] [2026-10-12T16:36:18.256Z] FirebaseError: Request to https://firebasedatabase.googleapis.com/v1beta/projects/pvz2-5c9ed/locations/-/instances/pvz2-5c9ed-default-rtdb had HTTP Error: 403, Permission 'firebasedatabase.instances.get' denied on resource '//firebasedatabase.googleapis.com/projects/pvz2-5c9ed/locations/-/instances/pvz2-5c9ed-default-rtdb' (or it may not exist). Remediate access with this Troubleshooter URL or share it with your administrator - https://console.cloud.google.com/iam-admin/troubleshooter/summary;errorId=CiQwMWExMzBmYS0wNDBiLTcyN2YtYWI1Yi1kMGM2ZTAzMDkwZTESQXByb2plY3RzL3B2ejItNWM5ZWQvbG9jYXRpb25zLy0vaW5zdGFuY2VzL3B2ejItNWM5ZWQtZGVmYXVsdC1ydGRi .
+    at responseToError (C:\Users\hoang\AppData\Local\npm-cache\_npx\7750544ccf494d8b\node_modules\firebase-tools\lib\responseToError.js:53:12)
+    at RetryOperation._fn (C:\Users\hoang\AppData\Local\npm-cache\_npx\7750544ccf494d8b\node_modules\firebase-tools\lib\apiv2.js:415:77)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+[error] 
+[error] Error: Failed to get instance details for instance: pvz2-5c9ed-default-rtdb. See firebase-debug.log for more details.
+[debug] [2026-10-12T16:39:07.071Z] ----------------------------------------------------------------------
+[debug] [2026-10-12T16:39:07.073Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\hoang\AppData\Local\npm-cache\_npx\7750544ccf494d8b\node_modules\firebase-tools\lib\bin\firebase.js deploy --only database --project pvz2-5c9ed
+[debug] [2026-10-12T16:39:07.074Z] CLI Version:   15.33.0
+[debug] [2026-10-12T16:39:07.074Z] Platform:      win32
+[debug] [2026-10-12T16:39:07.074Z] Node Version:  v22.21.0
+[debug] [2026-10-12T16:39:07.075Z] Detected Agent: codex_cli
+[debug] [2026-10-12T16:39:07.075Z] Time:          Mon Oct 12 2026 23:39:07 GMT+0700 (Giờ Đông Dương)
+[debug] [2026-10-12T16:39:07.075Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-10-12T16:39:08.964Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-10-12T16:39:08.965Z] > authorizing via signed-in user (hoanghuutuyen06022004@gmail.com)
+[debug] [2026-10-12T16:39:08.965Z] [iam] checking project pvz2-5c9ed for permissions ["firebase.projects.get","firebasedatabase.instances.update"]
+[debug] [2026-10-12T16:39:08.984Z] Checked if tokens are valid: true, expires at: 1791826373923
+[debug] [2026-10-12T16:39:08.984Z] Checked if tokens are valid: true, expires at: 1791826373923
+[debug] [2026-10-12T16:39:08.986Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/pvz2-5c9ed:testIamPermissions [none]
+[debug] [2026-10-12T16:39:08.988Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/pvz2-5c9ed:testIamPermissions  x-goog-user-project=pvz2-5c9ed
+[debug] [2026-10-12T16:39:08.988Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/pvz2-5c9ed:testIamPermissions {"permissions":["firebase.projects.get","firebasedatabase.instances.update"]}
+[debug] [2026-10-12T16:39:10.239Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/pvz2-5c9ed:testIamPermissions 200
+[debug] [2026-10-12T16:39:10.240Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/pvz2-5c9ed:testIamPermissions {"permissions":["firebase.projects.get","firebasedatabase.instances.update"]}
+[debug] [2026-10-12T16:39:10.240Z] Checked if tokens are valid: true, expires at: 1791826373923
+[debug] [2026-10-12T16:39:10.240Z] Checked if tokens are valid: true, expires at: 1791826373923
+[debug] [2026-10-12T16:39:10.240Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/pvz2-5c9ed [none]
+[debug] [2026-10-12T16:39:10.621Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/pvz2-5c9ed 200
+[debug] [2026-10-12T16:39:10.621Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/pvz2-5c9ed {"projectId":"pvz2-5c9ed","projectNumber":"558858829268","displayName":"pvz2","name":"projects/pvz2-5c9ed","resources":{"hostingSite":"pvz2-5c9ed","realtimeDatabaseInstance":"pvz2-5c9ed-default-rtdb"},"state":"ACTIVE","labels":{"firebase":"enabled"},"etag":"1_0903087a-a4dd-4387-a00e-78c8885fb3e0"}
+[info] 
+[info] === Deploying to 'pvz2-5c9ed'...
+[info] 
+[info] i  deploying database 
+[info] i  database: checking rules syntax... 
+[debug] [2026-10-12T16:39:10.624Z] Checked if tokens are valid: true, expires at: 1791826373923
+[debug] [2026-10-12T16:39:10.625Z] Checked if tokens are valid: true, expires at: 1791826373923
+[debug] [2026-10-12T16:39:10.625Z] >>> [apiv2][query] GET https://firebasedatabase.googleapis.com/v1beta/projects/pvz2-5c9ed/locations/-/instances/pvz2-5c9ed-default-rtdb [none]
+[debug] [2026-10-12T16:39:11.971Z] <<< [apiv2][status] GET https://firebasedatabase.googleapis.com/v1beta/projects/pvz2-5c9ed/locations/-/instances/pvz2-5c9ed-default-rtdb 200
+[debug] [2026-10-12T16:39:11.971Z] <<< [apiv2][body] GET https://firebasedatabase.googleapis.com/v1beta/projects/pvz2-5c9ed/locations/-/instances/pvz2-5c9ed-default-rtdb {"name":"projects/558858829268/locations/asia-southeast1/instances/pvz2-5c9ed-default-rtdb","project":"projects/558858829268","databaseUrl":"https://pvz2-5c9ed-default-rtdb.asia-southeast1.firebasedatabase.app","type":"DEFAULT_DATABASE","state":"ACTIVE"}
+[debug] [2026-10-12T16:39:11.972Z] Checked if tokens are valid: true, expires at: 1791826373923
+[debug] [2026-10-12T16:39:11.972Z] Checked if tokens are valid: true, expires at: 1791826373923
+[debug] [2026-10-12T16:39:11.972Z] >>> [apiv2][query] PUT https://pvz2-5c9ed-default-rtdb.asia-southeast1.firebasedatabase.app/.settings/rules.json dryRun=true
+[debug] [2026-10-12T16:39:11.972Z] >>> [apiv2][body] PUT https://pvz2-5c9ed-default-rtdb.asia-southeast1.firebasedatabase.app/.settings/rules.json "{\n  \"rules\": {\n    \".read\": true,\n    \".write\": true,\n    \"users\": {\n      \"$uid\": {\n        \".read\": true,\n        \".write\": true\n      }\n    },\n    \"leaderboard\": {\n      \".read\": true,\n      \"$uid\": {\n        \".write\": true,\n        \".validate\": \"newData.hasChildren(['playerName', 'score', 'wave', 'kills']) && newData.child('playerName').isString() && newData.child('playerName').val().length <= 40 && newData.child('score').isNumber() && newData.child('score').val() >= 0 && newData.child('wave').isNumber() && newData.child('wave').val() >= 0 && newData.child('kills').isNumber() && newData.child('kills').val() >= 0\"\n      }\n    }\n  }\n}\n"
+[debug] [2026-10-12T16:39:12.231Z] <<< [apiv2][status] PUT https://pvz2-5c9ed-default-rtdb.asia-southeast1.firebasedatabase.app/.settings/rules.json 200
+[debug] [2026-10-12T16:39:12.231Z] <<< [apiv2][body] PUT https://pvz2-5c9ed-default-rtdb.asia-southeast1.firebasedatabase.app/.settings/rules.json {"status":"ok"}
+[info] +  database: rules syntax for database pvz2-5c9ed-default-rtdb is valid 
+[info] i  database: releasing rules... 
+[debug] [2026-10-12T16:39:12.232Z] Checked if tokens are valid: true, expires at: 1791826373923
+[debug] [2026-10-12T16:39:12.232Z] Checked if tokens are valid: true, expires at: 1791826373923
+[debug] [2026-10-12T16:39:12.232Z] >>> [apiv2][query] GET https://firebasedatabase.googleapis.com/v1beta/projects/pvz2-5c9ed/locations/-/instances/pvz2-5c9ed-default-rtdb [none]
+[debug] [2026-10-12T16:39:12.574Z] <<< [apiv2][status] GET https://firebasedatabase.googleapis.com/v1beta/projects/pvz2-5c9ed/locations/-/instances/pvz2-5c9ed-default-rtdb 200
+[debug] [2026-10-12T16:39:12.574Z] <<< [apiv2][body] GET https://firebasedatabase.googleapis.com/v1beta/projects/pvz2-5c9ed/locations/-/instances/pvz2-5c9ed-default-rtdb {"name":"projects/558858829268/locations/asia-southeast1/instances/pvz2-5c9ed-default-rtdb","project":"projects/558858829268","databaseUrl":"https://pvz2-5c9ed-default-rtdb.asia-southeast1.firebasedatabase.app","type":"DEFAULT_DATABASE","state":"ACTIVE"}
+[debug] [2026-10-12T16:39:12.575Z] Checked if tokens are valid: true, expires at: 1791826373923
+[debug] [2026-10-12T16:39:12.575Z] Checked if tokens are valid: true, expires at: 1791826373923
+[debug] [2026-10-12T16:39:12.575Z] >>> [apiv2][query] PUT https://pvz2-5c9ed-default-rtdb.asia-southeast1.firebasedatabase.app/.settings/rules.json 
+[debug] [2026-10-12T16:39:12.575Z] >>> [apiv2][body] PUT https://pvz2-5c9ed-default-rtdb.asia-southeast1.firebasedatabase.app/.settings/rules.json "{\n  \"rules\": {\n    \".read\": true,\n    \".write\": true,\n    \"users\": {\n      \"$uid\": {\n        \".read\": true,\n        \".write\": true\n      }\n    },\n    \"leaderboard\": {\n      \".read\": true,\n      \"$uid\": {\n        \".write\": true,\n        \".validate\": \"newData.hasChildren(['playerName', 'score', 'wave', 'kills']) && newData.child('playerName').isString() && newData.child('playerName').val().length <= 40 && newData.child('score').isNumber() && newData.child('score').val() >= 0 && newData.child('wave').isNumber() && newData.child('wave').val() >= 0 && newData.child('kills').isNumber() && newData.child('kills').val() >= 0\"\n      }\n    }\n  }\n}\n"
+[debug] [2026-10-12T16:39:12.949Z] <<< [apiv2][status] PUT https://pvz2-5c9ed-default-rtdb.asia-southeast1.firebasedatabase.app/.settings/rules.json 200

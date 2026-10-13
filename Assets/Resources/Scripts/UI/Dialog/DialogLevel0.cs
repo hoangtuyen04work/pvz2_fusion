@@ -89,6 +89,12 @@ public class DialogLevel0 : MonoBehaviour, IStartupDialogSkippable
         AdventureDialogUI.AddCloseButton(plantIntroduce, FinishTutorialFromInformation);
     }
 
+    private void OnDestroy()
+    {
+        // Tutorial dùng Canvas độc lập nên cần dọn riêng khi prefab hội thoại bị huỷ.
+        if (fusionTutorialPanel != null) Destroy(fusionTutorialPanel);
+    }
+
     private void Update()
     {
         if (tutorialFrameRect == null || tutorialEntranceAnimating) return;
@@ -130,8 +136,19 @@ public class DialogLevel0 : MonoBehaviour, IStartupDialogSkippable
         tutorialButtonNormal = tutorialButtonNormal ?? CreateSlicedSprite(Resources.Load<Sprite>("GameUI/button1"), .14f, .30f);
         tutorialButtonHighlighted = tutorialButtonHighlighted ?? CreateSlicedSprite(Resources.Load<Sprite>("GameUI/button2"), .18f, .28f);
 
-        fusionTutorialPanel = new GameObject("Bảng Hướng Dẫn Fusion", typeof(RectTransform), typeof(CanvasRenderer), typeof(CanvasGroup));
-        fusionTutorialPanel.transform.SetParent(transform, false);
+        fusionTutorialPanel = new GameObject("Bảng Hướng Dẫn Fusion",
+            typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster),
+            typeof(CanvasRenderer), typeof(CanvasGroup));
+
+        // Canvas riêng giúp tutorial không còn phụ thuộc TopCanvas 800x600 của gameplay.
+        Canvas tutorialCanvas = fusionTutorialPanel.GetComponent<Canvas>();
+        tutorialCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        tutorialCanvas.sortingOrder = 2200;
+
+        CanvasScaler tutorialScaler = fusionTutorialPanel.GetComponent<CanvasScaler>();
+        tutorialScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        tutorialScaler.referenceResolution = new Vector2(760f, 520f);
+        tutorialScaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
 
         RectTransform panelRect = fusionTutorialPanel.GetComponent<RectTransform>();
         panelRect.anchorMin = Vector2.zero;
@@ -324,17 +341,26 @@ public class DialogLevel0 : MonoBehaviour, IStartupDialogSkippable
         BuildPage1_CoreLogic(contentArea.transform, font);
         BuildPage2_FormulasAndEvolution(contentArea.transform, font);
 
+        // Footer độc lập với vùng cuộn: nội dung không thể tràn xuống che nút.
+        GameObject footer = new GameObject("Thanh Điều Hướng", typeof(RectTransform));
+        footer.transform.SetParent(woodFrame.transform, false);
+        RectTransform footerRect = footer.GetComponent<RectTransform>();
+        footerRect.anchorMin = new Vector2(0.05f, 0.02f);
+        footerRect.anchorMax = new Vector2(0.95f, 0.17f);
+        footerRect.offsetMin = Vector2.zero;
+        footerRect.offsetMax = Vector2.zero;
+
         // Nút CHUYỂN TRANG / TIẾP THEO
-        GameObject nextPageButton = CreateActionButton("Nút Chuyển Trang", woodFrame.transform, new Vector2(-180f, 20f), new Vector2(160f, 50f),
+        GameObject nextPageButton = CreateActionButton("Nút Chuyển Trang", footer.transform, new Vector2(-180f, 8f), new Vector2(160f, 50f),
             "TRANG SAU", font, 17, OnNextPageClicked);
         nextPageButtonText = nextPageButton.GetComponentInChildren<Text>();
 
         // Nút VÀO TRẬN / BẮT ĐẦU CHƠI
-        CreateActionButton("Nút Bắt Đầu", woodFrame.transform, new Vector2(0f, 20f), new Vector2(160f, 50f),
+        CreateActionButton("Nút Bắt Đầu", footer.transform, new Vector2(0f, 8f), new Vector2(160f, 50f),
             "VÀO TRẬN", font, 17, OnStartGameClicked);
 
         // NÚT BỎ QUA / SKIP (To rõ, nổi bật để người dùng có thể skip bất cứ lúc nào)
-        CreateSkipButton("Nút Bỏ Qua", woodFrame.transform, new Vector2(180f, 20f), new Vector2(160f, 50f),
+        CreateSkipButton("Nút Bỏ Qua", footer.transform, new Vector2(180f, 8f), new Vector2(160f, 50f),
             "BỎ QUA", font, 17, OnSkipClicked);
 
         UpdatePageVisibility();
@@ -395,7 +421,7 @@ public class DialogLevel0 : MonoBehaviour, IStartupDialogSkippable
 
         tutorialFrameFitScale = Mathf.Clamp(
             Mathf.Min((safeWidth - margin * 2f) / 760f, (safeHeight - margin * 2f) / 520f),
-            0.45f, 1f);
+            0.25f, 1f);
 
         // Đặt giữa vùng an toàn để tránh tai thỏ, camera khoét lỗ và thanh điều hướng.
         tutorialFrameRect.anchoredPosition = new Vector2(

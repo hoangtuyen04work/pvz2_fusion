@@ -306,17 +306,8 @@ public class FirebaseAuthService : MonoBehaviour
             return;
         }
 
-        StartCoroutine(WithValidToken((tokenOk, tokenMessage) =>
-        {
-            if (!tokenOk)
-            {
-                onComplete?.Invoke(false, tokenMessage);
-                return;
-            }
-
-            string dbUrl = FirebaseConfig.DatabaseUrl.TrimEnd('/') + $"/users/{CurrentUserId}.json?auth={CurrentIdToken}";
-            StartCoroutine(PutDatabaseRoutine(dbUrl, json, onComplete));
-        }));
+        string dbUrl = FirebaseConfig.DatabaseUrl.TrimEnd('/') + $"/users/{CurrentUserId}.json";
+        StartCoroutine(PutDatabaseRoutine(dbUrl, json, onComplete));
     }
 
     public void SyncPlayerDataWithCloud(PlayerProfileData localData,
@@ -340,15 +331,7 @@ public class FirebaseAuthService : MonoBehaviour
             return;
         }
 
-        StartCoroutine(WithValidToken((tokenOk, tokenMessage) =>
-        {
-            if (!tokenOk)
-            {
-                onComplete?.Invoke(false, null, tokenMessage);
-                return;
-            }
-            StartCoroutine(MergeProfileTransactionRoutine(localData, onComplete));
-        }));
+        StartCoroutine(MergeProfileTransactionRoutine(localData, onComplete));
     }
 
     /// <summary>Gộp tiến trình cục bộ vào hồ sơ trước khi tải lên Cloud.</summary>
@@ -530,17 +513,18 @@ public class FirebaseAuthService : MonoBehaviour
     /// <summary>
     /// Tự động cập nhật kết quả màn chơi Sinh tồn của người chơi lên Cloud
     /// </summary>
-    public void RecordEndlessResult(int score, int wave, int kills, float durationSeconds)
+    public void RecordEndlessResult(int score, int wave, int kills, float durationSeconds,
+        Action<bool, string> onComplete = null)
     {
-        if (!IsLoggedIn) return;
+        if (!IsLoggedIn)
+        {
+            onComplete?.Invoke(false, "Kết quả đã lưu trên máy. Hãy đăng nhập để đưa lên bảng xếp hạng Cloud.");
+            return;
+        }
 
         if (FirebaseConfig.IsConfigured && !CurrentUserId.StartsWith("guest_"))
         {
-            StartCoroutine(WithValidToken((tokenOk, tokenMessage) =>
-            {
-                if (tokenOk) StartCoroutine(UpdateEndlessTransactionRoutine(score, wave, kills, durationSeconds));
-                else Debug.LogWarning(tokenMessage);
-            }));
+            StartCoroutine(UpdateEndlessTransactionRoutine(score, wave, kills, durationSeconds, onComplete));
             return;
         }
 
@@ -549,6 +533,7 @@ public class FirebaseAuthService : MonoBehaviour
             if (!ok)
             {
                 Debug.LogWarning("Không thể cập nhật kỷ lục Cloud: " + msg);
+                onComplete?.Invoke(false, msg);
                 return;
             }
 
@@ -584,6 +569,7 @@ public class FirebaseAuthService : MonoBehaviour
                 if (!saved)
                 {
                     Debug.LogWarning("Không thể lưu kỷ lục Cloud: " + saveMessage);
+                    onComplete?.Invoke(false, saveMessage);
                     return;
                 }
 
@@ -596,7 +582,7 @@ public class FirebaseAuthService : MonoBehaviour
                     durationSeconds = profile.endlessBestDuration,
                     playedAtUtc = profile.endlessBestPlayedAtUtc,
                     gameVersion = Application.version
-                }, null);
+                }, onComplete);
             });
         });
     }
@@ -610,36 +596,20 @@ public class FirebaseAuthService : MonoBehaviour
         }
 
         string json = JsonUtility.ToJson(record);
-        StartCoroutine(WithValidToken((tokenOk, tokenMessage) =>
-        {
-            if (!tokenOk)
-            {
-                onComplete?.Invoke(false, tokenMessage);
-                return;
-            }
-            string url = FirebaseConfig.DatabaseUrl.TrimEnd('/') + $"/leaderboard/{CurrentUserId}.json?auth={CurrentIdToken}";
-            StartCoroutine(PutDatabaseRoutine(url, json, onComplete));
-        }));
+        string url = FirebaseConfig.DatabaseUrl.TrimEnd('/') + $"/leaderboard/{CurrentUserId}.json";
+        StartCoroutine(PutDatabaseRoutine(url, json, onComplete));
     }
 
     public void LoadGlobalLeaderboard(Action<bool, List<EndlessScoreRecord>, string> onComplete)
     {
-        if (!IsLoggedIn || CurrentUserId.StartsWith("guest_") || !FirebaseConfig.IsConfigured)
+        if (!FirebaseConfig.IsConfigured)
         {
             onComplete?.Invoke(false, null, "Đang hiển thị bảng xếp hạng cục bộ.");
             return;
         }
 
-        StartCoroutine(WithValidToken((tokenOk, tokenMessage) =>
-        {
-            if (!tokenOk)
-            {
-                onComplete?.Invoke(false, null, tokenMessage);
-                return;
-            }
-            string url = FirebaseConfig.DatabaseUrl.TrimEnd('/') + $"/leaderboard.json?auth={CurrentIdToken}";
-            StartCoroutine(GetLeaderboardRoutine(url, onComplete));
-        }));
+        string publicUrl = FirebaseConfig.DatabaseUrl.TrimEnd('/') + "/leaderboard.json";
+        StartCoroutine(GetLeaderboardRoutine(publicUrl, onComplete));
     }
 
     /// <summary>
@@ -681,17 +651,8 @@ public class FirebaseAuthService : MonoBehaviour
             return;
         }
 
-        StartCoroutine(WithValidToken((tokenOk, tokenMessage) =>
-        {
-            if (!tokenOk)
-            {
-                onComplete?.Invoke(false, null, tokenMessage);
-                return;
-            }
-
-            string dbUrl = FirebaseConfig.DatabaseUrl.TrimEnd('/') + $"/users/{CurrentUserId}.json?auth={CurrentIdToken}";
-            StartCoroutine(GetDatabaseRoutine(dbUrl, onComplete));
-        }));
+        string dbUrl = FirebaseConfig.DatabaseUrl.TrimEnd('/') + $"/users/{CurrentUserId}.json";
+        StartCoroutine(GetDatabaseRoutine(dbUrl, onComplete));
     }
 
     // ==================== HTTP Routines ====================
@@ -820,7 +781,7 @@ public class FirebaseAuthService : MonoBehaviour
     private IEnumerator MergeProfileTransactionRoutine(PlayerProfileData localData,
         Action<bool, PlayerProfileData, string> onComplete)
     {
-        string url = FirebaseConfig.DatabaseUrl.TrimEnd('/') + $"/users/{CurrentUserId}.json?auth={CurrentIdToken}";
+        string url = FirebaseConfig.DatabaseUrl.TrimEnd('/') + $"/users/{CurrentUserId}.json";
         const int maxAttempts = 3;
         for (int attempt = 0; attempt < maxAttempts; attempt++)
         {
@@ -866,9 +827,10 @@ public class FirebaseAuthService : MonoBehaviour
         onComplete?.Invoke(false, null, "Dữ liệu Cloud vừa thay đổi trên thiết bị khác. Vui lòng đồng bộ lại.");
     }
 
-    private IEnumerator UpdateEndlessTransactionRoutine(int score, int wave, int kills, float durationSeconds)
+    private IEnumerator UpdateEndlessTransactionRoutine(int score, int wave, int kills, float durationSeconds,
+        Action<bool, string> onComplete)
     {
-        string url = FirebaseConfig.DatabaseUrl.TrimEnd('/') + $"/users/{CurrentUserId}.json?auth={CurrentIdToken}";
+        string url = FirebaseConfig.DatabaseUrl.TrimEnd('/') + $"/users/{CurrentUserId}.json";
         const int maxAttempts = 3;
         for (int attempt = 0; attempt < maxAttempts; attempt++)
         {
@@ -880,7 +842,9 @@ public class FirebaseAuthService : MonoBehaviour
                 yield return get.SendWebRequest();
                 if (get.result != UnityWebRequest.Result.Success)
                 {
-                    Debug.LogWarning("Không thể tải hồ sơ để cập nhật Sinh tồn: " + get.error);
+                    string message = "Không thể tải hồ sơ để cập nhật Sinh tồn: " + get.error;
+                    Debug.LogWarning(message);
+                    onComplete?.Invoke(false, message);
                     yield break;
                 }
                 etag = get.GetResponseHeader("ETag");
@@ -924,17 +888,21 @@ public class FirebaseAuthService : MonoBehaviour
                         playedAtUtc = profile.endlessBestPlayedAtUtc,
                         gameVersion = Application.version
                     };
-                    SaveGlobalLeaderboardRecord(record, null);
+                    SaveGlobalLeaderboardRecord(record, onComplete);
                     yield break;
                 }
                 if (put.responseCode != 412)
                 {
-                    Debug.LogWarning("Không thể cập nhật kết quả Sinh tồn: " + put.error);
+                    string message = "Không thể cập nhật kết quả Sinh tồn: " + put.error;
+                    Debug.LogWarning(message);
+                    onComplete?.Invoke(false, message);
                     yield break;
                 }
             }
         }
-        Debug.LogWarning("Hồ sơ thay đổi đồng thời trên thiết bị khác; kết quả Sinh tồn chưa được đồng bộ.");
+        const string conflictMessage = "Hồ sơ thay đổi đồng thời trên thiết bị khác; kết quả Sinh tồn chưa được đồng bộ.";
+        Debug.LogWarning(conflictMessage);
+        onComplete?.Invoke(false, conflictMessage);
     }
 
     private IEnumerator GetDatabaseRoutine(string url, Action<bool, PlayerProfileData, string> onComplete)

@@ -26,6 +26,11 @@ public sealed class EndlessLeaderboardOverlay : MonoBehaviour
     private static Sprite cachedButton2;
     private static Sprite cachedCancel;
 
+    private RectTransform dialogRect;
+    private int lastLayoutScreenWidth;
+    private int lastLayoutScreenHeight;
+    private Rect lastLayoutSafeArea;
+
     public static void Show()
     {
         if (Object.FindAnyObjectByType<EndlessLeaderboardOverlay>() != null) return;
@@ -47,6 +52,15 @@ public sealed class EndlessLeaderboardOverlay : MonoBehaviour
     private void Awake()
     {
         LoadAssets();
+    }
+
+    private void Update()
+    {
+        if (dialogRect == null) return;
+        if (lastLayoutScreenWidth == Screen.width && lastLayoutScreenHeight == Screen.height &&
+            lastLayoutSafeArea == Screen.safeArea) return;
+
+        FitDialogToSafeArea();
     }
 
     private static void LoadAssets()
@@ -74,8 +88,9 @@ public sealed class EndlessLeaderboardOverlay : MonoBehaviour
         // 2. Khung thoại chính bằng bảng gỗ đá PvZ
         var dialogObject = new GameObject("Leaderboard Board", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
         dialogObject.transform.SetParent(transform, false);
-        var dialogRect = dialogObject.GetComponent<RectTransform>();
+        dialogRect = dialogObject.GetComponent<RectTransform>();
         CenterRect(dialogRect, new Vector2(DialogWidth, DialogHeight), Vector2.zero);
+        FitDialogToSafeArea();
 
         var dialogImage = dialogObject.GetComponent<Image>();
         dialogImage.sprite = cachedDialogMain;
@@ -199,22 +214,28 @@ public sealed class EndlessLeaderboardOverlay : MonoBehaviour
         scrollRect.viewport = viewport.GetComponent<RectTransform>();
         scrollRect.content = contentRect;
 
-        List<EndlessScoreRecord> localRecords = EndlessLeaderboard.Load();
-        if (FirebaseAuthService.IsLoggedIn && FirebaseConfig.IsConfigured &&
-            !FirebaseAuthService.CurrentUserId.StartsWith("guest_"))
+        // Bảng xếp hạng thế giới được phép xem công khai. Chỉ thao tác ghi điểm
+        // mới yêu cầu tài khoản Firebase thật.
+        if (FirebaseConfig.IsConfigured)
         {
             ShowStatus(content.transform, "Đang tải bảng xếp hạng thế giới…");
             FirebaseAuthService.Instance.LoadGlobalLeaderboard((ok, cloudRecords, message) =>
             {
                 if (this == null || content == null) return;
                 ClearContent(content.transform);
-                PopulateRecords(content.transform, ok ? cloudRecords : localRecords,
-                    ok ? null : message + "\nĐang hiển thị dữ liệu cục bộ.");
+                if (!ok)
+                {
+                    // Bảng xếp hạng chỉ dùng dữ liệu Cloud. Khi Cloud không đọc
+                    // được thì để trống, không hiện lỗi kỹ thuật và không dùng local.
+                    return;
+                }
+
+                PopulateRecords(content.transform, cloudRecords, null);
             });
         }
         else
         {
-            PopulateRecords(content.transform, localRecords, null);
+            // Không có cấu hình Cloud thì giữ bảng trống.
         }
     }
 
@@ -400,13 +421,39 @@ public sealed class EndlessLeaderboardOverlay : MonoBehaviour
         text.color = color;
         text.raycastTarget = false;
         text.resizeTextForBestFit = true;
-        text.resizeTextMinSize = 11;
+        text.resizeTextMinSize = 9;
         text.resizeTextMaxSize = fontSize;
         text.horizontalOverflow = HorizontalWrapMode.Wrap;
         text.verticalOverflow = VerticalWrapMode.Truncate;
         text.lineSpacing = 0.9f;
 
         return text;
+    }
+
+    private void FitDialogToSafeArea()
+    {
+        if (dialogRect == null || Screen.width <= 0 || Screen.height <= 0) return;
+
+        RectTransform canvasRect = transform as RectTransform;
+        if (canvasRect == null || canvasRect.rect.width <= 0f || canvasRect.rect.height <= 0f) return;
+
+        Rect safeArea = Screen.safeArea;
+        float safeWidth = canvasRect.rect.width * safeArea.width / Screen.width;
+        float safeHeight = canvasRect.rect.height * safeArea.height / Screen.height;
+        const float margin = 18f;
+        float fitScale = Mathf.Clamp(
+            Mathf.Min((safeWidth - margin * 2f) / DialogWidth, (safeHeight - margin * 2f) / DialogHeight),
+            0.45f, 1f);
+
+        // Co nguyên khung để mọi cột giữ chung một hệ lưới, tránh header và dữ liệu lệch nhau.
+        dialogRect.localScale = Vector3.one * fitScale;
+        dialogRect.anchoredPosition = new Vector2(
+            (safeArea.center.x / Screen.width - 0.5f) * canvasRect.rect.width,
+            (safeArea.center.y / Screen.height - 0.5f) * canvasRect.rect.height);
+
+        lastLayoutScreenWidth = Screen.width;
+        lastLayoutScreenHeight = Screen.height;
+        lastLayoutSafeArea = safeArea;
     }
 
     private static void CreateColumnDivider(Transform parent, float anchorX, bool isHeader)

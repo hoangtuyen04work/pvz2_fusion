@@ -75,6 +75,7 @@ public class AIAdvisorUI : MonoBehaviour
     private AIServiceConnector connector;
     private bool isWaiting = false;
     private bool isPausedByAdvisor = false;
+    private bool isDisabledForPvp = false;
 
     // ---- Các thông điệp hiển thị ----
     private const string MSG_LOADING = "Đang phân tích chiến thuật...";
@@ -85,6 +86,14 @@ public class AIAdvisorUI : MonoBehaviour
         collector = GetComponent<GameStateCollector>();
         connector = GetComponent<AIServiceConnector>();
 
+        // PvP is a match between two players, so the tactical AI must not be
+        // visible or make background requests in this mode.
+        if (NetSession.Mode == NetGameMode.Pvp)
+        {
+            DisableForPvp();
+            return;
+        }
+
         // Đăng ký sự kiện nhận phản hồi từ AIServiceConnector
         connector.OnAdviceReceived += HandleAdviceReceived;
         connector.OnError += HandleError;
@@ -92,6 +101,8 @@ public class AIAdvisorUI : MonoBehaviour
 
     private void Start()
     {
+        if (isDisabledForPvp) return;
+
         if (animatedAdvisor == null && askButton != null)
         {
             animatedAdvisor = askButton.GetComponent<UIAnimatedAdvisor>();
@@ -165,6 +176,8 @@ public class AIAdvisorUI : MonoBehaviour
     // -------------------------------------------------------
     private void OnAskButtonClicked()
     {
+        if (isDisabledForPvp || NetSession.Mode == NetGameMode.Pvp) return;
+
         // Nếu panel đang mở và không trong quá trình gửi request -> bấm lại sẽ đóng panel
         if (advisorPanel != null && advisorPanel.activeSelf && !isWaiting)
         {
@@ -205,6 +218,22 @@ public class AIAdvisorUI : MonoBehaviour
 
         // 4. Gửi request lên server AI
         connector.RequestAdvice(gameStateJson);
+    }
+
+    private void DisableForPvp()
+    {
+        isDisabledForPvp = true;
+
+        if (askButton != null) askButton.gameObject.SetActive(false);
+        if (advisorPanel != null) advisorPanel.SetActive(false);
+        if (backdropButton != null) backdropButton.gameObject.SetActive(false);
+        if (electricArc != null) electricArc.SetActive(false);
+
+        if (animatedAdvisor != null) animatedAdvisor.enabled = false;
+        if (collector != null) collector.enabled = false;
+        if (connector != null) connector.enabled = false;
+
+        enabled = false;
     }
 
     // -------------------------------------------------------
